@@ -32,6 +32,7 @@ function paymongo_init_gateway_class() {
 
 	define( 'WC_PAYMONGO_MAIN_FILE', __FILE__ );
 	define( 'WC_PAYMONGO_VERSION', '1.0.0' );
+	define( 'WC_PAYMONGO_BASE_URL',  'https://api.paymongo.com/v1' );
 	
 
 	if ( ! class_exists( 'WC_Paymongo' ) ) :
@@ -81,6 +82,9 @@ function paymongo_init_gateway_class() {
 			public function init() {
 				require_once dirname(__FILE__).'/classes/wc-paymongo-gateway.php';
 				require_once dirname(__FILE__).'/classes/wc-paymongo-gcash-gateway.php';
+				require_once dirname(__FILE__).'/classes/wc-paymongo-grabpay-gateway.php';
+				require_once dirname(__FILE__).'/classes/wc-paymongo-webhook-handler.php';
+
 
 				add_filter( 'woocommerce_payment_gateways', array( $this, 'add_gateways' ) );
 
@@ -92,6 +96,7 @@ function paymongo_init_gateway_class() {
 			public function add_gateways( $methods ) {
 				$methods[] = 'WC_Paymongo_Gateway'; 
 				$methods[] = 'WC_Paymongo_Gcash_Gateway';
+				$methods[] = 'WC_Paymongo_GrabPay_Gateway';
 				
 				return $methods;
 			}
@@ -99,9 +104,12 @@ function paymongo_init_gateway_class() {
 			public function filter_gateway_order_admin( $sections ) {
 				unset( $sections['paymongo'] );
 				unset( $sections['paymongo_gcash'] );
+				unset( $sections['paymongo_grabpay'] );
+
 
 				$sections['paymongo'] = __('Paymongo - Credit/Debit Card', 'woocommerce-gateway-paymongo' );
 				$sections['paymongo_gcash'] = __( 'Paymongo - GCash', 'woocommerce-gateway-paymongo' );
+				$sections['paymongo_grabpay'] = __( 'Paymongo - GrabPay', 'woocommerce-gateway-paymongo' );
 
 				return $sections;
 			}

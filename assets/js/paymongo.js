@@ -40,6 +40,10 @@ jQuery(document).ready(function ($) {
       if (params.paymongo === "gcash_failed") {
         paymongoForm.showError("Failed to authorize GCash transaction");
       }
+
+      if (params.paymongo === "grabpay_failed") {
+        paymongoForm.showError("Failed to authorize GrabPay transaction");
+      }
     },
     showError: (message) => {
       $(".paymongo-error").remove();
@@ -57,6 +61,12 @@ jQuery(document).ready(function ($) {
 
       if ($("#payment_method_paymongo_gcash_payment_gateway").attr("checked")) {
         paymongoForm.createSource("gcash");
+      }
+
+      if (
+        $("#payment_method_paymongo_grabpay_payment_gateway").attr("checked")
+      ) {
+        paymongoForm.createSource("grabpay");
       }
 
       return false;
@@ -150,10 +160,14 @@ jQuery(document).ready(function ($) {
 
       return false;
     },
-    createSource: function () {
-      console.log("createSource");
+    createSource: function (type) {
       jQuery.post(
-        wc_checkout_params.checkout_url + "&gcash=true",
+        (paymongoForm.isOrderPay
+          ? paymongo_params.order_pay_url
+          : wc_checkout_params.checkout_url) +
+          "&" +
+          type +
+          "=true",
         paymongoForm.checkoutForm.serialize(),
         paymongoForm.onCreateSourceSuccess
       );
@@ -165,15 +179,19 @@ jQuery(document).ready(function ($) {
       const [expMonth, expYear] = $("#paymongo_expdate").val().split("/");
       const cvc = $("#paymongo_cvv").val();
 
-      const line1 = paymongo_params.billing_address_1;
-      const line2 = paymongo_params.billing_address_2;
-      const city = paymongo_params.billing_city;
-      const state = paymongo_params.billing_state;
-      const country = paymongo_params.billing_country;
-      const postal_code = paymongo_params.billing_postcode;
+      const line1 =
+        paymongo_params.billing_address_1 || $("#billing_address_1").val();
+      const line2 =
+        paymongo_params.billing_address_2 || $("#billing_address_2").val();
+      const city = paymongo_params.billing_city || $("#billing_city").val();
+      const state = paymongo_params.billing_state || $("#billing_state").val();
+      const country =
+        paymongo_params.billing_country || $("#billing_country").val();
+      const postal_code =
+        paymongo_params.billing_postcode || $("#billing_postcode").val();
       const name = paymongoForm.getName();
-      const email = paymongo_params.billing_email;
-      const phone = paymongo_params.billing_phone;
+      const email = paymongo_params.billing_email || $("#billing_email").val();
+      const phone = paymongo_params.billing_phone || $("#billing_phone").val();
 
       const payload = {
         type: "card",
@@ -223,11 +241,14 @@ jQuery(document).ready(function ($) {
       $(".blockUI").remove();
     },
     getName: function () {
-      let name =
-        paymongo_params.billing_first_name +
-        " " +
-        paymongo_params.billing_last_name;
-      let companyName = paymongo_params.billing_company;
+      const firstName =
+        paymongo_params.billing_first_name || $("#billing_first_name").val();
+      const lastName =
+        paymongo_params.billing_last_name || $("#billing_last_name").val();
+
+      let name = firstName + " " + lastName;
+      let companyName =
+        paymongo_params.billing_company || $("#billing_company").val();
 
       if (companyName && companyName.length) {
         name = name + " - " + companyName;

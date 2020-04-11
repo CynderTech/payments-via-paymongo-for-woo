@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 class WC_Paymongo_GrabPay_Gateway extends WC_Payment_Gateway {
 	/**
 	 * @var Singleton The reference the *Singleton* instance of this class
@@ -50,7 +54,6 @@ class WC_Paymongo_GrabPay_Gateway extends WC_Payment_Gateway {
 		}
 
 		add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
-		add_action('woocommerce_api_paymongo_grabpay', array($this, 'grabpay_handler'));
 		add_action('wp_enqueue_scripts', array($this, 'payment_scripts'));
 
 		if ( 'yes' === $this->enabled ) {
@@ -80,12 +83,6 @@ class WC_Paymongo_GrabPay_Gateway extends WC_Payment_Gateway {
 				'description' => 'This controls the description which the user sees during checkout.',
 				'default'     => 'Simple and easy payments.',
 			),
-			'webhook' => array(
-				'title' => 'IMPORTANT! Setup Webhook Resource',
-				'type' => 'title',
-				'description' => 'Create a Webhook resource using curl command or any API tools like Postman.<br /><b><i>'
-				. add_query_arg( 'wc-api', 'paymongo_grabpay', trailingslashit( get_home_url() ) ) . '</b></i>'
-			)
 		);
 	}
 
@@ -130,7 +127,9 @@ class WC_Paymongo_GrabPay_Gateway extends WC_Payment_Gateway {
 		}
 	}
 
-	public function create_source($order_id) {
+	public function process_payment($order_id) {
+		global $woocommerce;
+
 		$order = wc_get_order($order_id);
 
 		$payload = json_encode(
@@ -155,13 +154,9 @@ class WC_Paymongo_GrabPay_Gateway extends WC_Payment_Gateway {
 							'phone' => $order->get_billing_phone(),
 						),
 						'redirect' => array(
-							'success' => add_query_arg('paymongo', 'grabpay_pending', wc_get_checkout_url()),
+							'success' => add_query_arg('paymongo', 'grabpay_pending', $this->get_return_url($order)),
 							'failed' => add_query_arg('paymongo', 'grabpay_failed', wc_get_checkout_url()),
 						),
-						'metadata' => array(
-							'order_id' => $order_id,
-							'order_key' => $order->get_order_key(),
-						)
 					),
 				),
 			)
@@ -177,7 +172,7 @@ class WC_Paymongo_GrabPay_Gateway extends WC_Payment_Gateway {
 			),
 		);
 
-		$response = wp_remote_post('https://api.paymongo.com/v1/sources', $args);
+		$response = wp_remote_post(WC_PAYMONGO_BASE_URL . '/sources', $args);
 
 		if(!is_wp_error($response)) {
 			$body = json_decode($response['body'], true);
@@ -188,6 +183,11 @@ class WC_Paymongo_GrabPay_Gateway extends WC_Payment_Gateway {
 				&& array_key_exists('attributes', $body['data'])
 				&& array_key_exists('status', $body['data']['attributes'])
 				&& $body['data']['attributes']['status'] == 'pending') {
+
+				$order->add_meta_data('source_id', $body['data']['id']);
+				$order->update_status('pending');
+				wc_reduce_stock_levels($order_id);
+				$woocommerce->cart->empty_cart();
 
 				wp_send_json(
 					array(
@@ -214,36 +214,6 @@ class WC_Paymongo_GrabPay_Gateway extends WC_Payment_Gateway {
 			);
 			return;
 		}
-	}
-	
-	public function process_payment($order_id) {
-		global $woocommerce;
-
-		if (!isset($_POST['paymongo_grabpay_status'])) {
-			return $this->create_source($order_id);
-		}
-
-		$order = wc_get_order($order_id);
-		$order->update_status('pending');
-		$order->reduce_order_stock();
-		WC()->cart->empty_cart();
-
-		return array(
-			'result' => 'success',
-			'redirect' => $this->get_return_url($order)
-		);
-	}
-
-	public function grabpay_success_handler () {
-		var_dump('grabpay_success_handler');
-		var_dump('$_GET');
-		var_dump($_GET);
-		var_dump('$_POST');
-		var_dump($_POST);
-		var_dump('$_REQUEST');
-		var_dump($_REQUEST);
-		wp_send_json($_GET);
-		
 	}
 
 	/**
