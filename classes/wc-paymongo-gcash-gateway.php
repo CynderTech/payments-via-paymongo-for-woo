@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 class WC_Paymongo_Gcash_Gateway extends WC_Payment_Gateway {
 	/**
 	 * @var Singleton The reference the *Singleton* instance of this class
@@ -49,8 +53,7 @@ class WC_Paymongo_Gcash_Gateway extends WC_Payment_Gateway {
 			$this->secret_key = ! empty( $main_settings['test_secret_key'] ) ? $main_settings['test_secret_key'] : '';
 		}
 
-		add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
-		add_action('woocommerce_api_paymongo_gcash', array($this, 'gcash_handler'));
+		add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));		add_action('woocommerce_api_paymongo_gcash', array($this, 'gcash_handler'));
 		add_action('wp_enqueue_scripts', array($this, 'payment_scripts'));
 
 		if ( 'yes' === $this->enabled ) {
@@ -79,18 +82,6 @@ class WC_Paymongo_Gcash_Gateway extends WC_Payment_Gateway {
 				'type'        => 'textarea',
 				'description' => 'This controls the description which the user sees during checkout.',
 				'default'     => 'Simple and easy payments.',
-			),
-			'webhook' => array(
-				'title' => 'IMPORTANT! Setup Webhook Resource',
-				'type' => 'title',
-				'description' => 'Create a Webhook resource using curl command or any API tools like Postman. Copy the <b>secret_key</b> and put it in the field below. <p>Use this URL: <b><i>'
-				. add_query_arg( 'wc-api', 'paymongo_gcash', trailingslashit( get_home_url() ) ) . '</b></i></p>'
-			),
-			'gcash_webhook_secret' => array(
-				'title'       => 'Webhook Secret Key',
-				'type'        => 'password',
-				'description' => 'This is the secret_key returned when you created the webhook',
-				'default'     => '',
 			),
 		);
 	}
@@ -141,6 +132,8 @@ class WC_Paymongo_Gcash_Gateway extends WC_Payment_Gateway {
 
 		$order = wc_get_order($order_id);
 
+		$isPayForOrder = isset($_GET['pay_for_order']) && 'true' === $_GET['pay_for_order'];
+
 		$payload = json_encode(
 			array(
 				'data' => array(
@@ -164,7 +157,7 @@ class WC_Paymongo_Gcash_Gateway extends WC_Payment_Gateway {
 						),
 						'redirect' => array(
 							'success' => add_query_arg('paymongo', 'gcash_pending', $this->get_return_url($order)),
-							'failed' => add_query_arg('paymongo', 'gcash_failed', wc_get_checkout_url()),
+							'failed' => add_query_arg('paymongo', 'gcash_failed', $isPayForOrder ? $order->get_checkout_payment_url() : wc_get_checkout_url()),
 						),
 					),
 				),
@@ -181,7 +174,7 @@ class WC_Paymongo_Gcash_Gateway extends WC_Payment_Gateway {
 			),
 		);
 
-		$response = wp_remote_post('https://api.paymongo.com/v1/sources', $args);
+		$response = wp_remote_post(WC_PAYMONGO_BASE_URL . '/sources', $args);
 
 		if(!is_wp_error($response)) {
 			$body = json_decode($response['body'], true);
@@ -195,14 +188,14 @@ class WC_Paymongo_Gcash_Gateway extends WC_Payment_Gateway {
 
 				$order->add_meta_data('source_id', $body['data']['id']);
 				$order->update_status('pending');
-				$order->reduce_order_stock();
+				wc_reduce_stock_levels($order_id);
 				$woocommerce->cart->empty_cart();
 
 				wp_send_json(
 					array(
 						'result' => 'success',
 						'checkout_url' => $body['data']['attributes']['redirect']['checkout_url'],
-						'data' => json_encode($body),
+						'data' => $woocommerce->cart->get_checkout_url(),
 					)
 				);
 
@@ -223,124 +216,6 @@ class WC_Paymongo_Gcash_Gateway extends WC_Payment_Gateway {
 				)
 			);
 			return;
-		}
-	}
-
-	/* Handle GCash Webhook */
-	public function gcash_handler() {
-		// get header
-		$payload = file_get_contents('php://input');
-
-		if (!$this->is_sender_paymongo($payload)) {
-			header("HTTP/1.1 401 Unauthorized");
-			die();
-		}
-
-		$decoded = json_decode($payload, true);
-
-		if ($decoded['attributes']['type'] == 'source.chargeable') {
-			$source_id = $decoded['attributes']['data']['id'];
-			$orders = wc_get_orders(
-				array(
-					'limit' => 1, // Query all orders
-					'meta_key' => 'source_id', // The postmeta key field
-					'meta_value' => $source_id, // The comparison argument
-				)
-			);
-
-			$order = $orders[0];
-
-			$createPaymentPayload = array(
-				'data' => array(
-					'attributes' => array(
-						'amount' => $decoded['attributes']['data']['attributes']['amount'],
-						'currency' => $order->get_currency(),
-						'description' => $order->get_order_key(),
-						'source' => array(
-							'id' => $source_id,
-							'type' => 'source'
-						),
-					),
-				),
-			);
-
-
-			$args = array(
-				'body' => json_encode($createPaymentPayload),
-				'method' => "POST",
-				'headers' => array(
-					'Authorization' => 'Basic ' . base64_encode($this->secret_key),
-					'accept' => 'application/json',
-					'content-type' => 'application/json'
-				),
-			);
-
-
-			$response = wp_remote_post('https://api.paymongo.com/v1/payments', $args);
-
-			if(!is_wp_error($response)) {
-				$body = json_decode($response['body'], true);
-				if ($body['data']['attributes']['status'] == 'paid') {
-					$order->payment_complete($body['data']['id']);
-					
-					header("HTTP/1.1 200 OK");
-					die();
-				}
-			} else {
-				header("HTTP/1.1 422 Unprocessable Entity");
-				die();
-			}
-		}
-
-		die();
-	}
-
-	// Check if sender is actually paymongo
-	public function is_sender_paymongo($payload) {
-		// manually created raw signature
-		$rawSignature = $this->assemble_signature($payload);
-
-		// get saved webhook secrete
-		$webhookSecret = $this->get_option('gcash_webhook_secret');
-
-		// hashed rawSignature
-		$encryptedSignature = hash_hmac('sha256', $rawSignature, $webhookSecret);
-		$requestSignature = $this->testmode ? $this->get_from_paymongo_signature('test') : $this->get_from_paymongo_signature('live');
-
-		return $encryptedSignature == $requestSignature;
-	}
-
-	// Assemble Raw Signature
-	public function assemble_signature($payload) {
-		$timestamp = $this->get_from_paymongo_signature('timestamp');
-
-		$raw = $timestamp . '.' . $data;
-
-		return $raw;
-	}
-
-	/** 
-	* Get Property from Paymongo-Signature Header
-	* @param key('timestamp', 'live', 'test')
-	*/
-	public function get_from_paymongo_signature($key) {
-		$headers = getallheaders();
-		$signature = $headers["Paymongo-Signature"];
-		$explodedSignature = explode(',', $signature);
-
-		if ($key == 'timestamp') {
-			$explodedTimestamp = explode('=', $explodedSignature[0]);
-			return $explodedTimestamp[1];
-		}
-
-		if ($key == 'test') {
-			$explodedTest = explode('=', $explodedSignature[1]);
-			return $explodedTest[1];
-		}
-
-		if ($key == 'live') {
-			$explodedLive = explode('=', $explodedSignature[2]);
-			return $explodedLive[1];
 		}
 	}
 
