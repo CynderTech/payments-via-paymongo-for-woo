@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 class WC_Paymongo_Gateway extends WC_Payment_Gateway {
 	/**
 	 * @var Singleton The reference the *Singleton* instance of this class
@@ -90,6 +94,24 @@ class WC_Paymongo_Gateway extends WC_Payment_Gateway {
 				'title'       => 'Live Secret Key',
 				'type'        => 'password'
 			),
+			'webhook' => array(
+				'title' => 'IMPORTANT! Setup Webhook Resource',
+				'type' => 'title',
+				'description' => 'Create a Webhook resource using curl command or any API tools like Postman. Copy the <b>secret_key</b> and put it in the field below. <p>Use this URL: <b><i>'
+				. add_query_arg( 'wc-api', 'wc_paymongo', trailingslashit( get_home_url() ) ) . '</b></i></p>'
+			),
+			'webhook_secret' => array(
+				'title'       => 'Webhook Secret Key',
+				'type'        => 'password',
+				'description' => 'This is the secret_key returned when you created the webhook using live keys',
+				'default'     => '',
+			),
+			'test_webhook_secret' => array(
+				'title'       => 'Test Webhook Secret Key',
+				'type'        => 'password',
+				'description' => 'This is the secret_key returned when you created the webhook using test keys',
+				'default'     => '',
+			),
 		);
 	}
 
@@ -118,9 +140,9 @@ class WC_Paymongo_Gateway extends WC_Payment_Gateway {
 		$paymongo_params['publicKey'] = $this->public_key;
 
 		// Order Pay Page
-		if ( isset( $_GET['pay_for_order'] ) && 'true' === $_GET['pay_for_order'] ) { // wpcs: csrf ok.
-			$order_id = wc_get_order_id_by_order_key( urldecode( $_GET['key'] ) ); // wpcs: csrf ok, sanitization ok, xss ok.
-			$order = wc_get_order( $order_id );
+		if (isset($_GET['pay_for_order']) && 'true' === $_GET['pay_for_order']) { // wpcs: csrf ok.
+			$order_id = wc_get_order_id_by_order_key(urldecode($_GET['key']) ); // wpcs: csrf ok, sanitization ok, xss ok.
+			$order = wc_get_order($order_id);
 			$paymongo_params['order_pay_url'] = $order->get_checkout_payment_url();
 			$paymongo_params['billing_first_name'] = $order->get_billing_first_name();
 			$paymongo_params['billing_last_name'] = $order->get_billing_last_name();
@@ -207,7 +229,7 @@ class WC_Paymongo_Gateway extends WC_Payment_Gateway {
 			),
 		);
 
-		$response = wp_remote_post('https://api.paymongo.com/v1/payment_intents', $args);
+		$response = wp_remote_post(WC_PAYMONGO_BASE_URL . '/payment_intents', $args);
 
 		if(!is_wp_error($response)) {
 			$body = json_decode($response['body'], true);
@@ -267,7 +289,7 @@ class WC_Paymongo_Gateway extends WC_Payment_Gateway {
 		);
 
 		// get payment intent status
-		$response = wp_remote_get('https://api.paymongo.com/v1/payment_intents/' . $_POST['paymongo_intent_id'], $args);
+		$response = wp_remote_get(WC_PAYMONGO_BASE_URL . '/payment_intents/' . $_POST['paymongo_intent_id'], $args);
 	
 		if(!is_wp_error($response)) {
 			$body = json_decode($response['body'], true);
@@ -275,7 +297,7 @@ class WC_Paymongo_Gateway extends WC_Payment_Gateway {
 			if ($body['data']['attributes']['status'] == 'succeeded') {
 				// we received the payment
 				$order->payment_complete($body['data']['id']);
-				$order->reduce_order_stock();
+				wc_reduce_stock_levels($order_id);
 
 				// some notes to customer (replace true with false to make it private)
 				$order->add_order_note('Your order has been paid, Thank You!', true);
