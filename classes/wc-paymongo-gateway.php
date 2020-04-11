@@ -23,6 +23,11 @@ class WC_Paymongo_Gateway extends WC_Payment_Gateway {
 		return self::$instance;
 	}
 
+	/**
+	 * Starting point of the payment gateway
+	 * 
+	 * @since 1.0.0
+	 */
 	public function __construct() {
 		$this->id = 'paymongo_payment_gateway';
 		$this->icon = 'https://dashboard.paymongo.com/static/media/paymongo-green.97e4c087.png';
@@ -48,6 +53,11 @@ class WC_Paymongo_Gateway extends WC_Payment_Gateway {
 		add_action('wp_enqueue_scripts', array($this, 'payment_scripts'));
 	}
 
+	/**
+	 * Payment Gateway Settings Page Fields
+	 * 
+	 * @since 1.0.0
+	 */
 	public function init_form_fields() {
 		$this->form_fields = array(
 			'enabled' => array(
@@ -115,7 +125,11 @@ class WC_Paymongo_Gateway extends WC_Payment_Gateway {
 		);
 	}
 
-
+	/**
+	 * Registers scripts and styles for payment gateway
+	 * 
+	 * @since 1.0.0
+	 */
 	public function payment_scripts() { 
 		// we need JavaScript to process a token only on cart/checkout pages, right?
 		if (!is_cart() && !is_checkout() && !isset($_GET['pay_for_order'])) {
@@ -170,6 +184,12 @@ class WC_Paymongo_Gateway extends WC_Payment_Gateway {
 		wp_enqueue_script('woocommerce_paymongo');
 	}
 
+
+	/**
+	 * Renders Payment fields for checkout page
+	 * 
+	 * @since 1.0.0
+	 */
 	public function payment_fields() {
 		if ($this->description) {
 			if ($this->testmode) {
@@ -204,6 +224,12 @@ class WC_Paymongo_Gateway extends WC_Payment_Gateway {
 		return true;
 	}
 
+	/**
+	 * Creates Paymongo Payment Intent
+	 * 
+	 * @link https://developers.paymongo.com/reference#the-payment-intent-object
+	 * @since 1.0.0
+	 */
 	public function create_payment_intent($order_id) {
 		$order = wc_get_order($order_id);
 		$payload = json_encode(
@@ -269,6 +295,12 @@ class WC_Paymongo_Gateway extends WC_Payment_Gateway {
 		}
 	}
 
+	/**
+	 * Creates Paymongo Payment Intent
+	 * 
+	 * @link https://developers.paymongo.com/reference#the-payment-intent-object
+	 * @since 1.0.0
+	 */
 	public function process_payment($order_id) {
 		global $woocommerce;
 
@@ -310,7 +342,6 @@ class WC_Paymongo_Gateway extends WC_Payment_Gateway {
 					'result' => 'success',
 					'redirect' => $this->get_return_url($order)
 				);
-
 			} else {
 				wc_add_notice( 'Please try again.', 'error' );
 				return;
@@ -319,55 +350,6 @@ class WC_Paymongo_Gateway extends WC_Payment_Gateway {
 		} else {
 				wc_add_notice( 'Connection error.', 'error' );
 				return;
-			}
 		}
-
-	public function webhook() {
-
-	}
-
-	/*
-	* Parse Paymongo errors
-	*/
-	public function show_error($error) {
-		$error_message = 'Something went wrong.';
-		if ($error['code'] == 'parameter_required') {
-			switch ($error['source']['attribute']) {
-				case 'amount':
-					$error_message = 'Amount is required';
-				break;
-
-				case 'currency': 
-					$error_message =  'Currency is required';
-				break;
-
-				default:
-					$error_message =  $error['detail'];
-				break;
-			}
-		}
-
-		if ($error['code'] == 'parameter_below_minimum') {
-			switch ($error['source']['attribute']) {
-				case 'amount':
-					$error_message = 'Amount should be greater than 100';
-				break;
-
-				default:
-					$error_message =  $error['detail'];
-				break;
-			}
-		}
-
-		if ($error['code'] == 'parameter_invalid') {
-			switch ($error['source']['attribute']) {
-				default:
-					$error_message = $error['detail'];
-				break;
-			}
-		}
-
-		wc_add_notice($error_message, 'error');
-		return;
 	}
 }

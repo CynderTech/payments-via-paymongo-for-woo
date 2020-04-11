@@ -23,6 +23,11 @@ class WC_Paymongo_GrabPay_Gateway extends WC_Payment_Gateway {
 		return self::$instance;
 	}
 
+	/**
+	 * Starting point of the payment gateway
+	 * 
+	 * @since 1.0.0
+	 */
 	public function __construct() {
 		$this->id = 'paymongo_grabpay_payment_gateway';
 		$this->icon = 'https://dashboard.paymongo.com/static/media/paymongo-green.97e4c087.png';
@@ -61,6 +66,11 @@ class WC_Paymongo_GrabPay_Gateway extends WC_Payment_Gateway {
 		}
 	}
 
+	/**
+	 * Payment Gateway Settings Page Fields
+	 * 
+	 * @since 1.0.0
+	 */
 	public function init_form_fields() {
 		$this->form_fields = array(
 			'enabled' => array(
@@ -86,7 +96,11 @@ class WC_Paymongo_GrabPay_Gateway extends WC_Payment_Gateway {
 		);
 	}
 
-
+	/**
+	 * Registers scripts and styles for payment gateway
+	 * 
+	 * @since 1.0.0
+	 */
 	public function payment_scripts() { 
 		// we need JavaScript to process a token only on cart/checkout pages, right?
 		if ( ! is_cart() && ! is_checkout() && ! isset( $_GET['pay_for_order'] ) ) {
@@ -127,6 +141,12 @@ class WC_Paymongo_GrabPay_Gateway extends WC_Payment_Gateway {
 		}
 	}
 
+	/**
+	 * Creates Paymongo GrabPay source
+	 * 
+	 * @link https://developers.paymongo.com/reference#the-sources-object
+	 * @since 1.0.0
+	 */
 	public function process_payment($order_id) {
 		global $woocommerce;
 

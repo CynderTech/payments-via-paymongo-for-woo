@@ -19,15 +19,26 @@ class WC_Paymongo_Webhook_Handler extends WC_Payment_Gateway {
 		return self::$instance;
 	}
 	
+	/**
+	 * Starting point of the webhook handler
+	 * 
+	 * @since 1.0.0
+	 */
 	public function __construct() {
 		$main_settings = get_option('woocommerce_paymongo_payment_gateway_settings');
 		$this->testmode = (!empty($main_settings['testmode']) && 'yes' === $main_settings['testmode']) ? true : false;
 		$this->secret_key = $this->testmode ? $main_settings['test_secret_key'] : $main_settings['secret_key'];
 		$webhook_secret_key = ($this->testmode ? 'test_' : '') . 'webhook_secret';
 		$this->webhook_secret = !empty($main_settings[$webhook_secret_key]) ? $main_settings[$webhook_secret_key] : false;
+
 		add_action('woocommerce_api_wc_paymongo', array($this, 'check_for_webhook'));
 	}
 
+	/**
+	 * Check incoming request for Paymongo request data
+	 * 
+	 * @since 1.0.0
+	 */
 	public function check_for_webhook() {
 		if (('POST' !== $_SERVER['REQUEST_METHOD'])
 			|| !isset($_GET['wc-api'])
@@ -52,6 +63,13 @@ class WC_Paymongo_Webhook_Handler extends WC_Payment_Gateway {
 		}
 	}
 
+	/**
+	 * Actual Processing of webhook request
+	 * 
+	 * @link https://developers.paymongo.com/docs/webhooks-2#section-2-respond-to-the-webhook-event
+	 * @param string $payload JSON String
+	 * @since 1.0.0
+	 */
 	public function process_webhook($payload) {
 		$decoded = json_decode($payload, true);
 		$eventData = $decoded['data']['attributes'];
@@ -73,6 +91,14 @@ class WC_Paymongo_Webhook_Handler extends WC_Payment_Gateway {
 		die();
 	}
 
+	/**
+	 * Creates Paymongo Payment Record
+	 * 
+	 * @link https://developers.paymongo.com/reference#payment-source
+	 * @param array $source Source data from event data sent by paymongo
+	 * @param array $order Order data from woocommerce database
+	 * @since 1.0.0
+	 */
 	public function create_payment_record($source, $order) {
 		$createPaymentPayload = array(
 			'data' => array(
@@ -130,7 +156,14 @@ class WC_Paymongo_Webhook_Handler extends WC_Payment_Gateway {
 		die();
 	}
 
-	// Check if sender is actually paymongo
+	/**
+	 * Checks if request is from paymongo servers
+	 * 
+	 * @link https://developers.paymongo.com/docs/webhooks-2#section-3-securing-a-webhook-optional-but-highly-recommended
+	 * @param array $payload Source data from event data sent by paymongo
+	 * @param array $headers Request headers
+	 * @since 1.0.0
+	 */
 	public function is_valid_request($payload, $headers) {
 		// manually created raw signature
 		$rawSignature = $this->assemble_signature($payload, $headers);
@@ -146,7 +179,14 @@ class WC_Paymongo_Webhook_Handler extends WC_Payment_Gateway {
 		return $encryptedSignature == $requestSignature;
 	}
 
-	// Assemble Raw Signature
+	/**
+	 * Combines timestamp and payload to be hashed
+	 * 
+	 * @link https://developers.paymongo.com/docs/webhooks-2#section-3-securing-a-webhook-optional-but-highly-recommended
+	 * @param array $payload Source data from event data sent by paymongo
+	 * @param array $headers request headers
+	 * @since 1.0.0
+	 */
 	public function assemble_signature($payload, $headers) {
 		$timestamp = $this->get_from_paymongo_signature('timestamp', $headers);
 		
@@ -157,7 +197,11 @@ class WC_Paymongo_Webhook_Handler extends WC_Payment_Gateway {
 
 	/** 
 	* Get Property from Paymongo-Signature Header
-	* @param key('timestamp', 'live', 'test')
+	*
+	* @link https://developers.paymongo.com/docs/webhooks-2#section-3-securing-a-webhook-optional-but-highly-recommended
+	* @param string $key values('timestamp', 'live', 'test')
+	* @param array $headers request headers
+	* @since 1.0.0
 	*/
 	public function get_from_paymongo_signature($key, $headers) {
 		$signature = $headers["Paymongo-Signature"];
@@ -179,7 +223,11 @@ class WC_Paymongo_Webhook_Handler extends WC_Payment_Gateway {
 		}
 	}
 
-	// get request headers
+	/** 
+	* Gets request headers
+	*
+	* @since 1.0.0
+	*/
 	public function get_request_headers() {
 		if (!function_exists('getallheaders')) {
 			$headers = array();
@@ -196,7 +244,12 @@ class WC_Paymongo_Webhook_Handler extends WC_Payment_Gateway {
 		}
 	}
 
-	// Get Order by Source
+	/** 
+	* Get Order by source record
+	*
+	* @param string $source Source object from $payload
+	* @since 1.0.0
+	*/
 	public function get_order_by_source($source) {
 		$source_id = $source['id'];
 

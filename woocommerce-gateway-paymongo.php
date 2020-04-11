@@ -79,12 +79,17 @@ function paymongo_init_gateway_class() {
 				$this->init();
 			}
 
+			/**
+			 * Initialize Paymongo plugin
+			 * 
+			 * @since 1.0.0
+			 */
 			public function init() {
 				require_once dirname(__FILE__).'/classes/wc-paymongo-gateway.php';
 				require_once dirname(__FILE__).'/classes/wc-paymongo-gcash-gateway.php';
 				require_once dirname(__FILE__).'/classes/wc-paymongo-grabpay-gateway.php';
 				require_once dirname(__FILE__).'/classes/wc-paymongo-webhook-handler.php';
-
+				require_once dirname(__FILE__).'/classes/wc-paymongo-logger.php';
 
 				add_filter( 'woocommerce_payment_gateways', array( $this, 'add_gateways' ) );
 
@@ -93,6 +98,11 @@ function paymongo_init_gateway_class() {
 				}
 			}
 
+			/**
+			 * Registers Payment Gateways
+			 * 
+			 * @since 1.0.0
+			 */
 			public function add_gateways( $methods ) {
 				$methods[] = 'WC_Paymongo_Gateway'; 
 				$methods[] = 'WC_Paymongo_Gcash_Gateway';
@@ -101,6 +111,11 @@ function paymongo_init_gateway_class() {
 				return $methods;
 			}
 
+			/**
+			 * Registers Payment Gateways
+			 * 
+			 * @since 1.0.0
+			 */
 			public function filter_gateway_order_admin( $sections ) {
 				unset( $sections['paymongo'] );
 				unset( $sections['paymongo_gcash'] );
@@ -114,6 +129,11 @@ function paymongo_init_gateway_class() {
 				return $sections;
 			}
 
+			/**
+			 * Install/Update function
+			 * 
+			 * @since 1.0.0
+			 */
 			public function install() {
 				if ( ! is_plugin_active( plugin_basename( __FILE__ ) ) ) {
 					return;
@@ -130,6 +150,11 @@ function paymongo_init_gateway_class() {
 				}
 			}
 
+			/**
+			 * Updates Plugin Version
+			 * 
+			 * @since 1.0.0
+			 */
 			public function update_plugin_version() {
 				delete_option( 'wc_paymongo_version' );
 				update_option( 'wc_paymongo_version', WC_PAYMONGO_VERSION );
@@ -141,5 +166,4 @@ function paymongo_init_gateway_class() {
 	endif;
 }
 
-// add_filter( 'woocommerce_payment_gateways', 'paymongo_add_gateway_class' );
 add_action( 'plugins_loaded', 'paymongo_init_gateway_class' );
