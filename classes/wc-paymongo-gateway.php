@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-class WC_Paymongo_Gateway extends WC_Payment_Gateway {
+class WC_PayMongo_Gateway extends WC_Payment_Gateway {
 	/**
 	 * @var Singleton The reference the *Singleton* instance of this class
 	 */
@@ -32,7 +32,7 @@ class WC_Paymongo_Gateway extends WC_Payment_Gateway {
 		$this->id = 'paymongo_payment_gateway';
 		$this->icon = 'https://dashboard.paymongo.com/static/media/paymongo-green.97e4c087.png';
 		$this->has_fields = true;
-		$this->method_title = 'Paymongo';
+		$this->method_title = 'PayMongo';
 		$this->method_description = 'Simple and easy payments.';
 
 		$this->supports = array(
@@ -62,7 +62,7 @@ class WC_Paymongo_Gateway extends WC_Payment_Gateway {
 		$this->form_fields = array(
 			'enabled' => array(
 				'title'       => 'Enable/Disable',
-				'label'       => 'Enable Paymongo Gateway',
+				'label'       => 'Enable PayMongo Gateway',
 				'type'        => 'checkbox',
 				'description' => '',
 				'default'     => 'no'
@@ -71,7 +71,7 @@ class WC_Paymongo_Gateway extends WC_Payment_Gateway {
 				'type'        => 'text',
 				'title'       => 'Title',
 				'description' => 'This controls the title which the user sees during checkout.',
-				'default'     => 'Paymongo',
+				'default'     => 'PayMongo',
 				'desc_tip'    => true,
 			),
 			'description' => array(
@@ -225,7 +225,7 @@ class WC_Paymongo_Gateway extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Creates Paymongo Payment Intent
+	 * Creates PayMongo Payment Intent
 	 * 
 	 * @link https://developers.paymongo.com/reference#the-payment-intent-object
 	 * @since 1.0.0
@@ -296,7 +296,7 @@ class WC_Paymongo_Gateway extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Creates Paymongo Payment Intent
+	 * Creates PayMongo Payment Intent
 	 * 
 	 * @link https://developers.paymongo.com/reference#the-payment-intent-object
 	 * @since 1.0.0

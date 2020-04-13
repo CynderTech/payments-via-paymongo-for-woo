@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Log all things!
  *
  */
-class WC_Paymongo_Logger {
+class WC_PayMongo_Logger {
 
 	public static $logger;
 	const WC_LOG_FILENAME = 'woocommerce-gateway-paymongo';
@@ -39,12 +39,12 @@ class WC_Paymongo_Logger {
 				$formatted_end_time   = date_i18n( get_option( 'date_format' ) . ' g:ia', $end_time );
 				$elapsed_time         = round( abs( $end_time - $start_time ) / 60, 2 );
 
-				$log_entry  = "\n" . '====Paymongo Version: ' . WC_PAYMONGO_VERSION . '====' . "\n";
+				$log_entry  = "\n" . '====PayMongo Version: ' . WC_PAYMONGO_VERSION . '====' . "\n";
 				$log_entry .= '====Start Log ' . $formatted_start_time . '====' . "\n" . $message . "\n";
 				$log_entry .= '====End Log ' . $formatted_end_time . ' (' . $elapsed_time . ')====' . "\n\n";
 
 			} else {
-				$log_entry  = "\n" . '====Paymongo Version: ' . WC_PAYMONGO_VERSION . '====' . "\n";
+				$log_entry  = "\n" . '====PayMongo Version: ' . WC_PAYMONGO_VERSION . '====' . "\n";
 				$log_entry .= '====Start Log====' . "\n" . $message . "\n" . '====End Log====' . "\n\n";
 
 			}

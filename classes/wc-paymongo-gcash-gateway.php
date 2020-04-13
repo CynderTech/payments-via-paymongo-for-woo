@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-class WC_Paymongo_Gcash_Gateway extends WC_Payment_Gateway {
+class WC_PayMongo_Gcash_Gateway extends WC_Payment_Gateway {
 	/**
 	 * @var Singleton The reference the *Singleton* instance of this class
 	 */
@@ -32,7 +32,7 @@ class WC_Paymongo_Gcash_Gateway extends WC_Payment_Gateway {
 		$this->id = 'paymongo_gcash_payment_gateway';
 		$this->icon = 'https://dashboard.paymongo.com/static/media/paymongo-green.97e4c087.png';
 		$this->has_fields = true;
-		$this->method_title = 'Paymongo GCash Gateway';
+		$this->method_title = 'PayMongo GCash Gateway';
 		$this->method_description = 'Simple and easy payments with GCash.';
 
 		$this->supports = array(
@@ -75,7 +75,7 @@ class WC_Paymongo_Gcash_Gateway extends WC_Payment_Gateway {
 		$this->form_fields = array(
 			'enabled' => array(
 				'title'       => 'Enable/Disable',
-				'label'       => 'Enable Paymongo GCash Gateway',
+				'label'       => 'Enable PayMongo GCash Gateway',
 				'type'        => 'checkbox',
 				'description' => '',
 				'default'     => 'no'
@@ -84,7 +84,7 @@ class WC_Paymongo_Gcash_Gateway extends WC_Payment_Gateway {
 				'title'       => 'Title',
 				'type'        => 'text',
 				'description' => 'This controls the title which the user sees during checkout.',
-				'default'     => 'GCash - Paymongo',
+				'default'     => 'GCash - PayMongo',
 				'desc_tip'    => true,
 			),
 			'description' => array(
@@ -142,7 +142,7 @@ class WC_Paymongo_Gcash_Gateway extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Creates Paymongo GCash source
+	 * Creates PayMongo GCash source
 	 * 
 	 * @link https://developers.paymongo.com/reference#the-sources-object
 	 * @since 1.0.0

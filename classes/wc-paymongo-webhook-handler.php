@@ -1,6 +1,6 @@
 <?php
 
-class WC_Paymongo_Webhook_Handler extends WC_Payment_Gateway {
+class WC_PayMongo_Webhook_Handler extends WC_Payment_Gateway {
 	/**
 	 * @var Singleton The reference the *Singleton* instance of this class
 	 */
@@ -35,7 +35,7 @@ class WC_Paymongo_Webhook_Handler extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Check incoming request for Paymongo request data
+	 * Check incoming request for PayMongo request data
 	 * 
 	 * @since 1.0.0
 	 */
@@ -57,7 +57,7 @@ class WC_Paymongo_Webhook_Handler extends WC_Payment_Gateway {
 			status_header(200);
 			die();
 		} else {
-			WC_Paymongo_Logger::log('Incoming webhook failed validation: ' . print_r($request_body, true));
+			WC_PayMongo_Logger::log('Incoming webhook failed validation: ' . print_r($request_body, true));
 			status_header(400);
 			die();
 		}
@@ -86,13 +86,13 @@ class WC_Paymongo_Webhook_Handler extends WC_Payment_Gateway {
 			return $this->create_payment_record($sourceData, $order);
 		}
 
-		WC_Paymongo_Logger::log('Invalid event type = ' . $source_id);
+		WC_PayMongo_Logger::log('Invalid event type = ' . $source_id);
 		status_header(422);
 		die();
 	}
 
 	/**
-	 * Creates Paymongo Payment Record
+	 * Creates PayMongo Payment Record
 	 * 
 	 * @link https://developers.paymongo.com/reference#payment-source
 	 * @param array $source Source data from event data sent by paymongo
@@ -132,7 +132,7 @@ class WC_Paymongo_Webhook_Handler extends WC_Payment_Gateway {
 			
 			if ($body['errors'] && $body['errors'][0]) {
 				status_header($response['response']['code']);
-				WC_Paymongo_Logger::log('Payment failed: ' . $body);
+				WC_PayMongo_Logger::log('Payment failed: ' . $body);
 			}
 
 			if ($status == 'paid') {
@@ -143,7 +143,7 @@ class WC_Paymongo_Webhook_Handler extends WC_Payment_Gateway {
 			}
 
 			if ($status == 'failed') {
-				WC_Paymongo_Logger::log('Payment failed: ' . $response['body']);
+				WC_PayMongo_Logger::log('Payment failed: ' . $response['body']);
 				$order->update_status($status);
 				status_header(400);
 				die();
@@ -196,7 +196,7 @@ class WC_Paymongo_Webhook_Handler extends WC_Payment_Gateway {
 	}
 
 	/** 
-	* Get Property from Paymongo-Signature Header
+	* Get Property from PayMongo-Signature Header
 	*
 	* @link https://developers.paymongo.com/docs/webhooks-2#section-3-securing-a-webhook-optional-but-highly-recommended
 	* @param string $key values('timestamp', 'live', 'test')
@@ -204,7 +204,7 @@ class WC_Paymongo_Webhook_Handler extends WC_Payment_Gateway {
 	* @since 1.0.0
 	*/
 	public function get_from_paymongo_signature($key, $headers) {
-		$signature = $headers["Paymongo-Signature"];
+		$signature = $headers["PayMongo-Signature"];
 		$explodedSignature = explode(',', $signature);
 
 		if ($key == 'timestamp') {
@@ -262,7 +262,7 @@ class WC_Paymongo_Webhook_Handler extends WC_Payment_Gateway {
 		);
 
 		if (empty($orders)) {
-			WC_Paymongo_Logger::log('Failed to find order with source_id = ' . $source_id);
+			WC_PayMongo_Logger::log('Failed to find order with source_id = ' . $source_id);
 			
 			return false;
 		}
@@ -271,4 +271,4 @@ class WC_Paymongo_Webhook_Handler extends WC_Payment_Gateway {
 	}
 }
 
-WC_Paymongo_Webhook_Handler::get_instance();
+WC_PayMongo_Webhook_Handler::get_instance();

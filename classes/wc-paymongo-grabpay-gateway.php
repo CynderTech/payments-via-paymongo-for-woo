@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-class WC_Paymongo_GrabPay_Gateway extends WC_Payment_Gateway {
+class WC_PayMongo_GrabPay_Gateway extends WC_Payment_Gateway {
 	/**
 	 * @var Singleton The reference the *Singleton* instance of this class
 	 */
@@ -32,7 +32,7 @@ class WC_Paymongo_GrabPay_Gateway extends WC_Payment_Gateway {
 		$this->id = 'paymongo_grabpay_payment_gateway';
 		$this->icon = 'https://dashboard.paymongo.com/static/media/paymongo-green.97e4c087.png';
 		$this->has_fields = true;
-		$this->method_title = 'Paymongo GrabPay Gateway';
+		$this->method_title = 'PayMongo GrabPay Gateway';
 		$this->method_description = 'Simple and easy payments with GrabPay.';
 
 		$this->supports = array(
@@ -75,7 +75,7 @@ class WC_Paymongo_GrabPay_Gateway extends WC_Payment_Gateway {
 		$this->form_fields = array(
 			'enabled' => array(
 				'title'       => 'Enable/Disable',
-				'label'       => 'Enable Paymongo GrabPay Gateway',
+				'label'       => 'Enable PayMongo GrabPay Gateway',
 				'type'        => 'checkbox',
 				'description' => '',
 				'default'     => 'no'
@@ -84,7 +84,7 @@ class WC_Paymongo_GrabPay_Gateway extends WC_Payment_Gateway {
 				'title'       => 'Title',
 				'type'        => 'text',
 				'description' => 'This controls the title which the user sees during checkout.',
-				'default'     => 'GrabPay - Paymongo',
+				'default'     => 'GrabPay - PayMongo',
 				'desc_tip'    => true,
 			),
 			'description' => array(
@@ -142,7 +142,7 @@ class WC_Paymongo_GrabPay_Gateway extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Creates Paymongo GrabPay source
+	 * Creates PayMongo GrabPay source
 	 * 
 	 * @link https://developers.paymongo.com/reference#the-sources-object
 	 * @since 1.0.0

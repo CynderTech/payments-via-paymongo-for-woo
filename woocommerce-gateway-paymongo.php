@@ -1,6 +1,6 @@
 <?php
 /*
- * Plugin Name: WooCommerce Paymongo Payment Gateway
+ * Plugin Name: WooCommerce PayMongo Payment Gateway
  * Plugin URI: 
  * Description: Take credit card payments on your store.
  * Author: CynderTech Corp.
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function woocommerce_missing_wc_notice() {
 	/* translators: 1. URL link. */
-	echo '<div class="error"><p><strong>' . sprintf( esc_html__( 'Paymongo requires WooCommerce to be installed and active. You can download %s here.', 'woocommerce-gateway-paymongo' ), '<a href="https://woocommerce.com/" target="_blank">WooCommerce</a>' ) . '</strong></p></div>';
+	echo '<div class="error"><p><strong>' . sprintf( esc_html__( 'PayMongo requires WooCommerce to be installed and active. You can download %s here.', 'woocommerce-gateway-paymongo' ), '<a href="https://woocommerce.com/" target="_blank">WooCommerce</a>' ) . '</strong></p></div>';
 }
 
 function paymongo_init_gateway_class() {
@@ -35,8 +35,8 @@ function paymongo_init_gateway_class() {
 	define( 'WC_PAYMONGO_BASE_URL',  'https://api.paymongo.com/v1' );
 	
 
-	if ( ! class_exists( 'WC_Paymongo' ) ) :
-		class WC_Paymongo {
+	if ( ! class_exists( 'WC_PayMongo' ) ) :
+		class WC_PayMongo {
 			/**
 			 * @var Singleton The reference the *Singleton* instance of this class
 			 */
@@ -80,7 +80,7 @@ function paymongo_init_gateway_class() {
 			}
 
 			/**
-			 * Initialize Paymongo plugin
+			 * Initialize PayMongo plugin
 			 * 
 			 * @since 1.0.0
 			 */
@@ -104,9 +104,9 @@ function paymongo_init_gateway_class() {
 			 * @since 1.0.0
 			 */
 			public function add_gateways( $methods ) {
-				$methods[] = 'WC_Paymongo_Gateway'; 
-				$methods[] = 'WC_Paymongo_Gcash_Gateway';
-				$methods[] = 'WC_Paymongo_GrabPay_Gateway';
+				$methods[] = 'WC_PayMongo_Gateway'; 
+				$methods[] = 'WC_PayMongo_Gcash_Gateway';
+				$methods[] = 'WC_PayMongo_GrabPay_Gateway';
 				
 				return $methods;
 			}
@@ -122,9 +122,9 @@ function paymongo_init_gateway_class() {
 				unset( $sections['paymongo_grabpay'] );
 
 
-				$sections['paymongo'] = __('Paymongo - Credit/Debit Card', 'woocommerce-gateway-paymongo' );
-				$sections['paymongo_gcash'] = __( 'Paymongo - GCash', 'woocommerce-gateway-paymongo' );
-				$sections['paymongo_grabpay'] = __( 'Paymongo - GrabPay', 'woocommerce-gateway-paymongo' );
+				$sections['paymongo'] = __('PayMongo - Credit/Debit Card', 'woocommerce-gateway-paymongo' );
+				$sections['paymongo_gcash'] = __( 'PayMongo - GCash', 'woocommerce-gateway-paymongo' );
+				$sections['paymongo_grabpay'] = __( 'PayMongo - GrabPay', 'woocommerce-gateway-paymongo' );
 
 				return $sections;
 			}
@@ -162,7 +162,7 @@ function paymongo_init_gateway_class() {
 
 		}
 	
-		WC_Paymongo::get_instance();
+		WC_PayMongo::get_instance();
 	endif;
 }
 
