@@ -30,7 +30,7 @@ class WC_PayMongo_GrabPay_Gateway extends WC_Payment_Gateway {
 	 */
 	public function __construct() {
 		$this->id = 'paymongo_grabpay_payment_gateway';
-		$this->icon = 'https://dashboard.paymongo.com/static/media/paymongo-green.97e4c087.png';
+		$this->icon = 'https://b.paymongocdn.com/images/logo-with-text.png';
 		$this->has_fields = true;
 		$this->method_title = 'PayMongo GrabPay Gateway';
 		$this->method_description = 'Simple and easy payments with GrabPay.';
