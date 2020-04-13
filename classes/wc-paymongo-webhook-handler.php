@@ -87,17 +87,17 @@ class WC_PayMongo_Webhook_Handler extends WC_Payment_Gateway
             die();
         }
 
-        $request_body = file_get_contents('php://input');
-        $request_headers = $this->getRequestHeaders();
+        $requestBody = file_get_contents('php://input');
+        $requestHeaders = $this->getRequestHeaders();
 
         // Validate it to make sure it is legit.
-        if ($this->isValidRequest($request_body, $request_headers)) {
-            $this->processWebhook($request_body);
+        if ($this->isValidRequest($requestBody, $requestHeaders)) {
+            $this->processWebhook($requestBody);
             status_header(200);
             die();
         } else {
             WC_PayMongo_Logger::log(
-                'Incoming webhook failed validation: ' . print_r($request_body, true)
+                'Incoming webhook failed validation: ' . print_r($requestBody, true)
             );
             status_header(400);
             die();
@@ -231,6 +231,7 @@ class WC_PayMongo_Webhook_Handler extends WC_Payment_Gateway
             $this->getFromPayMongoSignature('test', $headers)
             : $this->getFromPayMongoSignature('live', $headers);
         
+
         return $encryptedSignature == $requestSignature;
     }
 
@@ -267,7 +268,7 @@ class WC_PayMongo_Webhook_Handler extends WC_Payment_Gateway
      */
     public function getFromPayMongoSignature($key, $headers)
     {
-        $signature = $headers["PayMongo-Signature"];
+        $signature = $headers["Paymongo-Signature"];
         $explodedSignature = explode(',', $signature);
 
         if ($key == 'timestamp') {

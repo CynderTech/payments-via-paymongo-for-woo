@@ -281,7 +281,7 @@ class WC_PayMongo_Gateway extends WC_Payment_Gateway
         echo '<div class="form-row form-row-wide">';
         echo '<label>Card Number <span class="required">*</span></label>';
         echo '<input id="paymongo_ccNo" class="paymongo_ccNo" type="text"' .
-            ' autocomplete="off"></div>';
+             ' autocomplete="off"></div>';
         echo '<div class="form-row form-row-first">';
         echo '<label>Expiry Date <span class="required">*</span></label>';
         echo '<input id="paymongo_expdate" class="paymongo_expdate" ' .
@@ -289,7 +289,7 @@ class WC_PayMongo_Gateway extends WC_Payment_Gateway
         echo '<div class="form-row form-row-last">';
         echo '<label>Card Code (CVC) <span class="required">*</span></label>';
         echo '<input id="paymongo_cvv" class="paymongo_cvv"' .
-            ' type="password" autocomplete="off" placeholder="CVC">';
+             ' type="password" autocomplete="off" placeholder="CVC">';
         echo '</div><div class="clear"></div>';
     
         do_action('woocommerce_credit_card_form_end', $this->id);
@@ -418,6 +418,7 @@ class WC_PayMongo_Gateway extends WC_Payment_Gateway
             $args
         );
     
+        // var_dump($response);
         if (!is_wp_error($response)) {
             $body = json_decode($response['body'], true);
 

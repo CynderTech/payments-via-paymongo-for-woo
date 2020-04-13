@@ -106,6 +106,34 @@ jQuery(document).ready(function ($) {
       });
     },
     onPaymentIntentSuccess: function (res) {
+      console.log("res", res);
+
+      if (res && "failure" === res.result) {
+        var $form = $("form.checkout");
+
+        // Remove notices from all sources
+        $(".woocommerce-error, .woocommerce-message").remove();
+
+        // Add new errors returned by this event
+        if (res.messages) {
+          $form.prepend(
+            '<div class="woocommerce-NoticeGroup woocommerce-NoticeGroup-updateOrderReview">' +
+              res.messages +
+              "</div>"
+          ); // eslint-disable-line max-len
+        } else {
+          $form.prepend(res);
+        }
+
+        // Lose focus for all fields
+        $form
+          .find(".input-text, select, input:checkbox")
+          .trigger("validate")
+          .blur();
+
+        paymongoForm.scrollToNotices();
+      }
+
       // add payment intent field
       if (!paymongoForm.checkoutForm.find("#paymongo_client_key").length) {
         paymongoForm.checkoutForm.append(
@@ -286,6 +314,16 @@ jQuery(document).ready(function ($) {
           blocks: [4],
         });
       }
+    },
+    scrollToNotices: function () {
+      var scrollElement = $(
+        ".woocommerce-NoticeGroup-updateOrderReview, .woocommerce-NoticeGroup-checkout"
+      );
+
+      if (!scrollElement.length) {
+        scrollElement = $(".form.checkout");
+      }
+      $.scroll_to_notices(scrollElement);
     },
   };
 
