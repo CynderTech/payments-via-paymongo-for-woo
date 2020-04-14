@@ -264,7 +264,7 @@ class WC_PayMongo_Gateway extends WC_Payment_Gateway
                 $this->description .= ' TEST MODE ENABLED. In test mode,' .
                 ' you can use the card numbers listed in the ' .
                 '<a href="'.
-                'https://developers.paymongo.com/reference#the-token-object' .
+                'https://developers.paymongo.com/docs/testing' .
                 '" target="_blank" rel="noopener noreferrer">documentation</a>.';
                 $this->description  = trim($this->description);
             }
