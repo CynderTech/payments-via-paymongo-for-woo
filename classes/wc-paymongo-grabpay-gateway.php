@@ -217,8 +217,6 @@ class WC_PayMongo_GrabPay_Gateway extends WC_Payment_Gateway
 
         $order = wc_get_order($orderId);
 
-        $isPayForOrder = isset($_GET['pay_for_order'])
-            && 'true' === $_GET['pay_for_order'];
 
         $payload = json_encode(
             array(
@@ -251,9 +249,7 @@ class WC_PayMongo_GrabPay_Gateway extends WC_Payment_Gateway
                             'failed' => add_query_arg(
                                 'paymongo',
                                 'grabpay_failed',
-                                $isPayForOrder ?
-                                    $order->get_checkout_payment_url()
-                                    : wc_get_checkout_url()
+                                $order->get_checkout_payment_url()
                             ),
                         ),
                     ),
@@ -300,7 +296,7 @@ class WC_PayMongo_GrabPay_Gateway extends WC_Payment_Gateway
                 wp_send_json(
                     array(
                         'result' => 'error',
-                        'data' => $body,
+                        'errors' => $body['errors'],
                     )
                 );
                 return;
@@ -308,7 +304,8 @@ class WC_PayMongo_GrabPay_Gateway extends WC_Payment_Gateway
         } else {
             wp_send_json(
                 array(
-                    'result' => 'error',
+                    'result' => 'failure',
+                    'messages' => WC_PayMongo_Error_Handler::parseErrors(),
                 )
             );
             return;

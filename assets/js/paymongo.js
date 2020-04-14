@@ -45,17 +45,19 @@ jQuery(document).ready(function ($) {
         paymongoForm.showError("Failed to authorize GrabPay transaction");
       }
     },
-    showError: (message) => {
-      $(".paymongo-error").remove();
-      $(".woocommerce-notices-wrapper:first").append(
-        '<div class="woocommerce-error paymongo-error">' + message + "</div>"
-      );
-    },
+
     onSubmit: function (e) {
       e.preventDefault(e);
 
       // if default paymongo
       if ($("#payment_method_paymongo_payment_gateway").attr("checked")) {
+        const errors = paymongoForm.validateCardFields() || [];
+
+        if (errors.length) {
+          paymongoForm.showErrors(errors);
+          return false;
+        }
+
         paymongoForm.createPaymentIntent();
       }
 
@@ -106,32 +108,10 @@ jQuery(document).ready(function ($) {
       });
     },
     onPaymentIntentSuccess: function (res) {
-      console.log("res", res);
-
-      if (res && "failure" === res.result) {
-        var $form = $("form.checkout");
-
-        // Remove notices from all sources
-        $(".woocommerce-error, .woocommerce-message").remove();
-
-        // Add new errors returned by this event
-        if (res.messages) {
-          $form.prepend(
-            '<div class="woocommerce-NoticeGroup woocommerce-NoticeGroup-updateOrderReview">' +
-              res.messages +
-              "</div>"
-          ); // eslint-disable-line max-len
-        } else {
-          $form.prepend(res);
-        }
-
-        // Lose focus for all fields
-        $form
-          .find(".input-text, select, input:checkbox")
-          .trigger("validate")
-          .blur();
-
-        paymongoForm.scrollToNotices();
+      if (res.result && res.result === "error") {
+        const errors = paymongoForm.parsePayMongoErrors(res.errors);
+        paymongoForm.showErrors(errors);
+        return;
       }
 
       // add payment intent field
@@ -189,6 +169,17 @@ jQuery(document).ready(function ($) {
       return false;
     },
     createSource: function (type) {
+      if (
+        !window.confirm(
+          "This payment option will empty your cart " +
+            "and generate an order with pending status.\n" +
+            "You can view the order in My Account > Orders\n\n" +
+            "Do you want to proceed?"
+        )
+      ) {
+        return;
+      }
+
       jQuery.post(
         (paymongoForm.isOrderPay
           ? paymongo_params.order_pay_url
@@ -265,8 +256,13 @@ jQuery(document).ready(function ($) {
       return false;
     },
     onFail: function (err) {
-      paymongoForm.removeLoader();
-      $(".blockUI").remove();
+      if (err.responseJSON && err.responseJSON.errors) {
+        const errors = paymongoForm.parsePayMongoErrors(
+          err.responseJSON.errors
+        );
+
+        paymongoForm.showErrors(errors);
+      }
     },
     getName: function () {
       const firstName =
@@ -285,6 +281,12 @@ jQuery(document).ready(function ($) {
       return name;
     },
     onCreateSourceSuccess: (res) => {
+      if (res.result && res.result === "error") {
+        const errors = paymongoForm.parsePayMongoErrors(res.errors);
+        paymongoForm.showErrors(errors);
+        return;
+      }
+
       if (!res.checkout_url) {
         return paymongoForm.showError(
           "Failed to get Gcash Link, Please try again"
@@ -317,13 +319,95 @@ jQuery(document).ready(function ($) {
     },
     scrollToNotices: function () {
       var scrollElement = $(
-        ".woocommerce-NoticeGroup-updateOrderReview, .woocommerce-NoticeGroup-checkout"
+        ".woocommerce-NoticeGroup, .woocommerce-NoticeGroup"
       );
 
       if (!scrollElement.length) {
-        scrollElement = $(".form.checkout");
+        scrollElement = paymongoForm.checkoutForm;
       }
       $.scroll_to_notices(scrollElement);
+    },
+    showError: (message) => {
+      $(".paymongo-error").remove();
+      $(".woocommerce-notices-wrapper:first").append(
+        '<div class="woocommerce-error paymongo-error">' + message + "</div>"
+      );
+    },
+    showErrors: function (errors) {
+      // Remove notices from all sources
+      $(".woocommerce-error, .woocommerce-message").remove();
+      $(".blockUI").remove();
+      paymongoForm.removeLoader();
+
+      if (!errors.length) return;
+
+      let messages = '<ul class="woocommerce-error">';
+
+      for (let x = 0; x < errors.length; x++) {
+        messages += "<li>" + errors[x] + "</li>";
+        if (x === errors.length) {
+          messages += "</ul>";
+        }
+      }
+
+      paymongoForm.checkoutForm.prepend(
+        '<div class="woocommerce-NoticeGroup woocommerce-NoticeGroup-PayMongoErrors">' +
+          messages +
+          "</div>"
+      );
+      // Lose focus for all fields
+      paymongoForm.checkoutForm
+        .find(".input-text, select, input:checkbox")
+        .trigger("validate")
+        .blur();
+
+      paymongoForm.scrollToNotices();
+    },
+    validateCardFields: function (payload) {
+      const errors = [];
+      const ccNo = $("#paymongo_ccNo").val();
+      const expDate = $("#paymongo_expdate").val();
+      const [expMonth, expYear] = expDate.split("/");
+      const cvc = $("#paymongo_cvv").val();
+
+      if (!ccNo) {
+        errors.push("<b>Card Number<b> is required.");
+      }
+
+      if (!expDate) {
+        errors.push("<b>Expiration Date</b> is required.");
+      } else if (expDate.indexOf("/") > -1) {
+        if (!expMonth) {
+          errors.push("<b>Expiration Month</b> is required.");
+        }
+
+        if (!expYear) {
+          errors.push("<b>Expiration Year</b> is required.");
+        }
+      } else {
+        errors.push("<b>Expiration date</b> is invalid ('MM/YY')");
+      }
+
+      if (!cvc) {
+        errors.push("<b>CVC</b> is required.");
+      }
+
+      return errors;
+    },
+    parsePayMongoErrors: function (paymongoErrors) {
+      if (!paymongoErrors || !paymongoErrors.length) {
+        paymongoForm.showError("Something went wrong.");
+      }
+
+      const errors = [];
+
+      for (let x = 0; x < paymongoErrors.length; x++) {
+        errors.push(
+          paymongoErrors[x].detail + " (CODE: " + paymongoErrors[x].code + ")"
+        );
+      }
+
+      return errors;
     },
   };
 

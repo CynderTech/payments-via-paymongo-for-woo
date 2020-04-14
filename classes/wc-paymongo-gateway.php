@@ -355,7 +355,6 @@ class WC_PayMongo_Gateway extends WC_Payment_Gateway
                         'result' => 'success',
                         'payment_client_key' => $clientKey,
                         'payment_intent_id' => $body['data']['id'],
-                        'body' => $body
                     )
                 );
 
@@ -364,7 +363,7 @@ class WC_PayMongo_Gateway extends WC_Payment_Gateway
                 wp_send_json(
                     array(
                         'result' => 'error',
-                        'data' => $response,
+                        'errors' => $body['errors'],
                     )
                 );
                 return;
@@ -372,7 +371,8 @@ class WC_PayMongo_Gateway extends WC_Payment_Gateway
         } else {
             wp_send_json(
                 array(
-                    'result' => 'error',
+                    'result' => 'failure',
+                    'messages' => WC_PayMongo_Error_Handler::parseErrors(),
                 )
             );
             return;
@@ -439,7 +439,8 @@ class WC_PayMongo_Gateway extends WC_Payment_Gateway
                     'redirect' => $this->get_return_url($order)
                 );
             } else {
-                wc_add_notice('Please try again.', 'error');
+                $messages = WC_PayMongo_Error_Handler::parseErrors($body['errors']);
+                wc_add_notice($messages, 'error');
                 return;
             }
 

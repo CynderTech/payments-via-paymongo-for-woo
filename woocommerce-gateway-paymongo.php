@@ -134,6 +134,7 @@ function Paymongo_Init_Gateway_class()
                 include_once $fileDir.'/classes/wc-paymongo-gcash-gateway.php';
                 include_once $fileDir.'/classes/wc-paymongo-grabpay-gateway.php';
                 include_once $fileDir.'/classes/wc-paymongo-webhook-handler.php';
+                include_once $fileDir.'/classes/wc-paymongo-error-handler.php';
                 include_once $fileDir.'/classes/wc-paymongo-logger.php';
 
                 add_filter(
