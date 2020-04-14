@@ -169,16 +169,16 @@ jQuery(document).ready(function ($) {
       return false;
     },
     createSource: function (type) {
-      if (
-        !window.confirm(
-          "This payment option will empty your cart " +
-            "and generate an order with pending status.\n" +
-            "You can view the order in My Account > Orders\n\n" +
-            "Do you want to proceed?"
-        )
-      ) {
-        return;
-      }
+      // if (
+      //   !window.confirm(
+      //     "This payment option will empty your cart " +
+      //       "and generate an order with pending status.\n" +
+      //       "You can view the order in My Account > Orders\n\n" +
+      //       "Do you want to proceed?"
+      //   )
+      // ) {
+      //   return;
+      // }
 
       jQuery.post(
         (paymongoForm.isOrderPay
