@@ -328,14 +328,16 @@ jQuery(document).ready(function ($) {
       $.scroll_to_notices(scrollElement);
     },
     showError: (message) => {
-      $(".paymongo-error").remove();
+      $(".woocommerce-error, .woocommerce-message, .paymongo-error").remove();
+      $(".blockUI").remove();
+      paymongoForm.removeLoader();
       $(".woocommerce-notices-wrapper:first").append(
         '<div class="woocommerce-error paymongo-error">' + message + "</div>"
       );
     },
     showErrors: function (errors) {
       // Remove notices from all sources
-      $(".woocommerce-error, .woocommerce-message").remove();
+      $(".woocommerce-error, .woocommerce-message, .paymongo-error").remove();
       $(".blockUI").remove();
       paymongoForm.removeLoader();
 
