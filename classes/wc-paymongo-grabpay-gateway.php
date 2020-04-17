@@ -305,7 +305,7 @@ class WC_PayMongo_GrabPay_Gateway extends WC_Payment_Gateway
             wp_send_json(
                 array(
                     'result' => 'failure',
-                    'messages' => WC_PayMongo_Error_Handler::parseErrors(),
+                    'messages' => $response->get_error_messages(),
                 )
             );
             return;
