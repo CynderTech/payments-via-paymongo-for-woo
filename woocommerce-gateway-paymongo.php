@@ -6,7 +6,7 @@
  * Description: Take credit card payments on your store.
  * Author: PayMongo
  * Author URI: http://paymongo.com
- * Version: 1.0.0
+ * Version: 1.0.1
  * 
  * @category Plugin
  * @package  PayMongo
