@@ -50,7 +50,7 @@ function Paymongo_Init_Gateway_class()
     }
 
     define('WC_PAYMONGO_MAIN_FILE', __FILE__);
-    define('WC_PAYMONGO_VERSION', '1.0.0');
+    define('WC_PAYMONGO_VERSION', '1.0.1');
     define('WC_PAYMONGO_BASE_URL',  'https://api.paymongo.com/v1');
     
 
