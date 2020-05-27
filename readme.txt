@@ -1,4 +1,4 @@
-=== PayMongo Payment Gateway For WooCommerce ===
+=== WC PayMongo Payment Gateway ===
 Contributors: CynderTech Corp.
 Tags: credit card, gcash, grabpay
 Requires at least: 5.0
