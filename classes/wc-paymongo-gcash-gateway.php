@@ -54,9 +54,8 @@ class WC_PayMongo_Gcash_Gateway extends WC_Payment_Gateway
     public function __construct()
     {
         $this->id = 'paymongo_gcash_payment_gateway';
-        $this->icon = 'https://b.paymongocdn.com/images/logo-with-text.png';
         $this->has_fields = true;
-        $this->method_title = 'PayMongo GCash Gateway';
+        $this->method_title = 'GCash Gateway via PayMongo';
         $this->method_description = 'Simple and easy payments with GCash.';
 
         $this->supports = array(
@@ -118,7 +117,7 @@ class WC_PayMongo_Gcash_Gateway extends WC_Payment_Gateway
         $this->form_fields = array(
             'enabled' => array(
                 'title'       => 'Enable/Disable',
-                'label'       => 'Enable PayMongo GCash Gateway',
+                'label'       => 'Enable GCash Gateway via PayMongo',
                 'type'        => 'checkbox',
                 'description' => '',
                 'default'     => 'no'
@@ -128,7 +127,7 @@ class WC_PayMongo_Gcash_Gateway extends WC_Payment_Gateway
                 'type'        => 'text',
                 'description' => 'This controls the title which ' .
                                  'the user sees during checkout.',
-                'default'     => 'GCash - PayMongo',
+                'default'     => 'GCash via PayMongo',
                 'desc_tip'    => true,
             ),
             'description' => array(
@@ -136,7 +135,7 @@ class WC_PayMongo_Gcash_Gateway extends WC_Payment_Gateway
                 'type'        => 'textarea',
                 'description' => 'This controls the description which ' .
                                  'the user sees during checkout.',
-                'default'     => 'Simple and easy payments.',
+                'default'     => 'Simple and easy payments via GCash.',
             ),
         );
     }
@@ -172,6 +171,26 @@ class WC_PayMongo_Gcash_Gateway extends WC_Payment_Gateway
         if (!$this->testmode && !is_ssl()) {
             return;
         }
+
+        $paymongoVar = array();
+        $paymongoVar['publicKey'] = $this->public_key;
+
+        // Order Pay Page
+        if (isset($_GET['pay_for_order']) && 'true' === $_GET['pay_for_order']) {
+            $orderId = wc_get_order_id_by_order_key(urldecode($_GET['key']));
+            $order = wc_get_order($orderId);
+            $paymongoVar['order_pay_url'] = $order->get_checkout_payment_url();
+            $paymongoVar['billing_first_name'] = $order->get_billing_first_name();
+            $paymongoVar['billing_last_name'] = $order->get_billing_last_name();
+            $paymongoVar['billing_address_1'] = $order->get_billing_address_1();
+            $paymongoVar['billing_address_2'] = $order->get_billing_address_2();
+            $paymongoVar['billing_state'] = $order->get_billing_state();
+            $paymongoVar['billing_city'] = $order->get_billing_city();
+            $paymongoVar['billing_postcode'] = $order->get_billing_postcode();
+            $paymongoVar['billing_country'] = $order->get_billing_country();
+            $paymongoVar['billing_email'] = $order->get_billing_email();
+            $paymongoVar['billing_phone'] = $order->get_billing_phone();
+        }
         
         if (!wp_script_is('woocommerce_paymongo', 'enqueued')) {
             wp_register_script(
@@ -182,17 +201,7 @@ class WC_PayMongo_Gcash_Gateway extends WC_Payment_Gateway
             wp_localize_script(
                 'woocommerce_paymongo',
                 'paymongo_params',
-                array(
-                    'publicKey' => $this->public_key,
-                    'billing_first_name' => $order->get_billing_first_name(),
-                    'billing_last_name' => $order->get_billing_last_name(),
-                    'billing_address_1' => $order->get_billing_address_1(),
-                    'billing_address_2' => $order->get_billing_address_2(),
-                    'billing_state' => $order->get_billing_state(),
-                    'billing_city' => $order->get_billing_city(),
-                    'billing_postcode' => $order->get_billing_postcode(),
-                    'billing_country' => $order->get_billing_country(),
-                )
+                $paymongoVar
             );
                 
             wp_enqueue_style('paymongo');
@@ -311,6 +320,14 @@ class WC_PayMongo_Gcash_Gateway extends WC_Payment_Gateway
             return;
         }
     }
+
+
+    public function get_icon() {
+        $icons_str = '<img src="' . WC_PAYMONGO_PLUGIN_URL . '/assets/images/gcash.png" class="paymongo-cards-icon" alt="'. $this->title .'" />';
+
+        return apply_filters( 'woocommerce_gateway_icon', $icons_str, $this->id );
+    }
+
 
     /**
      * Custom GCash order received text.

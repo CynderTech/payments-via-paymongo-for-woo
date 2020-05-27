@@ -11,13 +11,21 @@ function getUrlVars() {
 }
 
 jQuery(document).ready(function ($) {
+  console.log('$("#payment_method_paymongo_cc_payment_gateway")', $("#payment_method_paymongo_cc_payment_gateway"))
+  jQuery(document).on('change', "#payment_method_paymongo_cc_payment_gateway", function() {
+    console.log('changed' );
+    if (this.checked) {
+      paymongoForm.setUpCleave()
+    }
+  });
+
   const paymongoForm = {
     isOrderPay: $(document.body).hasClass("woocommerce-order-pay"),
     checkoutForm: $(document.body).hasClass("woocommerce-order-pay")
       ? $("#order_review")
       : $("form.woocommerce-checkout"),
     init: function () {
-      paymongoForm.setUpCleave();
+      // paymongoForm.setUpCleave();
       paymongoForm.checkErrors();
 
       if (paymongoForm.isOrderPay) {
@@ -50,7 +58,7 @@ jQuery(document).ready(function ($) {
       e.preventDefault(e);
 
       // if default paymongo
-      if ($("#payment_method_paymongo_payment_gateway").attr("checked")) {
+      if ($("#payment_method_paymongo_cc_payment_gateway").attr("checked")) {
         const errors = paymongoForm.validateCardFields() || [];
 
         if (errors.length) {
@@ -155,7 +163,7 @@ jQuery(document).ready(function ($) {
     },
     createPaymentIntent: function () {
       paymongoForm.addLoader(
-        ".wc_payment_method .payment_box.payment_method_paymongo_payment_gateway"
+        ".wc_payment_method .payment_box.payment_method_paymongo_cc_payment_gateway"
       );
 
       jQuery.post(
@@ -299,20 +307,23 @@ jQuery(document).ready(function ($) {
     },
     setUpCleave: function () {
       if ($("#paymongo_ccNo").length) {
-        $("#paymongo_ccNo").cleave({
+        var ccNo = new Cleave('#paymongo_ccNo', {
           creditCard: true,
         });
       }
 
       if ($("#paymongo_expdate").length) {
-        $("#paymongo_expdate").cleave({
+        var expDate = new Cleave('#paymongo_expdate', {
+
           date: true,
           datePattern: ["m", "y"],
         });
+
       }
 
       if ($("#paymongo_cvv").length) {
-        $("#paymongo_cvv").cleave({
+        var expDate = new Cleave('#paymongo_cvv', {
+
           blocks: [4],
         });
       }
