@@ -162,7 +162,7 @@ class WC_PayMongo_CC_Gateway extends WC_Payment_Gateway
         // no reason to enqueue JavaScript if API keys are not set
         if (!$this->testmode
             && (empty($this->secret_key)
-                || empty($this->public_key))
+            || empty($this->public_key))
         ) {
             return;
         }
@@ -413,11 +413,17 @@ class WC_PayMongo_CC_Gateway extends WC_Payment_Gateway
             return;
         }
     }
-
-    public function get_icon() {
+    
+    /**
+     * Get Icon for checkout page
+     * 
+     * @return string
+     */
+    public function get_icon() // phpcs:ignore
+    {
         $icons_str = '<img src="' . WC_PAYMONGO_PLUGIN_URL . '/assets/images/cards.png" class="paymongo-cards-icon" alt="'. $this->title .'" />';
 
-        return apply_filters( 'woocommerce_gateway_icon', $icons_str, $this->id );
+        return apply_filters('woocommerce_gateway_icon', $icons_str, $this->id);
     }
 
     /**

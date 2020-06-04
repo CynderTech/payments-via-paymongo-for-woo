@@ -1,5 +1,5 @@
-=== WC PayMongo Payment Gateway ===
-Contributors: CynderTech Corp.
+=== PayMongo Payment Gateaway for WooCommerce ===
+Contributors: Cyndertech Corp.
 Tags: credit card, gcash, grabpay
 Requires at least: 5.0
 Tested up to: 5.3.2
@@ -14,6 +14,12 @@ Take credit card payments on your store using PayMongo.
 
 Accept Visa, MasterCard, GCash and GrabPay directly on your store with the PayMongo Payment Gateway for WooCommerce
 
+== Disclaimer ==
+
+This plugin was developed by CynderTech Corp. in collaboration with PayMongo Philippines, Inc.
+
+All product and company names are trademarks™ or registered® trademarks of their respective holders. Use of them does not imply any affiliation with or endorsement by them.
+
 = Simple and easy payments on your store =
 
 The PayMongo plugin extends WooCommerce enabling you to take payment using PayMongo's Payment API
@@ -24,12 +30,12 @@ This gateway requires WooCommerce 3.9.3 and above.
 
 = Automatic installation =
 
-To install the "WooCommerce PayMongo Payment Gateway" plugin
+To install the "PayMongo Payment Gateway for WooCommerce" plugin
 
 1. Log in to your WordPress dashboard
 2. Navigate to the Plugins menu and click Add New.
-3. In the search field type “WooCommerce PayMongo Payment Gateway” and click Search Plugins.
-4. Once you found the "WooCommerce PayMongo Payment Gateway", click Install Now
+3. In the search field type “PayMongo Payment Gateway for WooCommerce” and click Search Plugins.
+4. Once you found the "PayMongo Payment Gateway for WooCommerce", click Install Now
 
 = Manual installation =
 

@@ -1,9 +1,9 @@
 <?php
 /**
  * PHP version 7
- * Plugin Name: WC PayMongo Payment Gateway
+ * Plugin Name: PayMongo Gateway for WooCommerces
  * Plugin URI: 
- * Description: Take credit card, GCash and GrabPay payments on your store via PayMongo.
+ * Description: Take credit card, GCash and GrabPay payments via PayMongo.
  * Author: CynderTech
  * Author URI: http://paymongo.com
  * Version: 1.0.1
@@ -56,7 +56,15 @@ function Paymongo_Init_Gateway_class()
     define('WC_PAYMONGO_MAIN_FILE', __FILE__);
     define('WC_PAYMONGO_VERSION', '1.1.0');
     define('WC_PAYMONGO_BASE_URL',  'https://api.paymongo.com/v1');
-    define('WC_PAYMONGO_PLUGIN_URL', untrailingslashit( plugins_url( basename( plugin_dir_path( __FILE__ ) ), basename( __FILE__ ) ) ) );
+    define(
+        'WC_PAYMONGO_PLUGIN_URL',
+        untrailingslashit(
+            plugins_url(
+                basename(plugin_dir_path(__FILE__)),
+                basename(__FILE__)
+            )
+        )
+    );
     
 
     if (!class_exists('WC_PayMongo')) :
@@ -167,6 +175,7 @@ function Paymongo_Init_Gateway_class()
              */
             public function addGateways($methods)
             {
+                $methods[] = 'WC_PayMongo_Gateway';
                 $methods[] = 'WC_PayMongo_CC_Gateway';
                 $methods[] = 'WC_PayMongo_Gcash_Gateway';
                 $methods[] = 'WC_PayMongo_GrabPay_Gateway';
@@ -185,6 +194,7 @@ function Paymongo_Init_Gateway_class()
              */
             public function filterGatewayOrderAdmin($sections) 
             {
+                unset($sections['paymongo']);
                 unset($sections['paymongo_cc']);
                 unset($sections['paymongo_gcash']);
                 unset($sections['paymongo_grabpay']);

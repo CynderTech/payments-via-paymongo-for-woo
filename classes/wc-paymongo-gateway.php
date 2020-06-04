@@ -82,7 +82,6 @@ class WC_PayMongo_Gateway extends WC_Payment_Gateway
             'woocommerce_update_options_payment_gateways_' . $this->id,
             array($this, 'process_admin_options')
         );
-        add_action('wp_enqueue_scripts', array($this, 'paymentScripts'));
     }
 
     /**
@@ -170,13 +169,5 @@ class WC_PayMongo_Gateway extends WC_Payment_Gateway
                 'default'     => '',
             ),
         );
-    }
-
-    /**
-     * @return string
-     */
-    public function paymentScripts()
-    {
-        return false;
     }
 }
