@@ -1,8 +1,8 @@
 <?php
 /**
  * PHP version 7
- * Plugin Name: PayMongo Gateway for WooCommerces
- * Plugin URI: 
+ * Plugin Name: Payments via PayMongo for WooCommerce
+ * Plugin URI: https://wordpress.org/plugins/payments-via-paymongo-for-woo/
  * Description: Take credit card, GCash and GrabPay payments via PayMongo.
  * Author: CynderTech
  * Author URI: http://paymongo.com
