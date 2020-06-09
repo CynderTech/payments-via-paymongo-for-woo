@@ -1,4 +1,4 @@
-=== PayMongo Payment Gateaway for WooCommerce ===
+=== Payments via PayMongo for WooCommerce ===
 Contributors: Cyndertech Corp.
 Tags: credit card, gcash, grabpay
 Requires at least: 5.0
