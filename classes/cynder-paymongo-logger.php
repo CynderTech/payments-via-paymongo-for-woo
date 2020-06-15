@@ -23,11 +23,11 @@ if (!defined('ABSPATH')) {
  * @license  n/a (http://127.0.0.0)
  * @link     n/a
  */
-class WC_PayMongo_Logger
+class Cynder_PayMongo_Logger
 {
 
     public static $logger;
-    const WC_LOG_FILENAME = 'woocommerce-gateway-paymongo';
+    const CYNDER_LOG_FILENAME = 'woocommerce-gateway-paymongo';
 
     /**
      * Utilize WC logger class
@@ -40,13 +40,13 @@ class WC_PayMongo_Logger
      */
     public static function log($message, $startTime = null, $endTime = null)
     {
-        if (!class_exists('WC_Logger')) {
+        if (!class_exists('Cynder_Logger')) {
             return;
         }
 
-        if (apply_filters('wc_paymongo_logging', true, $message)) {
+        if (apply_filters('cynder_paymongo_logging', true, $message)) {
             if (empty(self::$logger)) {
-                self::$logger = wc_get_logger();
+                self::$logger = cynder_get_logger();
             }
 
             $settings = get_option('woocommerce_paymongo_settings');
@@ -74,7 +74,7 @@ class WC_PayMongo_Logger
                 $elapsed_time         = round(abs($endTime - $startTime) / 60, 2);
 
                 $log_entry  = "\n" .
-                    '====PayMongo Version: ' . WC_PAYMONGO_VERSION . '====' . "\n";
+                    '====PayMongo Version: ' . CYNDER_PAYMONGO_VERSION . '====' . "\n";
                 $log_entry .= '====Start Log ' . $formatted_startTime . '====' . "\n"
                     . $message . "\n";
                 $log_entry .= '====End Log ' . $formatted_endTime 
@@ -82,7 +82,7 @@ class WC_PayMongo_Logger
 
             } else {
                 $log_entry  = "\n" 
-                    . '====PayMongo Version: ' . WC_PAYMONGO_VERSION . '====' . "\n";
+                    . '====PayMongo Version: ' . CYNDER_PAYMONGO_VERSION . '====' . "\n";
                 $log_entry .= '====Start Log====' 
                     . "\n" . $message . "\n"
                     . '====End Log====' . "\n\n";
@@ -90,7 +90,7 @@ class WC_PayMongo_Logger
 
             self::$logger->debug(
                 $log_entry,
-                array('source' => self::WC_LOG_FILENAME)
+                array('source' => self::CYNDER_LOG_FILENAME)
             );
         }
     }

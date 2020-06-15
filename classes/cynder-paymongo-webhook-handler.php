@@ -24,7 +24,7 @@ if (!defined('ABSPATH')) {
  * @license  n/a (http://127.0.0.0)
  * @link     n/a
  */
-class WC_PayMongo_Webhook_Handler extends WC_Payment_Gateway
+class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
 {
     /**
      * Singleton
@@ -67,7 +67,7 @@ class WC_PayMongo_Webhook_Handler extends WC_Payment_Gateway
             $main_settings[$webhook_secret_key]
             : false;
 
-        add_action('woocommerce_api_wc_paymongo', array($this, 'checkForWebhook'));
+        add_action('woocommerce_api_cynder_paymongo', array($this, 'checkForWebhook'));
     }
 
     /**
@@ -81,7 +81,7 @@ class WC_PayMongo_Webhook_Handler extends WC_Payment_Gateway
     {
         if (('POST' !== $_SERVER['REQUEST_METHOD'])
             || !isset($_GET['wc-api'])
-            || ('wc_paymongo' !== $_GET['wc-api'])
+            || ('cynder_paymongo' !== $_GET['wc-api'])
         ) {
             status_header(400);
             die();
@@ -96,7 +96,7 @@ class WC_PayMongo_Webhook_Handler extends WC_Payment_Gateway
             status_header(200);
             die();
         } else {
-            WC_PayMongo_Logger::log(
+            Cynder_PayMongo_Logger::log(
                 'Incoming webhook failed validation: ' . print_r($requestBody, true)
             );
             status_header(400);
@@ -131,7 +131,7 @@ class WC_PayMongo_Webhook_Handler extends WC_Payment_Gateway
             return $this->createPaymentRecord($sourceData, $order);
         }
 
-        WC_PayMongo_Logger::log('Invalid event type = ' . $source_id);
+        Cynder_PayMongo_Logger::log('Invalid event type = ' . $source_id);
         status_header(422);
         die();
     }
@@ -173,7 +173,7 @@ class WC_PayMongo_Webhook_Handler extends WC_Payment_Gateway
             ),
         );
 
-        $response = wp_remote_post(WC_PAYMONGO_BASE_URL . '/payments', $args);
+        $response = wp_remote_post(CYNDER_PAYMONGO_BASE_URL . '/payments', $args);
 
         if (!is_wp_error($response)) {
             $body = json_decode($response['body'], true);
@@ -181,7 +181,7 @@ class WC_PayMongo_Webhook_Handler extends WC_Payment_Gateway
             
             if ($body['errors'] && $body['errors'][0]) {
                 status_header($response['response']['code']);
-                WC_PayMongo_Logger::log('Payment failed: ' . $body);
+                Cynder_PayMongo_Logger::log('Payment failed: ' . $body);
             }
 
             if ($status == 'paid') {
@@ -192,7 +192,7 @@ class WC_PayMongo_Webhook_Handler extends WC_Payment_Gateway
             }
 
             if ($status == 'failed') {
-                WC_PayMongo_Logger::log('Payment failed: ' . $response['body']);
+                Cynder_PayMongo_Logger::log('Payment failed: ' . $response['body']);
                 $order->update_status($status);
                 status_header(400);
                 die();
@@ -340,7 +340,7 @@ class WC_PayMongo_Webhook_Handler extends WC_Payment_Gateway
         );
 
         if (empty($orders)) {
-            WC_PayMongo_Logger::log(
+            Cynder_PayMongo_Logger::log(
                 'Failed to find order with source_id = ' . $source_id
             );
             
@@ -351,4 +351,4 @@ class WC_PayMongo_Webhook_Handler extends WC_Payment_Gateway
     }
 }
 
-WC_PayMongo_Webhook_Handler::getInstance();
+Cynder_PayMongo_Webhook_Handler::getInstance();

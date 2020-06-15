@@ -24,7 +24,7 @@ if (!defined('ABSPATH')) {
  * @license  n/a (http://127.0.0.0)
  * @link     n/a
  */
-class WC_PayMongo_Gateway extends WC_Payment_Gateway
+class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
 {
     /**
      * Singleton instance
@@ -150,7 +150,7 @@ class WC_PayMongo_Gateway extends WC_Payment_Gateway
                             'and put it in the field below. <p>Use this URL: <b><i>'
                             . add_query_arg(
                                 'wc-api',
-                                'wc_paymongo',
+                                'cynder_paymongo',
                                 trailingslashit(get_home_url())
                             ) . '</b></i></p>'
             ),

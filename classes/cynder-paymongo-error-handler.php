@@ -23,7 +23,7 @@ if (!defined('ABSPATH')) {
  * @license  n/a (http://127.0.0.0)
  * @link     n/a
  */
-class WC_PayMongo_Error_Handler
+class Cynder_PayMongo_Error_Handler
 {
     /**
      * Build Error messages from PayMongo errors

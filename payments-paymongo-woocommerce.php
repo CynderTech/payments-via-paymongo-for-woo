@@ -28,7 +28,7 @@ if (!defined('ABSPATH')) {
  *
  * @return string
  */
-function Woocommerce_Missing_WC_notice()
+function Woocommerce_Missing_Cynder_notice()
 {
     /* translators: 1. URL link. */
     echo '<div class="error"><p><strong>' . sprintf(
@@ -49,15 +49,15 @@ function Woocommerce_Missing_WC_notice()
 function Paymongo_Init_Gateway_class()
 {
     if (!class_exists('WooCommerce')) {
-        add_action('admin_notices', 'Woocommerce_Missing_WC_notice');
+        add_action('admin_notices', 'Woocommerce_Missing_Cynder_notice');
         return;
     }
 
-    define('WC_PAYMONGO_MAIN_FILE', __FILE__);
-    define('WC_PAYMONGO_VERSION', '1.1.0');
-    define('WC_PAYMONGO_BASE_URL',  'https://api.paymongo.com/v1');
+    define('CYNDER_PAYMONGO_MAIN_FILE', __FILE__);
+    define('CYNDER_PAYMONGO_VERSION', '1.1.0');
+    define('CYNDER_PAYMONGO_BASE_URL',  'https://api.paymongo.com/v1');
     define(
-        'WC_PAYMONGO_PLUGIN_URL',
+        'CYNDER_PAYMONGO_PLUGIN_URL',
         untrailingslashit(
             plugins_url(
                 basename(plugin_dir_path(__FILE__)),
@@ -67,7 +67,7 @@ function Paymongo_Init_Gateway_class()
     );
     
 
-    if (!class_exists('WC_PayMongo')) :
+    if (!class_exists('Cynder_PayMongo')) :
         /**
          * Paymongo Class
          * 
@@ -78,7 +78,7 @@ function Paymongo_Init_Gateway_class()
          * @link     n/a
          * @phpcs:disable Standard.Cat.SniffName
          */
-        class WC_PayMongo
+        class Cynder_PayMongo
         {
             /**
              * *Singleton* instance of this class
@@ -143,13 +143,13 @@ function Paymongo_Init_Gateway_class()
             public function init()
             {
                 $fileDir = dirname(__FILE__);
-                include_once $fileDir.'/classes/wc-paymongo-gateway.php';
-                include_once $fileDir.'/classes/wc-paymongo-cc-gateway.php';
-                include_once $fileDir.'/classes/wc-paymongo-gcash-gateway.php';
-                include_once $fileDir.'/classes/wc-paymongo-grabpay-gateway.php';
-                include_once $fileDir.'/classes/wc-paymongo-webhook-handler.php';
-                include_once $fileDir.'/classes/wc-paymongo-error-handler.php';
-                include_once $fileDir.'/classes/wc-paymongo-logger.php';
+                include_once $fileDir.'/classes/cynder-paymongo-gateway.php';
+                include_once $fileDir.'/classes/cynder-paymongo-cc-gateway.php';
+                include_once $fileDir.'/classes/cynder-paymongo-gcash-gateway.php';
+                include_once $fileDir.'/classes/cynder-paymongo-grabpay-gateway.php';
+                include_once $fileDir.'/classes/cynder-paymongo-webhook-handler.php';
+                include_once $fileDir.'/classes/cynder-paymongo-error-handler.php';
+                include_once $fileDir.'/classes/cynder-paymongo-logger.php';
 
                 add_filter(
                     'woocommerce_payment_gateways',
@@ -175,10 +175,10 @@ function Paymongo_Init_Gateway_class()
              */
             public function addGateways($methods)
             {
-                $methods[] = 'WC_PayMongo_Gateway';
-                $methods[] = 'WC_PayMongo_CC_Gateway';
-                $methods[] = 'WC_PayMongo_Gcash_Gateway';
-                $methods[] = 'WC_PayMongo_GrabPay_Gateway';
+                $methods[] = 'Cynder_PayMongo_Gateway';
+                $methods[] = 'Cynder_PayMongo_CC_Gateway';
+                $methods[] = 'Cynder_PayMongo_Gcash_Gateway';
+                $methods[] = 'Cynder_PayMongo_GrabPay_Gateway';
                 
                 return $methods;
             }
@@ -230,12 +230,12 @@ function Paymongo_Init_Gateway_class()
                 }
 
                 if (!defined('IFRAME_REQUEST')
-                    && (WC_PAYMONGO_VERSION !== get_option('wc_paymongo_version'))
+                    && (CYNDER_PAYMONGO_VERSION !== get_option('cynder_paymongo_version'))
                 ) {
                     do_action('woocommerce_paymongo_updated');
 
-                    if (!defined('WC_PAYMONGO_INSTALLING')) {
-                        define('WC_PAYMONGO_INSTALLING', true);
+                    if (!defined('CYNDER_PAYMONGO_INSTALLING')) {
+                        define('CYNDER_PAYMONGO_INSTALLING', true);
                     }
 
                     $this->updatePluginVersion();
@@ -251,13 +251,13 @@ function Paymongo_Init_Gateway_class()
              */
             public function updatePluginVersion()
             {
-                delete_option('wc_paymongo_version');
-                update_option('wc_paymongo_version', WC_PAYMONGO_VERSION);
+                delete_option('cynder_paymongo_version');
+                update_option('cynder_paymongo_version', CYNDER_PAYMONGO_VERSION);
             }
 
         }
     
-        WC_PayMongo::getInstance();
+        Cynder_PayMongo::getInstance();
     endif;
 }
 

@@ -24,7 +24,7 @@ if (! defined('ABSPATH')) {
  * @license  n/a (http://127.0.0.0)
  * @link     n/a
  */
-class WC_PayMongo_GrabPay_Gateway extends WC_Payment_Gateway
+class Cynder_PayMongo_GrabPay_Gateway extends WC_Payment_Gateway
 {
     /**
      * Singleton instance of GrabPay
@@ -196,7 +196,7 @@ class WC_PayMongo_GrabPay_Gateway extends WC_Payment_Gateway
         if (!wp_script_is('woocommerce_paymongo', 'enqueued')) {
             wp_register_script(
                 'woocommerce_paymongo',
-                plugins_url('assets/js/paymongo.js', WC_PAYMONGO_MAIN_FILE),
+                plugins_url('assets/js/paymongo.js', CYNDER_PAYMONGO_MAIN_FILE),
                 array('jquery')
             );
 
@@ -277,7 +277,7 @@ class WC_PayMongo_GrabPay_Gateway extends WC_Payment_Gateway
             ),
         );
 
-        $response = wp_remote_post(WC_PAYMONGO_BASE_URL . '/sources', $args);
+        $response = wp_remote_post(CYNDER_PAYMONGO_BASE_URL . '/sources', $args);
 
         if (!is_wp_error($response)) {
             $body = json_decode($response['body'], true);
@@ -290,8 +290,8 @@ class WC_PayMongo_GrabPay_Gateway extends WC_Payment_Gateway
             ) {
                 $order->add_meta_data('source_id', $body['data']['id']);
                 $order->update_status('pending');
-                wc_reduce_stock_levels($orderId);
-                $woocommerce->cart->empty_cart();
+                // cynder_reduce_stock_levels($orderId);
+                // $woocommerce->cart->empty_cart();
                 $attributes = $body['data']['attributes'];
 
                 wp_send_json(
@@ -323,10 +323,11 @@ class WC_PayMongo_GrabPay_Gateway extends WC_Payment_Gateway
     }
 
 
-    public function get_icon() {
-        $icons_str = '<img src="' . WC_PAYMONGO_PLUGIN_URL . '/assets/images/grabpay.png" class="paymongo-grabpay-icon" alt="'. $this->title .'" />';
+    public function get_icon()
+    {
+        $icons_str = '<img src="' . CYNDER_PAYMONGO_PLUGIN_URL . '/assets/images/grabpay.png" class="paymongo-grabpay-icon" alt="'. $this->title .'" />';
 
-        return apply_filters( 'woocommerce_gateway_icon', $icons_str, $this->id );
+        return apply_filters('woocommerce_gateway_icon', $icons_str, $this->id);
     }
 
 
@@ -334,7 +335,7 @@ class WC_PayMongo_GrabPay_Gateway extends WC_Payment_Gateway
      * Custom GrabPay order received text.
      *
      * @param string   $text  Default text.
-     * @param WC_Order $order Order data.
+     * @param Cynder_Order $order Order data.
      * 
      * @return string
      */
