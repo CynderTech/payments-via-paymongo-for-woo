@@ -200,7 +200,7 @@ class Cynder_PayMongo_CC_Gateway extends WC_Payment_Gateway
         );
         wp_enqueue_script(
             'cleave',
-            plugins_url('assets/js/cleave.min.js', CYNDER_PAYMONGO_MAIN_FILE),
+            plugins_url('assets/js/cleave.min.js', CYNDER_PAYMONGO_MAIN_FILE)
         );
         wp_register_script(
             'woocommerce_paymongo',
