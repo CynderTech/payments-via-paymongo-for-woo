@@ -60,7 +60,8 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 == Screenshots ==
 
-1. The settings panel used to configure the gateway.
-2. Normal checkout with PayMongo.
-3. Checking out with GCash.
-4. Checking out with GrabPay.
+1. PayMongo Gateways on WooCommerce Payment settings
+2. The settings panel used to configure the gateway.
+3. Normal checkout with PayMongo.
+4. Checking out with GCash.
+5. Checking out with GrabPay.
