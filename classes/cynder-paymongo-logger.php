@@ -6,7 +6,7 @@
  * 
  * @category Plugin
  * @package  PayMongo
- * @author   PayMongo <developers@paymongo.com>
+ * @author   PayMongo <devops@cynder.io>
  * @license  n/a (http://127.0.0.0)
  * @link     n/a
  */
@@ -19,7 +19,7 @@ if (!defined('ABSPATH')) {
  * 
  * @category Class
  * @package  PayMongo
- * @author   PayMongo <developers@paymongo.com>
+ * @author   PayMongo <devops@cynder.io>
  * @license  n/a (http://127.0.0.0)
  * @link     n/a
  */
@@ -74,15 +74,20 @@ class Cynder_PayMongo_Logger
                 $elapsed_time         = round(abs($endTime - $startTime) / 60, 2);
 
                 $log_entry  = "\n" .
-                    '====PayMongo Version: ' . CYNDER_PAYMONGO_VERSION . '====' . "\n";
-                $log_entry .= '====Start Log ' . $formatted_startTime . '====' . "\n"
+                    '====PayMongo Version: '
+                    . CYNDER_PAYMONGO_VERSION
+                    . '====' . "\n";
+                $log_entry .= '====Start Log '
+                    . $formatted_startTime . '====' . "\n"
                     . $message . "\n";
                 $log_entry .= '====End Log ' . $formatted_endTime 
                     . ' (' . $elapsed_time . ')====' . "\n\n";
 
             } else {
                 $log_entry  = "\n" 
-                    . '====PayMongo Version: ' . CYNDER_PAYMONGO_VERSION . '====' . "\n";
+                    . '====PayMongo Version: '
+                    . CYNDER_PAYMONGO_VERSION
+                    . '====' . "\n";
                 $log_entry .= '====Start Log====' 
                     . "\n" . $message . "\n"
                     . '====End Log====' . "\n\n";

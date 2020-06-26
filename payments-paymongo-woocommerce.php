@@ -5,8 +5,7 @@
  * Plugin URI: https://wordpress.org/plugins/payments-via-paymongo-for-woo/
  * Description: Take credit card, GCash and GrabPay payments via PayMongo.
  * Author: CynderTech
- * Author URI: http://paymongo.com
- * Version: 1.0.1
+ * Author URI: http://cynder.io
  * Requires at least: 5.3.2
  * Tested up to: 5.4.1
  * WC requires at least: 3.9.3
