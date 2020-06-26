@@ -144,7 +144,6 @@ function Paymongo_Init_Gateway_class()
             {
                 $fileDir = dirname(__FILE__);
                 include_once $fileDir.'/classes/cynder-paymongo-gateway.php';
-                include_once $fileDir.'/classes/cynder-paymongo-cc-gateway.php';
                 include_once $fileDir.'/classes/cynder-paymongo-gcash-gateway.php';
                 include_once $fileDir.'/classes/cynder-paymongo-grabpay-gateway.php';
                 include_once $fileDir.'/classes/cynder-paymongo-webhook-handler.php';
@@ -176,7 +175,6 @@ function Paymongo_Init_Gateway_class()
             public function addGateways($methods)
             {
                 $methods[] = 'Cynder_PayMongo_Gateway';
-                $methods[] = 'Cynder_PayMongo_CC_Gateway';
                 $methods[] = 'Cynder_PayMongo_Gcash_Gateway';
                 $methods[] = 'Cynder_PayMongo_GrabPay_Gateway';
                 
@@ -195,12 +193,11 @@ function Paymongo_Init_Gateway_class()
             public function filterGatewayOrderAdmin($sections) 
             {
                 unset($sections['paymongo']);
-                unset($sections['paymongo_cc']);
                 unset($sections['paymongo_gcash']);
                 unset($sections['paymongo_grabpay']);
 
                 $gatewayName = 'woocommerce-gateway-paymongo';
-                $sections['paymongo_cc'] = __(
+                $sections['paymongo'] = __(
                     'Credit/Debit Card via PayMongo',
                     $gatewayName
                 );
@@ -230,7 +227,9 @@ function Paymongo_Init_Gateway_class()
                 }
 
                 if (!defined('IFRAME_REQUEST')
-                    && (CYNDER_PAYMONGO_VERSION !== get_option('cynder_paymongo_version'))
+                    && (CYNDER_PAYMONGO_VERSION !== get_option(
+                        'cynder_paymongo_version'
+                    ))
                 ) {
                     do_action('woocommerce_paymongo_updated');
 
