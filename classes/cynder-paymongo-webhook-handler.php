@@ -54,7 +54,7 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
      */
     public function __construct()
     {
-        $main_settings = get_option('woocommerce_paymongo_payment_gateway_settings');
+        $main_settings = get_option('woocommerce_paymongo_settings');
         $this->testmode = (
             !empty($main_settings['testmode'])
             && 'yes' === $main_settings['testmode']

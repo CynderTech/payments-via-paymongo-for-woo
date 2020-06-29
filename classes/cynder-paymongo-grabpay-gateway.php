@@ -54,7 +54,7 @@ class Cynder_PayMongo_GrabPay_Gateway extends WC_Payment_Gateway
      */
     public function __construct()
     {
-        $this->id = 'paymongo_grabpay_payment_gateway';
+        $this->id = 'paymongo_grabpay';
         $this->has_fields = true;
         $this->method_title = 'GrabPay Gateway via PayMongo';
         $this->method_description = 'Simple and easy payments with GrabPay.';
@@ -67,7 +67,7 @@ class Cynder_PayMongo_GrabPay_Gateway extends WC_Payment_Gateway
 
         $this->init_settings();
 
-        $mainSettings = get_option('woocommerce_paymongo_payment_gateway_settings');
+        $mainSettings = get_option('woocommerce_paymongo_settings');
 
         $this->title = $this->get_option('title');
         $this->description = $this->get_option('description');

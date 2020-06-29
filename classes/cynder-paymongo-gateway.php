@@ -54,7 +54,7 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
      */
     public function __construct()
     {
-        $this->id = 'paymongo_payment_gateway';
+        $this->id = 'paymongo';
         $this->has_fields = true;
         $this->method_title = 'Card Payments via PayMongo';
         $this->method_description = 'Simple and easy payments '
@@ -123,7 +123,7 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
                 'title'       => 'Title',
                 'description' => 'This controls the title that ' .
                                  'the user sees during checkout.',
-                'default'     => 'Main Settings',
+                'default'     => 'Credit Card via PayMongo',
                 'desc_tip'    => true,
             ),
             'description' => array(
@@ -476,14 +476,8 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
                     'result' => 'success',
                     'redirect' => $this->get_return_url($order)
                 );
-            } else if ($status == 'awaiting_next_action'
-                && isset($responseAttr['next_action'])
-            ) {
-                return array(
-                    'result' => 'next_action',
-                    'next_action' => $responseAttr['next_action'],
-                );
             } else {
+                echo $body;
                 $messages = Cynder_PayMongo_Error_Handler::parseErrors(
                     $body['errors']
                 );

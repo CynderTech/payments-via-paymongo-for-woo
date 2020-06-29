@@ -53,7 +53,7 @@ class Cynder_PayMongo_Gcash_Gateway extends WC_Payment_Gateway
      */
     public function __construct()
     {
-        $this->id = 'paymongo_gcash_payment_gateway';
+        $this->id = 'paymongo_gcash';
         $this->has_fields = true;
         $this->method_title = 'GCash Gateway via PayMongo';
         $this->method_description = 'Simple and easy payments with GCash.';
@@ -66,7 +66,7 @@ class Cynder_PayMongo_Gcash_Gateway extends WC_Payment_Gateway
 
         $this->init_settings();
 
-        $mainSettings = get_option('woocommerce_paymongo_payment_gateway_settings');
+        $mainSettings = get_option('woocommerce_paymongo_settings');
 
         $this->title = $this->get_option('title');
         $this->description = $this->get_option('description');
