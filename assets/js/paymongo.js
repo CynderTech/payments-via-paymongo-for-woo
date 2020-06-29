@@ -10,48 +10,23 @@ function getUrlVars() {
 }
 
 jQuery(document).ready(function ($) {
-    jQuery(document).on(
-        "change",
-        "#payment_method_paymongo_cc_payment_gateway",
-        function () {
-            console.log("changed");
-            if (this.checked) {
-                paymongoForm.setUpCleave();
-            }
-        }
-    );
-
-    jQuery(document).on(
-        "focus",
-        "#paymongo_expdate, #paymongo_ccNo",
-        function () {
-            paymongoForm.setUpCleave();
-        }
-    );
-
     const paymongoForm = {
+        initialized: false,
         isOrderPay: $(document.body).hasClass("woocommerce-order-pay"),
         checkoutForm: $(document.body).hasClass("woocommerce-order-pay")
             ? $("#order_review")
             : $("form.woocommerce-checkout"),
         init: function () {
-            // paymongoForm.setUpCleave();
-            paymongoForm.checkErrors();
-
+            if (paymongoForm.initialized) return;
             if (paymongoForm.isOrderPay) {
-                paymongoForm.checkoutForm.on(
-                    "click",
-                    'input[name="payment_method"]',
-                    paymongoForm.payment_method_selected
-                );
-
                 paymongoForm.checkoutForm.on("submit", paymongoForm.onSubmit);
             } else {
                 paymongoForm.checkoutForm.on(
-                    "checkout_place_order",
+                    "checkout_place_order_paymongo checkout_place_order_paymongo_gcash checkout_place_order_paymongo_grabpay",
                     paymongoForm.onSubmit
                 );
             }
+            paymongoForm.initialized = true;
         },
         checkErrors: function () {
             const params = getUrlVars();
@@ -70,9 +45,7 @@ jQuery(document).ready(function ($) {
             e.preventDefault(e);
 
             // if default paymongo
-            if (
-                $("#payment_method_paymongo_cc_payment_gateway").attr("checked")
-            ) {
+            if ($("#payment_method_paymongo").attr("checked")) {
                 const errors = paymongoForm.validateCardFields() || [];
 
                 if (errors.length) {
@@ -83,26 +56,17 @@ jQuery(document).ready(function ($) {
                 paymongoForm.createPaymentIntent();
             }
 
-            if (
-                $("#payment_method_paymongo_gcash_payment_gateway").attr(
-                    "checked"
-                )
-            ) {
+            if ($("#payment_method_paymongo_gcash").attr("checked")) {
                 paymongoForm.createSource("gcash");
             }
 
-            if (
-                $("#payment_method_paymongo_grabpay_payment_gateway").attr(
-                    "checked"
-                )
-            ) {
+            if ($("#payment_method_paymongo_grabpay").attr("checked")) {
                 paymongoForm.createSource("grabpay");
             }
 
             return false;
         },
         attachPaymentMethod: function (response, paymentIntent) {
-            console.log("paymentIntent", paymentIntent);
             jQuery.ajax({
                 url:
                     "https://api.paymongo.com/v1/payment_intents/" +
@@ -123,14 +87,36 @@ jQuery(document).ready(function ($) {
                     Authorization: "Basic " + btoa(paymongo_params.publicKey),
                 },
                 success: function (res) {
+                    if (!res || !res.data || !res.data.attributes) {
+                        return paymongoForm.onFail("Response is invalid");
+                    }
+
+                    const attributes = res.data.attributes;
+                    const status = attributes.status;
+
+                    if (status === "succeeded") {
+                        return paymongoForm.checkoutForm.submit();
+                    }
+
                     if (
-                        res &&
-                        res.data &&
-                        res.data.attributes &&
-                        res.data.attributes.status &&
-                        res.data.attributes.status === "succeeded"
+                        status === "awaiting_next_action" &&
+                        attributes.next_action
                     ) {
-                        paymongoForm.checkoutForm.submit();
+                        paymongoForm.setThreeDSListener(
+                            paymentIntent.payment_intent_id,
+                            paymentIntent.payment_client_key
+                        );
+                        paymongoForm.checkoutForm.append(
+                            '<div id="paymongo-3ds-modal" class="paymongo-modal modal">' +
+                                '<iframe src="' +
+                                attributes.next_action.redirect.url +
+                                '" />' +
+                                "</div>"
+                        );
+
+                        $("#paymongo-3ds-modal").modal({
+                            fadeDuration: 200,
+                        });
                     }
                 },
                 error: paymongoForm.onFail,
@@ -141,6 +127,10 @@ jQuery(document).ready(function ($) {
                 const errors = paymongoForm.parsePayMongoErrors(res.errors);
                 paymongoForm.showErrors(errors);
                 return;
+            }
+
+            if (res.result && res.result === "success" && res.redirect) {
+                return window.location.replace(res.redirect);
             }
 
             // add payment intent field
@@ -187,7 +177,7 @@ jQuery(document).ready(function ($) {
         },
         createPaymentIntent: function () {
             paymongoForm.addLoader(
-                ".wc_payment_method .payment_box.payment_method_paymongo_cc_payment_gateway"
+                ".wc_payment_method .payment_box.payment_method_paymongo"
             );
 
             jQuery.post(
@@ -203,9 +193,7 @@ jQuery(document).ready(function ($) {
         createSource: function (type) {
             if (
                 !window.confirm(
-                    "This payment option will empty your cart " +
-                        "and generate an order with pending status.\n" +
-                        "You can view the order in My Account > Orders\n\n" +
+                    "This will redirect you to the payment website\n" +
                         "Do you want to proceed?"
                 )
             ) {
@@ -274,7 +262,7 @@ jQuery(document).ready(function ($) {
                 },
             };
 
-            jQuery.ajax({
+            $.ajax({
                 url: "https://api.paymongo.com/v1/payment_methods",
                 data: JSON.stringify({ data: { attributes: payload } }),
                 method: "POST",
@@ -284,9 +272,6 @@ jQuery(document).ready(function ($) {
                     Authorization: "Basic " + btoa(paymongo_params.publicKey),
                 },
                 success: function (response) {
-                    $("#paymongo_ccNo").val(null);
-                    $("#paymongo_expdate").val(null);
-                    $("#paymongo_cvv").val(null);
                     paymongoForm.attachPaymentMethod(response, paymentIntent);
                 },
                 error: paymongoForm.onFail,
@@ -295,12 +280,24 @@ jQuery(document).ready(function ($) {
             return false;
         },
         onFail: function (err) {
+            if ($(document).find("#paymongo_client_key").length) {
+                $("#paymongo_client_key").remove();
+            }
+
+            if ($(document).find("#paymongo_intent_id").length) {
+                $("#paymongo_intent_id").remove();
+            }
+
             if (err.responseJSON && err.responseJSON.errors) {
                 const errors = paymongoForm.parsePayMongoErrors(
                     err.responseJSON.errors
                 );
 
-                paymongoForm.showErrors(errors);
+                return paymongoForm.showErrors(errors);
+            }
+
+            if (typeof err === "string") {
+                return paymongoForm.showError(err);
             }
         },
         getName: function () {
@@ -374,11 +371,14 @@ jQuery(document).ready(function ($) {
             ).remove();
             $(".blockUI").remove();
             paymongoForm.removeLoader();
-            $(".woocommerce-notices-wrapper:first").append(
-                '<div class="woocommerce-error paymongo-error">' +
+            paymongoForm.checkoutForm.prepend(
+                '<div class="woocommerce-NoticeGroup woocommerce-NoticeGroup-PayMongoErrors">' +
+                    '<div class="woocommerce-error paymongo-error">' +
                     message +
+                    "</div>" +
                     "</div>"
             );
+            paymongoForm.scrollToNotices();
         },
         showErrors: function (errors) {
             // Remove notices from all sources
@@ -461,7 +461,71 @@ jQuery(document).ready(function ($) {
 
             return errors;
         },
+        setThreeDSListener: function (intentId, clientKey) {
+            window.addEventListener("message", (ev) => {
+                if (ev.data === "3DS-authentication-complete") {
+                    jQuery.ajax({
+                        url:
+                            "https://api.paymongo.com/v1/payment_intents/" +
+                            intentId,
+                        data: {
+                            client_key: clientKey,
+                        },
+                        method: "GET",
+                        headers: {
+                            accept: "application/json",
+                            "content-type": "application/json",
+                            Authorization:
+                                "Basic " + btoa(paymongo_params.publicKey),
+                        },
+                        success: function (response) {
+                            var paymentIntent = response.data;
+                            var paymentIntentStatus =
+                                paymentIntent.attributes.status;
+
+                            if (paymentIntentStatus === "succeeded") {
+                                paymongoForm.checkoutForm.submit();
+                            } else if (
+                                paymentIntentStatus ===
+                                "awaiting_payment_method"
+                            ) {
+                                $.modal.close();
+                                paymongoForm.onFail(
+                                    paymentIntent.attributes.last_payment_error
+                                        .failed_message
+                                );
+                            }
+                        },
+                        error: paymongoForm.onFail,
+                    });
+                }
+            });
+        },
     };
 
-    paymongoForm.init();
+    // initialize form on payment method select
+    $(document).on(
+        "change",
+        "#payment_method_paymongo, #payment_method_paymongo_gcash, #payment_method_paymongo_grabpay",
+        function () {
+            if (this.checked) {
+                paymongoForm.setUpCleave();
+                paymongoForm.init();
+            }
+        }
+    );
+
+    // setup cleave on form focus
+    $(document).on("focus", "#paymongo_expdate, #paymongo_ccNo", function () {
+        paymongoForm.setUpCleave();
+    });
+
+    // check if one of the payment methods is already selected
+    if (
+        $(document).find(
+            "#payment_method_paymongo:checked, #payment_method_paymongo_gcash:checked, #payment_method_paymongo_grabpay:checked"
+        ).length
+    ) {
+        paymongoForm.init();
+    }
 });

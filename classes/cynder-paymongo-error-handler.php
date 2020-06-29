@@ -6,7 +6,7 @@
  * 
  * @category Plugin
  * @package  PayMongo
- * @author   PayMongo <developers@paymongo.com>
+ * @author   PayMongo <devops@cynder.io>
  * @license  n/a (http://127.0.0.0)
  * @link     n/a
  */
@@ -19,7 +19,7 @@ if (!defined('ABSPATH')) {
  * 
  * @category Class
  * @package  PayMongo
- * @author   PayMongo <developers@paymongo.com>
+ * @author   PayMongo <devops@cynder.io>
  * @license  n/a (http://127.0.0.0)
  * @link     n/a
  */

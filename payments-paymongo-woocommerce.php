@@ -5,8 +5,8 @@
  * Plugin URI: https://wordpress.org/plugins/payments-via-paymongo-for-woo/
  * Description: Take credit card, GCash and GrabPay payments via PayMongo.
  * Author: CynderTech
- * Author URI: http://paymongo.com
- * Version: 1.0.1
+ * Author URI: http://cynder.io
+ * Version: 1.1.0
  * Requires at least: 5.3.2
  * Tested up to: 5.4.1
  * WC requires at least: 3.9.3
@@ -73,7 +73,7 @@ function Paymongo_Init_Gateway_class()
          * 
          * @category Class
          * @package  PayMongo
-         * @author   PayMongo <developers@paymongo.com>
+         * @author   PayMongo <devops@cynder.io>
          * @license  n/a (http://127.0.0.0)
          * @link     n/a
          * @phpcs:disable Standard.Cat.SniffName
@@ -144,7 +144,6 @@ function Paymongo_Init_Gateway_class()
             {
                 $fileDir = dirname(__FILE__);
                 include_once $fileDir.'/classes/cynder-paymongo-gateway.php';
-                include_once $fileDir.'/classes/cynder-paymongo-cc-gateway.php';
                 include_once $fileDir.'/classes/cynder-paymongo-gcash-gateway.php';
                 include_once $fileDir.'/classes/cynder-paymongo-grabpay-gateway.php';
                 include_once $fileDir.'/classes/cynder-paymongo-webhook-handler.php';
@@ -176,7 +175,6 @@ function Paymongo_Init_Gateway_class()
             public function addGateways($methods)
             {
                 $methods[] = 'Cynder_PayMongo_Gateway';
-                $methods[] = 'Cynder_PayMongo_CC_Gateway';
                 $methods[] = 'Cynder_PayMongo_Gcash_Gateway';
                 $methods[] = 'Cynder_PayMongo_GrabPay_Gateway';
                 
@@ -195,12 +193,11 @@ function Paymongo_Init_Gateway_class()
             public function filterGatewayOrderAdmin($sections) 
             {
                 unset($sections['paymongo']);
-                unset($sections['paymongo_cc']);
                 unset($sections['paymongo_gcash']);
                 unset($sections['paymongo_grabpay']);
 
                 $gatewayName = 'woocommerce-gateway-paymongo';
-                $sections['paymongo_cc'] = __(
+                $sections['paymongo'] = __(
                     'Credit/Debit Card via PayMongo',
                     $gatewayName
                 );
@@ -230,7 +227,9 @@ function Paymongo_Init_Gateway_class()
                 }
 
                 if (!defined('IFRAME_REQUEST')
-                    && (CYNDER_PAYMONGO_VERSION !== get_option('cynder_paymongo_version'))
+                    && (CYNDER_PAYMONGO_VERSION !== get_option(
+                        'cynder_paymongo_version'
+                    ))
                 ) {
                     do_action('woocommerce_paymongo_updated');
 

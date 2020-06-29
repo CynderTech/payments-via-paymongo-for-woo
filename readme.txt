@@ -4,7 +4,7 @@ Tags: credit card, gcash, grabpay
 Requires at least: 5.0
 Tested up to: 5.3.2
 Requires PHP: 5.6
-Stable tag: 1.0.1
+Stable tag: 1.1.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -50,7 +50,8 @@ This step assumes you have already installed the plugin through Wordpress Dashbo
 4. Select the "Payments" Tab
 5. Look for the PayMongo Method and Press "Set up"
 6. Enter your Public Key and Secret Key
-6.1 If you want to activate the GCash or GrabPay payments you must also provide a webhook secret
+6.1 GCash/GrabPay Only - Generate a webhook secret using the link provided
+6.2 Copy the Webhook Secret and Paste it in the field
 7. Click "Save"
 8. Enable the Payment Gateways you want to use (Credit Card, GCash or GrabPay)
 
@@ -65,3 +66,13 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 3. Normal checkout with PayMongo.
 4. Checking out with GCash.
 5. Checking out with GrabPay.
+
+== Changelog ==
+
+= 1.1.0 =
+*Release Date - 27 June 2020*
+
+* [FIX]    3D Secure Implementation
+* [FIX]    Oversized Payment Method Logos
+* [CHANGE] Change Settings Layout
+* [CHANGE] Included link to Webhook Secret Generator
