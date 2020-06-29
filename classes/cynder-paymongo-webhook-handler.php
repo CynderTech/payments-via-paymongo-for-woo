@@ -6,7 +6,7 @@
  * 
  * @category Plugin
  * @package  PayMongo
- * @author   PayMongo <developers@paymongo.com>
+ * @author   PayMongo <devops@cynder.io>
  * @license  n/a (http://127.0.0.0)
  * @link     n/a
  */
@@ -20,7 +20,7 @@ if (!defined('ABSPATH')) {
  * 
  * @category Plugin
  * @package  PayMongo
- * @author   PayMongo <developers@paymongo.com>
+ * @author   PayMongo <devops@cynder.io>
  * @license  n/a (http://127.0.0.0)
  * @link     n/a
  */
@@ -54,7 +54,7 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
      */
     public function __construct()
     {
-        $main_settings = get_option('woocommerce_paymongo_payment_gateway_settings');
+        $main_settings = get_option('woocommerce_paymongo_settings');
         $this->testmode = (
             !empty($main_settings['testmode'])
             && 'yes' === $main_settings['testmode']
@@ -67,7 +67,10 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
             $main_settings[$webhook_secret_key]
             : false;
 
-        add_action('woocommerce_api_cynder_paymongo', array($this, 'checkForWebhook'));
+        add_action(
+            'woocommerce_api_cynder_paymongo',
+            array($this, 'checkForWebhook')
+        );
     }
 
     /**

@@ -6,7 +6,7 @@
  * 
  * @category Plugin
  * @package  PayMongo
- * @author   PayMongo <developers@paymongo.com>
+ * @author   PayMongo <devops@cynder.io>
  * @license  n/a (http://127.0.0.0)
  * @link     n/a
  */
@@ -20,7 +20,7 @@ if (! defined('ABSPATH')) {
  * 
  * @category Class
  * @package  PayMongo
- * @author   PayMongo <developers@paymongo.com>
+ * @author   PayMongo <devops@cynder.io>
  * @license  n/a (http://127.0.0.0)
  * @link     n/a
  */
@@ -54,7 +54,7 @@ class Cynder_PayMongo_GrabPay_Gateway extends WC_Payment_Gateway
      */
     public function __construct()
     {
-        $this->id = 'paymongo_grabpay_payment_gateway';
+        $this->id = 'paymongo_grabpay';
         $this->has_fields = true;
         $this->method_title = 'GrabPay Gateway via PayMongo';
         $this->method_description = 'Simple and easy payments with GrabPay.';
@@ -67,7 +67,7 @@ class Cynder_PayMongo_GrabPay_Gateway extends WC_Payment_Gateway
 
         $this->init_settings();
 
-        $mainSettings = get_option('woocommerce_paymongo_payment_gateway_settings');
+        $mainSettings = get_option('woocommerce_paymongo_settings');
 
         $this->title = $this->get_option('title');
         $this->description = $this->get_option('description');
@@ -322,10 +322,17 @@ class Cynder_PayMongo_GrabPay_Gateway extends WC_Payment_Gateway
         }
     }
 
-
-    public function get_icon()
+    /**
+     * Get Icon for checkout page
+     * 
+     * @return string
+     */
+    public function get_icon() // phpcs:ignore
     {
-        $icons_str = '<img src="' . CYNDER_PAYMONGO_PLUGIN_URL . '/assets/images/grabpay.png" class="paymongo-grabpay-icon" alt="'. $this->title .'" />';
+        $icons_str = '<img src="' 
+            . CYNDER_PAYMONGO_PLUGIN_URL
+            . '/assets/images/grabpay.png" class="paymongo-grabpay-icon" alt="'
+            . $this->title .'" />';
 
         return apply_filters('woocommerce_gateway_icon', $icons_str, $this->id);
     }
@@ -334,7 +341,7 @@ class Cynder_PayMongo_GrabPay_Gateway extends WC_Payment_Gateway
     /**
      * Custom GrabPay order received text.
      *
-     * @param string   $text  Default text.
+     * @param string       $text  Default text.
      * @param Cynder_Order $order Order data.
      * 
      * @return string
