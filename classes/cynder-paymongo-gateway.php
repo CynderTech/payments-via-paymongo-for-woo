@@ -462,7 +462,8 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
 
             if ($status == 'succeeded') {
                 // we received the payment
-                $order->payment_complete($body['data']['id']);
+                $payments = $responseAttr['payments'];
+                $order->payment_complete($payments[0]['id']);
                 wc_reduce_stock_levels($orderId);
 
                 // Sending invoice after successful payment
