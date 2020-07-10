@@ -69,6 +69,12 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 == Changelog ==
 
+= 1.1.1 =
+*Release Date - 10 July 2020*
+
+* [CHANGE] Now sends invoice through e-mail on successful payment
+* [CHANGE] Now uses *Payment ID* instead of *Payment Intent ID*
+
 = 1.1.0 =
 *Release Date - 27 June 2020*
 
