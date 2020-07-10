@@ -152,6 +152,8 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
      */
     public function createPaymentRecord($source, $order)
     {
+        global $woocommerce;
+
         $createPaymentPayload = array(
             'data' => array(
                 'attributes' => array(
@@ -180,15 +182,20 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
 
         if (!is_wp_error($response)) {
             $body = json_decode($response['body'], true);
-            $status = $body['data']['attributes']['status'];
             
-            if ($body['errors'] && $body['errors'][0]) {
+            if (array_key_exists('errors', $body) && $body['errors'][0]) {
                 status_header($response['response']['code']);
                 Cynder_PayMongo_Logger::log('Payment failed: ' . $body);
+                die();
             }
+
+            $status = $body['data']['attributes']['status'];
 
             if ($status == 'paid') {
                 $order->payment_complete($body['data']['id']);
+
+                // Sending invoice after successful payment
+                $woocommerce->mailer()->emails['WC_Email_Customer_Invoice']->trigger($order->get_order_number());
 
                 status_header(200);
                 die();
