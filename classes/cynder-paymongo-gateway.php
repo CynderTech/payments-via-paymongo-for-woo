@@ -465,8 +465,8 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
                 $order->payment_complete($body['data']['id']);
                 wc_reduce_stock_levels($orderId);
 
-                // some notes to customer
-                $order->add_order_note('Your order has been paid, Thank You!', true);
+                // Sending invoice after successful payment
+                $woocommerce->mailer()->emails['WC_Email_Customer_Invoice']->trigger($orderId);
 
                 // Empty cart
                 $woocommerce->cart->empty_cart();
