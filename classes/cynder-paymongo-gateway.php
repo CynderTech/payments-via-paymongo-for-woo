@@ -499,9 +499,9 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
      */
     public function get_icon() // phpcs:ignore
     {
-        $icons_str = '<img class="paymongo-method-logo" src="'
+        $icons_str = '<img class="paymongo-method-logo paymongo-cards-icon" src="'
             . CYNDER_PAYMONGO_PLUGIN_URL
-            . '/assets/images/cards.png" class="paymongo-cards-icon" alt="'
+            . '/assets/images/cards.png" alt="'
             . $this->title
             .'" />';
 

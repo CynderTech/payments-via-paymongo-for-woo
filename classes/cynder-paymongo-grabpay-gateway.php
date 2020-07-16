@@ -331,7 +331,7 @@ class Cynder_PayMongo_GrabPay_Gateway extends WC_Payment_Gateway
     {
         $icons_str = '<img src="' 
             . CYNDER_PAYMONGO_PLUGIN_URL
-            . '/assets/images/grabpay.png" class="paymongo-grabpay-icon" alt="'
+            . '/assets/images/grabpay.png" class="paymongo-method-logo paymongo-grabpay-icon" alt="'
             . $this->title .'" />';
 
         return apply_filters('woocommerce_gateway_icon', $icons_str, $this->id);
