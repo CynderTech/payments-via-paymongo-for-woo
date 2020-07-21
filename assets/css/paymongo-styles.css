@@ -6,7 +6,7 @@
     position: relative;
 }
 
-.wc_payment_method > label:first-of-type img.paymongo-cards-icon {
+.wc_payment_method > label:first-of-type img.paymongo-method-logo {
     max-width: 100px;
 }
 

@@ -330,7 +330,7 @@ class Cynder_PayMongo_Gcash_Gateway extends WC_Payment_Gateway
     {
         $icons_str = '<img src="' 
             . CYNDER_PAYMONGO_PLUGIN_URL
-            . '/assets/images/gcash.png" class="paymongo-cards-icon" alt="'
+            . '/assets/images/gcash.png" class="paymongo-method-logo paymongo-cards-icon" alt="'
             . $this->title .'" />';
 
         return apply_filters('woocommerce_gateway_icon', $icons_str, $this->id);
