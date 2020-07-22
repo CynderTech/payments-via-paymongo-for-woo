@@ -129,6 +129,11 @@ jQuery(document).ready(function ($) {
                 return;
             }
 
+            if (res.result && res.result === "failure" && res.messages) {
+                paymongoForm.showErrors(res.messages, true);
+                return;
+            }
+
             if (res.result && res.result === "success" && res.redirect) {
                 return window.location.replace(res.redirect);
             }
@@ -325,6 +330,11 @@ jQuery(document).ready(function ($) {
                 return;
             }
 
+            if (res.result && res.result === "failure" && res.messages) {
+                paymongoForm.showErrors(res.messages, true);
+                return;
+            }
+
             if (!res.checkout_url) {
                 return paymongoForm.showError(
                     "Failed to get Gcash Link, Please try again"
@@ -380,7 +390,7 @@ jQuery(document).ready(function ($) {
             );
             paymongoForm.scrollToNotices();
         },
-        showErrors: function (errors) {
+        showErrors: function (errors, predefined) {
             // Remove notices from all sources
             $(
                 ".woocommerce-error, .woocommerce-message, .paymongo-error"
@@ -392,10 +402,18 @@ jQuery(document).ready(function ($) {
 
             let messages = '<ul class="woocommerce-error">';
 
-            for (let x = 0; x < errors.length; x++) {
-                messages += "<li>" + errors[x] + "</li>";
-                if (x === errors.length) {
-                    messages += "</ul>";
+            /**
+             * If errors are predefined HTML, particularly coming from the
+             * response of WP or Woo, show it directly.
+             */
+            if (typeof predefined !== 'undefined' && predefined) {
+                messages = errors;
+            } else {
+                for (let x = 0; x < errors.length; x++) {
+                    messages += "<li>" + errors[x] + "</li>";
+                    if (x === errors.length) {
+                        messages += "</ul>";
+                    }
                 }
             }
 
