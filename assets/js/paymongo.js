@@ -44,8 +44,10 @@ jQuery(document).ready(function ($) {
         onSubmit: function (e) {
             e.preventDefault(e);
 
+            var paymentMethod = $('input[name=payment_method]:checked').val(); 
+
             // if default paymongo
-            if ($("#payment_method_paymongo").attr("checked")) {
+            if (paymentMethod == "paymongo") {
                 const errors = paymongoForm.validateCardFields() || [];
 
                 if (errors.length) {
@@ -56,11 +58,11 @@ jQuery(document).ready(function ($) {
                 paymongoForm.createPaymentIntent();
             }
 
-            if ($("#payment_method_paymongo_gcash").attr("checked")) {
+            if (paymentMethod == "paymongo_gcash") {
                 paymongoForm.createSource("gcash");
             }
 
-            if ($("#payment_method_paymongo_grabpay").attr("checked")) {
+            if (paymentMethod == "paymongo_grabpay") {
                 paymongoForm.createSource("grabpay");
             }
 
