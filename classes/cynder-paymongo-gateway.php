@@ -478,10 +478,16 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
                     'redirect' => $this->get_return_url($order)
                 );
             } else {
-                echo $body;
-                $messages = Cynder_PayMongo_Error_Handler::parseErrors(
-                    $body['errors']
-                );
+                wc_get_logger()->log('error', json_encode($body));
+                // $messages = Cynder_PayMongo_Error_Handler::parseErrors(
+                //     $body['errors']
+                // );
+                $errors = array_map(function ($error) {
+                    return Cynder_PayMongo_Error_Handler::parseError($error);
+                }, $body['errors']);
+
+                $messages = Cynder_PayMongo_Error_Handler::printErrors($errors);
+
                 wc_add_notice($messages, 'error');
                 return;
             }

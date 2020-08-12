@@ -468,18 +468,43 @@ jQuery(document).ready(function ($) {
                 paymongoForm.showError("Something went wrong.");
             }
 
-            const errors = [];
+            return paymongoErrors.map(({ detail, sub_code }) => {
+                const invalidSubcodes = [
+                    'processor_blocked',
+                    'lost_card',
+                    'stolen_card',
+                    'blocked'
+                ];
 
-            for (let x = 0; x < paymongoErrors.length; x++) {
-                errors.push(
-                    paymongoErrors[x].detail +
-                        " (CODE: " +
-                        paymongoErrors[x].code +
-                        ")"
-                );
-            }
+                if (invalidSubcodes.includes(sub_code)) return 'Something went wrong. Please try again.';
+                
+                if (!detail.includes('details.')) return detail;
 
-            return errors;
+                return detail
+                    .split(' ')
+                    .reduce((message, part) => {
+                        if (!part.includes('details.')) {
+                            if (!message) {
+                                return part;
+                            } else {
+                                return message + ' ' + part;
+                            }
+                        }
+
+                        const field = part
+                            .split('.')
+                            .pop()
+                            .split('_')
+                            .map((fieldPart, index) => {
+                                if (index === 0) return fieldPart[0].toUpperCase() + fieldPart.slice(1);
+
+                                return fieldPart;
+                            })
+                            .join(' ');
+                        
+                        return message + ' ' + field;
+                    }, '');
+            });
         },
         setThreeDSListener: function (intentId, clientKey) {
             window.addEventListener("message", (ev) => {
