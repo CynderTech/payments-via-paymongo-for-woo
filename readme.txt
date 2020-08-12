@@ -2,7 +2,7 @@
 Contributors: pickmeshop
 Tags: payments, credit card, gcash, grabpay
 Requires at least: 5.0
-Tested up to: 5.3.2
+Tested up to: 5.5
 Requires PHP: 5.6
 Stable tag: 1.1.3
 License: GPLv3
@@ -80,6 +80,13 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 3. Normal checkout with PayMongo.
 4. Checking out with GCash.
 5. Checking out with GrabPay.
+
+== Changelog ==
+
+= 1.1.4 =
+*Release Date - 12 August 2020*
+
+* [FIX] fixed error parsing for PayMongo errors
 
 == Changelog ==
 
