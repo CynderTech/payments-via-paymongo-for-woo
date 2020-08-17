@@ -151,7 +151,7 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
                 'type'        => 'password',
                 'description' => 'Provide a secret key to enable'
                     . ' <b>GCash</b> or <b>GrabPay</b> Payments<br>'
-                    . '<a href="https://paymongo-wsk-generator.cynder.io?url=' 
+                    . '<a target="_blank" href="https://paymongo-webhook-tool.meeco.dev?url=' 
                     . $webhookUrl
                     . '">Click this to generate a webhook secret</a>'
                     . ' or use this URL: <b>'
@@ -186,7 +186,7 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
                 'type'        => 'password',
                 'description' => 'Provide a secret key to enable'
                     . ' <b>GCash</b> or <b>GrabPay</b> Payments<br>'
-                    . '<a href="https://paymongo-wsk-generator.cynder.io?url=' 
+                    . '<a target="_blank" href="https://paymongo-webhook-tool.meeco.dev?url=' 
                     . $webhookUrl
                     . '">Click this to generate a webhook secret</a>'
                     . ' or use this URL: <b>'

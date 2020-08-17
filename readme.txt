@@ -54,7 +54,7 @@ The manual installation method involves downloading our plugin and uploading it 
 Before accepting actual payments for transactions, it is ideal to test payment workflows using the ***test mode***. Below are the steps to configure your plugin in test mode.
 
 1. Under the **Test Environment** subsection, enter your test public key and test secret key in their respective fields. You may obtain your test keys by registering an account at [PayMongo](https://paymongo.com).
-2. Generate a webhook secret key [^1] using Cynder's [Webhook Secret Key Generator](https://paymongo-wsk-generator.cynder.io). A convenience link is provided just below the field. After generating a webhook secret key using the key generator, paste it on the webhook secret key field.
+2. Generate a webhook secret key [^1] using Cynder's [Webhook Secret Key Generator](https://paymongo-webhook-tool.meeco.dev). A convenience link is provided just below the field. After generating a webhook secret key using the key generator, paste it on the webhook secret key field.
     * **Note:** The key generator requires a specific URL provided to you by the plugin under the webhook secret key field (ex. ***https://example.com/?wc-api=cynder_paymongo***), as well as your test secret key.
 3. Click the **Save Changes** button.
 4. Proceed with testing by ordering items from your store and head to checkout.
@@ -62,7 +62,7 @@ Before accepting actual payments for transactions, it is ideal to test payment w
 **Live Configuration**
 
 1. Under the **Live Environment** subsection, enter your live public key and live secret key in their respective fields. You may obtain your live keys by registering an account at [PayMongo](https://paymongo.com) **and have it verified**.
-2. Generate a webhook secret key [^1] using Cynder's [Webhook Secret Key Generator](https://paymongo-wsk-generator.cynder.io). A convenience link is provided just below the field. After generating a webhook secret key using the key generator, paste it on the webhook secret key field.
+2. Generate a webhook secret key [^1] using Cynder's [Webhook Secret Key Generator](https://paymongo-webhook-tool.meeco.dev). A convenience link is provided just below the field. After generating a webhook secret key using the key generator, paste it on the webhook secret key field.
     * **Note:** The key generator requires a specific URL provided to you by the plugin under the webhook secret key field (ex. ***https://example.com/?wc-api=cynder_paymongo***), as well as your live secret key.
 3. Click the **Save Changes** button.
 4. Done.
@@ -83,12 +83,15 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 == Changelog ==
 
+= 1.1.5 =
+*Release Date - 12 August 2020*
+
+* [CHORE] Changed Webhook Tool domain: https://paymongo-webhook-tool.meeco.dev
+
 = 1.1.4 =
 *Release Date - 12 August 2020*
 
 * [FIX] fixed error parsing for PayMongo errors
-
-== Changelog ==
 
 = 1.1.3 =
 *Release Date - 22 July 2020*
