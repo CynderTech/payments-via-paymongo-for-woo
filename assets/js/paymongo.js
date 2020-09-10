@@ -44,8 +44,10 @@ jQuery(document).ready(function ($) {
         onSubmit: function (e) {
             e.preventDefault(e);
 
+            var paymentMethod = $('input[name=payment_method]:checked').val(); 
+
             // if default paymongo
-            if ($("#payment_method_paymongo").attr("checked")) {
+            if (paymentMethod == "paymongo") {
                 const errors = paymongoForm.validateCardFields() || [];
 
                 if (errors.length) {
@@ -56,11 +58,11 @@ jQuery(document).ready(function ($) {
                 paymongoForm.createPaymentIntent();
             }
 
-            if ($("#payment_method_paymongo_gcash").attr("checked")) {
+            if (paymentMethod == "paymongo_gcash") {
                 paymongoForm.createSource("gcash");
             }
 
-            if ($("#payment_method_paymongo_grabpay").attr("checked")) {
+            if (paymentMethod == "paymongo_grabpay") {
                 paymongoForm.createSource("grabpay");
             }
 
@@ -126,6 +128,11 @@ jQuery(document).ready(function ($) {
             if (res.result && res.result === "error") {
                 const errors = paymongoForm.parsePayMongoErrors(res.errors);
                 paymongoForm.showErrors(errors);
+                return;
+            }
+
+            if (res.result && res.result === "failure" && res.messages) {
+                paymongoForm.showErrors(res.messages, true);
                 return;
             }
 
@@ -325,6 +332,11 @@ jQuery(document).ready(function ($) {
                 return;
             }
 
+            if (res.result && res.result === "failure" && res.messages) {
+                paymongoForm.showErrors(res.messages, true);
+                return;
+            }
+
             if (!res.checkout_url) {
                 return paymongoForm.showError(
                     "Failed to get Gcash Link, Please try again"
@@ -380,7 +392,7 @@ jQuery(document).ready(function ($) {
             );
             paymongoForm.scrollToNotices();
         },
-        showErrors: function (errors) {
+        showErrors: function (errors, predefined) {
             // Remove notices from all sources
             $(
                 ".woocommerce-error, .woocommerce-message, .paymongo-error"
@@ -392,10 +404,18 @@ jQuery(document).ready(function ($) {
 
             let messages = '<ul class="woocommerce-error">';
 
-            for (let x = 0; x < errors.length; x++) {
-                messages += "<li>" + errors[x] + "</li>";
-                if (x === errors.length) {
-                    messages += "</ul>";
+            /**
+             * If errors are predefined HTML, particularly coming from the
+             * response of WP or Woo, show it directly.
+             */
+            if (typeof predefined !== 'undefined' && predefined) {
+                messages = errors;
+            } else {
+                for (let x = 0; x < errors.length; x++) {
+                    messages += "<li>" + errors[x] + "</li>";
+                    if (x === errors.length) {
+                        messages += "</ul>";
+                    }
                 }
             }
 
@@ -448,18 +468,43 @@ jQuery(document).ready(function ($) {
                 paymongoForm.showError("Something went wrong.");
             }
 
-            const errors = [];
+            return paymongoErrors.map(({ detail, sub_code }) => {
+                const invalidSubcodes = [
+                    'processor_blocked',
+                    'lost_card',
+                    'stolen_card',
+                    'blocked'
+                ];
 
-            for (let x = 0; x < paymongoErrors.length; x++) {
-                errors.push(
-                    paymongoErrors[x].detail +
-                        " (CODE: " +
-                        paymongoErrors[x].code +
-                        ")"
-                );
-            }
+                if (invalidSubcodes.includes(sub_code)) return 'Something went wrong. Please try again.';
+                
+                if (!detail.includes('details.')) return detail;
 
-            return errors;
+                return detail
+                    .split(' ')
+                    .reduce((message, part) => {
+                        if (!part.includes('details.')) {
+                            if (!message) {
+                                return part;
+                            } else {
+                                return message + ' ' + part;
+                            }
+                        }
+
+                        const field = part
+                            .split('.')
+                            .pop()
+                            .split('_')
+                            .map((fieldPart, index) => {
+                                if (index === 0) return fieldPart[0].toUpperCase() + fieldPart.slice(1);
+
+                                return fieldPart;
+                            })
+                            .join(' ');
+                        
+                        return message + ' ' + field;
+                    }, '');
+            });
         },
         setThreeDSListener: function (intentId, clientKey) {
             window.addEventListener("message", (ev) => {

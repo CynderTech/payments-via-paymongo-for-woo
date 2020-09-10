@@ -151,7 +151,7 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
                 'type'        => 'password',
                 'description' => 'Provide a secret key to enable'
                     . ' <b>GCash</b> or <b>GrabPay</b> Payments<br>'
-                    . '<a href="https://paymongo-wsk-generator.cynder.io?url=' 
+                    . '<a target="_blank" href="https://paymongo-webhook-tool.meeco.dev?url=' 
                     . $webhookUrl
                     . '">Click this to generate a webhook secret</a>'
                     . ' or use this URL: <b>'
@@ -186,7 +186,7 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
                 'type'        => 'password',
                 'description' => 'Provide a secret key to enable'
                     . ' <b>GCash</b> or <b>GrabPay</b> Payments<br>'
-                    . '<a href="https://paymongo-wsk-generator.cynder.io?url=' 
+                    . '<a target="_blank" href="https://paymongo-webhook-tool.meeco.dev?url=' 
                     . $webhookUrl
                     . '">Click this to generate a webhook secret</a>'
                     . ' or use this URL: <b>'
@@ -478,10 +478,16 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
                     'redirect' => $this->get_return_url($order)
                 );
             } else {
-                echo $body;
-                $messages = Cynder_PayMongo_Error_Handler::parseErrors(
-                    $body['errors']
-                );
+                wc_get_logger()->log('error', json_encode($body));
+                // $messages = Cynder_PayMongo_Error_Handler::parseErrors(
+                //     $body['errors']
+                // );
+                $errors = array_map(function ($error) {
+                    return Cynder_PayMongo_Error_Handler::parseError($error);
+                }, $body['errors']);
+
+                $messages = Cynder_PayMongo_Error_Handler::printErrors($errors);
+
                 wc_add_notice($messages, 'error');
                 return;
             }

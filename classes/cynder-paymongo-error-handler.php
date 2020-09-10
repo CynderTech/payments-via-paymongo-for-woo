@@ -32,7 +32,7 @@ class Cynder_PayMongo_Error_Handler
      * 
      * @return string
      */
-    public static function parseErrors($errors)
+    public static function printErrors($errors)
     {
         if (!isset($errors) || count($errors) === $errors) {
             return '<div class="woocommerce-error">'
@@ -43,14 +43,24 @@ class Cynder_PayMongo_Error_Handler
         $messages = '<ul class="woocommerce-error">';
 
         foreach ($errors as $error) {
-            $messages .= '<li>' .
-                $error['detail'] .
-                ' (code: ' . $error['code'] . ')' .
-                '</li>';
+            $messages .= '<li>' . $error . '</li>';
         }
 
         $messages .= '</ul>';
 
         return $messages;
+    }
+
+    public static function parseError($error) {
+        if (!$error['detail']) return $error;
+
+        $detail = $error['detail'];
+        $details = explode(' ', $detail);
+
+        $field = ucwords(str_replace('_', ' ', end(explode('.', $details[0]))));
+
+        $details[0] = $field;
+
+        return implode(' ', $details);
     }
 }
