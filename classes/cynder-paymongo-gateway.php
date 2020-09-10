@@ -231,6 +231,9 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
         $paymongoVar = array();
         $paymongoVar['publicKey'] = $this->public_key;
 
+        $paymongoClient = array();
+        $paymongoClient['home_url'] = get_home_url();
+
         // Order Pay Page
         if (isset($_GET['pay_for_order']) && 'true' === $_GET['pay_for_order']) {
             $orderId = wc_get_order_id_by_order_key(urldecode($_GET['key']));
@@ -284,9 +287,17 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
             array('jquery')
         );
 
+        wp_register_script(
+            'woocommerce_paymongo_client',
+            plugins_url('assets/js/paymongo-client.js', CYNDER_PAYMONGO_MAIN_FILE),
+            array('jquery')
+        );
+        wp_localize_script('woocommerce_paymongo_client', 'cynder_paymongo_client_params', $paymongoClient);
+
         wp_enqueue_style('paymongo');
         wp_enqueue_style('jqueryModal');
         wp_enqueue_script('woocommerce_paymongo');
+        wp_enqueue_script('woocommerce_paymongo_client');
         wp_enqueue_script('woocommerce_paymongo_cc');
     }
 
