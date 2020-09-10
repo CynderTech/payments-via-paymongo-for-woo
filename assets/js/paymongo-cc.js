@@ -13,15 +13,7 @@ jQuery(document).ready(function ($) {
         /** If payment method is not CC, don't initialize form */
         if (paymentMethod !== 'paymongo') return;
 
-        this.addLoader();
-
         this.createPaymentIntent();
-    }
-
-    CCForm.prototype.addLoader = function () {
-        $(".wc_payment_method .payment_box.payment_method_paymongo").append(
-            '<div class="paymongo-loading"><div class="paymongo-roller"><div /><div /><div /><div /><div /><div /><div /><div /></div></div>'
-        );
     }
 
     CCForm.prototype.createPaymentIntent = function () {
@@ -32,15 +24,28 @@ jQuery(document).ready(function ($) {
             this.onPaymentIntentCreationResponse.bind(this),
         ];
 
+        this.addLoader();
+
         $(document.body).trigger('cynder_paymongo_create_payment_intent', args);
     }
 
     CCForm.prototype.onPaymentIntentCreationResponse = function (err, response) {
+        this.removeLoader();
         /** Needs better error handling */
         if (err) return console.log(err);
 
         console.log(response);
     }
+
+    CCForm.prototype.addLoader = function () {
+        $(".wc_payment_method .payment_box.payment_method_paymongo").append(
+            '<div class="paymongo-loading"><div class="paymongo-roller"><div /><div /><div /><div /><div /><div /><div /><div /></div></div>'
+        );
+    }
+
+    CCForm.prototype.removeLoader = function () {
+        $(".paymongo-loading").remove();
+    };
 
     new CCForm();
 });
