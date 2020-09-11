@@ -1,6 +1,16 @@
 jQuery(document).ready(function ($) {
     function CCForm() {
+        this.payment_client_key = null;
+        this.payment_intent_id = null;
         this.init();
+    }
+
+    CCForm.prototype.set = function(key, value) {
+        this[key] = value;
+    }
+
+    CCForm.prototype.get = function(key) {
+        return this[key];
     }
 
     CCForm.prototype.init = function () {
@@ -34,7 +44,27 @@ jQuery(document).ready(function ($) {
         /** Needs better error handling */
         if (err) return console.log(err);
 
-        console.log(response);
+        this.parseResponse(response);
+    }
+
+    CCForm.prototype.parseResponse = function (response) {
+        if (response.result && response.result === 'error') {
+            console.log('On error', response);
+            // const errors = paymongoForm.parsePayMongoErrors(response.errors);
+            // paymongoForm.showErrors(errors);
+            // return;
+        }
+
+        if (response.result && response.result === "failure" && response.messages) {
+            console.log('On failure', response);
+            // paymongoForm.showErrors(response.messages, true);
+            // return;
+        }
+
+        if (response.result && response.result === 'success') {
+            this.set('payment_client_key', response.payment_client_key);
+            this.set('payment_intent_id', response.payment_intent_id);
+        }
     }
 
     CCForm.prototype.addLoader = function () {
