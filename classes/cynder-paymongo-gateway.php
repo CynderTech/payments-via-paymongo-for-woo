@@ -243,17 +243,18 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
         if (isset($_GET['pay_for_order']) && 'true' === $_GET['pay_for_order']) {
             $orderId = wc_get_order_id_by_order_key(urldecode($_GET['key']));
             $order = wc_get_order($orderId);
-            $paymongoVar['order_pay_url'] = $order->get_checkout_payment_url();
-            $paymongoVar['billing_first_name'] = $order->get_billing_first_name();
-            $paymongoVar['billing_last_name'] = $order->get_billing_last_name();
-            $paymongoVar['billing_address_1'] = $order->get_billing_address_1();
-            $paymongoVar['billing_address_2'] = $order->get_billing_address_2();
-            $paymongoVar['billing_state'] = $order->get_billing_state();
-            $paymongoVar['billing_city'] = $order->get_billing_city();
-            $paymongoVar['billing_postcode'] = $order->get_billing_postcode();
-            $paymongoVar['billing_country'] = $order->get_billing_country();
-            $paymongoVar['billing_email'] = $order->get_billing_email();
-            $paymongoVar['billing_phone'] = $order->get_billing_phone();
+            $paymongoCc['order_pay_url'] = $order->get_checkout_payment_url();
+            $paymongoCc['total_amount'] = floatval($order->get_total());
+            $paymongoCc['billing_first_name'] = $order->get_billing_first_name();
+            $paymongoCc['billing_last_name'] = $order->get_billing_last_name();
+            $paymongoCc['billing_address_1'] = $order->get_billing_address_1();
+            $paymongoCc['billing_address_2'] = $order->get_billing_address_2();
+            $paymongoCc['billing_state'] = $order->get_billing_state();
+            $paymongoCc['billing_city'] = $order->get_billing_city();
+            $paymongoCc['billing_postcode'] = $order->get_billing_postcode();
+            $paymongoCc['billing_country'] = $order->get_billing_country();
+            $paymongoCc['billing_email'] = $order->get_billing_email();
+            $paymongoCc['billing_phone'] = $order->get_billing_phone();
         }
 
         wp_register_style(
@@ -454,72 +455,71 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
     {
         global $woocommerce;
 
-        if (!isset($_POST['paymongo_client_key'])
-            || !isset($_POST['paymongo_intent_id'])
-        ) {
-            return $this->createPaymentIntent($orderId);
-        }
+        wc_get_logger()->log('info', 'Payment Intent ID ' . $_POST['cynder_paymongo_intent_id']);
+        wc_get_logger()->log('info', 'Payment Method ID ' . $_POST['cynder_paymongo_method_id']);
 
-        // we need it to get any order details
-        $order = wc_get_order($orderId);
+        return array('result' => 'failure',);
 
-        $args = array(
-            'method' => "GET",
-            'headers' => array(
-                'Authorization' => 'Basic ' . base64_encode($this->secret_key),
-                'accept' => 'application/json',
-                'content-type' => 'application/json'
-            ),
-        );
+        // // we need it to get any order details
+        // $order = wc_get_order($orderId);
 
-        // get payment intent status
-        $response = wp_remote_get(
-            CYNDER_PAYMONGO_BASE_URL . '/payment_intents/' .
-            $_POST['paymongo_intent_id'],
-            $args
-        );
+        // $args = array(
+        //     'method' => "GET",
+        //     'headers' => array(
+        //         'Authorization' => 'Basic ' . base64_encode($this->secret_key),
+        //         'accept' => 'application/json',
+        //         'content-type' => 'application/json'
+        //     ),
+        // );
 
-        if (!is_wp_error($response)) {
-            $body = json_decode($response['body'], true);
-            $responseAttr = $body['data']['attributes'];
-            $status = $responseAttr['status'];
+        // // get payment intent status
+        // $response = wp_remote_get(
+        //     CYNDER_PAYMONGO_BASE_URL . '/payment_intents/' .
+        //     $_POST['paymongo_intent_id'],
+        //     $args
+        // );
 
-            if ($status == 'succeeded') {
-                // we received the payment
-                $payments = $responseAttr['payments'];
-                $order->payment_complete($payments[0]['id']);
-                wc_reduce_stock_levels($orderId);
+        // if (!is_wp_error($response)) {
+        //     $body = json_decode($response['body'], true);
+        //     $responseAttr = $body['data']['attributes'];
+        //     $status = $responseAttr['status'];
 
-                // Sending invoice after successful payment
-                $woocommerce->mailer()->emails['WC_Email_Customer_Invoice']->trigger($orderId);
+        //     if ($status == 'succeeded') {
+        //         // we received the payment
+        //         $payments = $responseAttr['payments'];
+        //         $order->payment_complete($payments[0]['id']);
+        //         wc_reduce_stock_levels($orderId);
 
-                // Empty cart
-                $woocommerce->cart->empty_cart();
+        //         // Sending invoice after successful payment
+        //         $woocommerce->mailer()->emails['WC_Email_Customer_Invoice']->trigger($orderId);
 
-                // Redirect to the thank you page
-                return array(
-                    'result' => 'success',
-                    'redirect' => $this->get_return_url($order)
-                );
-            } else {
-                wc_get_logger()->log('error', json_encode($body));
-                // $messages = Cynder_PayMongo_Error_Handler::parseErrors(
-                //     $body['errors']
-                // );
-                $errors = array_map(function ($error) {
-                    return Cynder_PayMongo_Error_Handler::parseError($error);
-                }, $body['errors']);
+        //         // Empty cart
+        //         $woocommerce->cart->empty_cart();
 
-                $messages = Cynder_PayMongo_Error_Handler::printErrors($errors);
+        //         // Redirect to the thank you page
+        //         return array(
+        //             'result' => 'success',
+        //             'redirect' => $this->get_return_url($order)
+        //         );
+        //     } else {
+        //         wc_get_logger()->log('error', json_encode($body));
+        //         // $messages = Cynder_PayMongo_Error_Handler::parseErrors(
+        //         //     $body['errors']
+        //         // );
+        //         $errors = array_map(function ($error) {
+        //             return Cynder_PayMongo_Error_Handler::parseError($error);
+        //         }, $body['errors']);
 
-                wc_add_notice($messages, 'error');
-                return;
-            }
+        //         $messages = Cynder_PayMongo_Error_Handler::printErrors($errors);
 
-        } else {
-            wc_add_notice('Connection error.', 'error');
-            return;
-        }
+        //         wc_add_notice($messages, 'error');
+        //         return;
+        //     }
+
+        // } else {
+        //     wc_add_notice('Connection error.', 'error');
+        //     return;
+        // }
     }
     
     /**

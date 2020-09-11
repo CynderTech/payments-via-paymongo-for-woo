@@ -1,4 +1,6 @@
 jQuery(document).ready(function ($) {
+    const BASE_API_URL = 'https://api.paymongo.com/v1';
+
     function PaymongoClient() {
         this.init();
     }
@@ -13,8 +15,9 @@ jQuery(document).ready(function ($) {
             amount: amount,
         };
 
-        $.post({
+        $.ajax({
             url: cynder_paymongo_client_params.home_url + '/?wc-api=cynder_paymongo_create_intent',
+            method: 'POST',
             headers: this.getHeaders(),
             data: JSON.stringify(payload),
             success: function (data) {
@@ -26,15 +29,31 @@ jQuery(document).ready(function ($) {
 
     PaymongoClient.prototype.createPaymentMethod = function (e, payload, callback) {
         $.ajax({
-            url: "https://api.paymongo.com/v1/payment_methods",
+            url: BASE_API_URL + '/payment_methods',
+            method: 'POST',
+            headers: this.getHeaders(true),
             data: this.buildPayload(payload),
-            method: "POST",
-            headers: this.getHeaders(),
-            success: function (response) {
-                return callback(null, response);
-            },
-            error: callback,
+            success: this.parseResponse.bind(this, callback),
+            error: this.parseError.bind(this, callback),
         });
+    }
+
+    PaymongoClient.prototype.parseResponse = function (callback, response) {
+        if (!response || !(response || {}).data || !((response || {}).data || {}).attributes) {
+            console.log(response);
+            /** Mimicking error structure from PayMongo API */
+            return callback([
+                {
+                    detail: 'Invalid response from Paymongo API'
+                }
+            ]);
+        }
+
+        return callback(null, response.data);
+    }
+
+    PaymongoClient.prototype.parseError = function (callback, err) {
+        return callback(err.responseJSON);
     }
 
     PaymongoClient.prototype.getHeaders = function(hasKey) {
@@ -43,7 +62,7 @@ jQuery(document).ready(function ($) {
             'Accept': 'application/json',
         };
 
-        if (!hasKey) {
+        if (hasKey) {
             headers['Authorization'] = "Basic " + btoa(cynder_paymongo_client_params.public_key)
         }
 
