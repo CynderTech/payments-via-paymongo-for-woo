@@ -19,12 +19,12 @@ jQuery(document).ready(function ($) {
         init: function () {
             if (paymongoForm.initialized) return;
             if (paymongoForm.isOrderPay) {
-                paymongoForm.checkoutForm.on("submit", paymongoForm.onSubmit);
+                // paymongoForm.checkoutForm.on("submit", paymongoForm.onSubmit);
             } else {
-                paymongoForm.checkoutForm.on(
-                    "checkout_place_order_paymongo checkout_place_order_paymongo_gcash checkout_place_order_paymongo_grabpay",
-                    paymongoForm.onSubmit
-                );
+                // paymongoForm.checkoutForm.on(
+                //     "checkout_place_order_paymongo checkout_place_order_paymongo_gcash checkout_place_order_paymongo_grabpay",
+                //     paymongoForm.onSubmit
+                // );
             }
             paymongoForm.initialized = true;
         },
@@ -41,33 +41,33 @@ jQuery(document).ready(function ($) {
             }
         },
 
-        onSubmit: function (e) {
-            e.preventDefault(e);
+        // onSubmit: function (e) {
+        //     e.preventDefault(e);
 
-            var paymentMethod = $('input[name=payment_method]:checked').val(); 
+        //     var paymentMethod = $('input[name=payment_method]:checked').val(); 
 
-            // if default paymongo
-            if (paymentMethod == "paymongo") {
-                const errors = paymongoForm.validateCardFields() || [];
+        //     // if default paymongo
+        //     if (paymentMethod == "paymongo") {
+        //         const errors = paymongoForm.validateCardFields() || [];
 
-                if (errors.length) {
-                    paymongoForm.showErrors(errors);
-                    return false;
-                }
+        //         if (errors.length) {
+        //             paymongoForm.showErrors(errors);
+        //             return false;
+        //         }
 
-                paymongoForm.createPaymentIntent();
-            }
+        //         paymongoForm.createPaymentIntent();
+        //     }
 
-            if (paymentMethod == "paymongo_gcash") {
-                paymongoForm.createSource("gcash");
-            }
+        //     if (paymentMethod == "paymongo_gcash") {
+        //         paymongoForm.createSource("gcash");
+        //     }
 
-            if (paymentMethod == "paymongo_grabpay") {
-                paymongoForm.createSource("grabpay");
-            }
+        //     if (paymentMethod == "paymongo_grabpay") {
+        //         paymongoForm.createSource("grabpay");
+        //     }
 
-            return false;
-        },
+        //     return false;
+        // },
         attachPaymentMethod: function (response, paymentIntent) {
             jQuery.ajax({
                 url:
@@ -549,28 +549,28 @@ jQuery(document).ready(function ($) {
     };
 
     // initialize form on payment method select
-    $(document).on(
-        "change",
-        "#payment_method_paymongo, #payment_method_paymongo_gcash, #payment_method_paymongo_grabpay",
-        function () {
-            if (this.checked) {
-                paymongoForm.setUpCleave();
-                paymongoForm.init();
-            }
-        }
-    );
+    // $(document).on(
+    //     "change",
+    //     "#payment_method_paymongo, #payment_method_paymongo_gcash, #payment_method_paymongo_grabpay",
+    //     function () {
+    //         if (this.checked) {
+    //             paymongoForm.setUpCleave();
+    //             paymongoForm.init();
+    //         }
+    //     }
+    // );
 
     // setup cleave on form focus
-    $(document).on("focus", "#paymongo_expdate, #paymongo_ccNo", function () {
-        paymongoForm.setUpCleave();
-    });
+    // $(document).on("focus", "#paymongo_expdate, #paymongo_ccNo", function () {
+    //     paymongoForm.setUpCleave();
+    // });
 
     // check if one of the payment methods is already selected
-    if (
-        $(document).find(
-            "#payment_method_paymongo:checked, #payment_method_paymongo_gcash:checked, #payment_method_paymongo_grabpay:checked"
-        ).length
-    ) {
-        paymongoForm.init();
-    }
+    // if (
+    //     $(document).find(
+    //         "#payment_method_paymongo:checked, #payment_method_paymongo_gcash:checked, #payment_method_paymongo_grabpay:checked"
+    //     ).length
+    // ) {
+    //     paymongoForm.init();
+    // }
 });

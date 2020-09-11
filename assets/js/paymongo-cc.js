@@ -15,6 +15,17 @@ jQuery(document).ready(function ($) {
 
     CCForm.prototype.init = function () {
         $(document.body).on('payment_method_selected', this.paymentMethodSelected.bind(this));
+        
+        if(cynder_paymongo_cc_params.isCheckout) {
+            $('form.woocommerce-checkout').on(
+                'checkout_place_order_paymongo',
+                this.createPaymentMethod.bind(this)
+            );
+        } else if (cynder_paymongo_cc_params.isOrderPay) {
+            $('#order_review').on('submit', this.createPaymentMethod.bind(this));
+        } else {
+            alert('Paymongo cannot find the checkout form. Initialization failed. Try to refresh the page.');
+        }
     }
 
     CCForm.prototype.paymentMethodSelected = function () {
@@ -23,7 +34,7 @@ jQuery(document).ready(function ($) {
         /** If payment method is not CC, don't initialize form */
         if (paymentMethod !== 'paymongo') return;
 
-        this.createPaymentIntent();
+        // this.createPaymentIntent();
     }
 
     CCForm.prototype.createPaymentIntent = function () {
@@ -41,30 +52,66 @@ jQuery(document).ready(function ($) {
 
     CCForm.prototype.onPaymentIntentCreationResponse = function (err, response) {
         this.removeLoader();
+
         /** Needs better error handling */
         if (err) return console.log(err);
 
-        this.parseResponse(response);
+        var data = this.parseWcResponse(response);
+
+        this.set('payment_client_key', data.payment_client_key);
+        this.set('payment_intent_id', data.payment_intent_id);
     }
 
-    CCForm.prototype.parseResponse = function (response) {
-        if (response.result && response.result === 'error') {
+    CCForm.prototype.createPaymentMethod = function (e) {
+        e.preventDefault(e);
+
+        console.log('Creating payment method');
+
+        var payload = {};
+
+        var args = [
+            payload,
+            this.onPaymentMethodCreationResponse.bind(this),
+        ];
+
+        this.addLoader();
+
+        $(document.body).trigger('cynder_paymongo_create_payment_method', args);
+
+        return false;
+    }
+
+    CCForm.prototype.onPaymentMethodCreationResponse = function (err, response) {
+        this.removeLoader();
+
+        /** Needs better error handling */
+        if (err) return console.log(err);
+
+        console.log(response);
+    }
+
+    CCForm.prototype.parseWcResponse = function (response) {
+        const result = response.result;
+
+        if (result && result === 'error') {
             console.log('On error', response);
             // const errors = paymongoForm.parsePayMongoErrors(response.errors);
             // paymongoForm.showErrors(errors);
-            // return;
+            return null;
         }
 
-        if (response.result && response.result === "failure" && response.messages) {
+        if (result && result === "failure" && response.messages) {
             console.log('On failure', response);
             // paymongoForm.showErrors(response.messages, true);
-            // return;
+            return null;
         }
 
-        if (response.result && response.result === 'success') {
-            this.set('payment_client_key', response.payment_client_key);
-            this.set('payment_intent_id', response.payment_intent_id);
+        if (result && result === 'success') {
+            delete response.result;
+            return response;
         }
+
+        return null;
     }
 
     CCForm.prototype.addLoader = function () {

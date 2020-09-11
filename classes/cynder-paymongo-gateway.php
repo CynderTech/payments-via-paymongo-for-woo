@@ -233,6 +233,11 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
 
         $paymongoClient = array();
         $paymongoClient['home_url'] = get_home_url();
+        $paymongoClient['public_key'] = $this->public_key;
+
+        $paymongoCc = array();
+        $paymongoCc['isCheckout'] = is_checkout() && !is_checkout_pay_page();
+        $paymongoCc['isOrderPay'] = is_checkout_pay_page();
 
         // Order Pay Page
         if (isset($_GET['pay_for_order']) && 'true' === $_GET['pay_for_order']) {
@@ -274,18 +279,19 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
             'jqueryModal',
             plugins_url('assets/js/jquery.modal.min.js', CYNDER_PAYMONGO_MAIN_FILE)
         );
-        wp_register_script(
-            'woocommerce_paymongo',
-            plugins_url('assets/js/paymongo.js', CYNDER_PAYMONGO_MAIN_FILE),
-            array('jquery', 'cleave', 'jqueryModal')
-        );
-        wp_localize_script('woocommerce_paymongo', 'paymongo_params', $paymongoVar);
+        // wp_register_script(
+        //     'woocommerce_paymongo',
+        //     plugins_url('assets/js/paymongo.js', CYNDER_PAYMONGO_MAIN_FILE),
+        //     array('jquery', 'cleave', 'jqueryModal')
+        // );
+        // wp_localize_script('woocommerce_paymongo', 'paymongo_params', $paymongoVar);
 
         wp_register_script(
             'woocommerce_paymongo_cc',
             plugins_url('assets/js/paymongo-cc.js', CYNDER_PAYMONGO_MAIN_FILE),
             array('jquery')
         );
+        wp_localize_script('woocommerce_paymongo_cc', 'cynder_paymongo_cc_params', $paymongoCc);
 
         wp_register_script(
             'woocommerce_paymongo_client',
@@ -296,7 +302,7 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
 
         wp_enqueue_style('paymongo');
         wp_enqueue_style('jqueryModal');
-        wp_enqueue_script('woocommerce_paymongo');
+        // wp_enqueue_script('woocommerce_paymongo');
         wp_enqueue_script('woocommerce_paymongo_client');
         wp_enqueue_script('woocommerce_paymongo_cc');
     }

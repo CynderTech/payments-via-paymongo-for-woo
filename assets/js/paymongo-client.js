@@ -5,6 +5,7 @@ jQuery(document).ready(function ($) {
 
     PaymongoClient.prototype.init = function () {
         $(document.body).on('cynder_paymongo_create_payment_intent', this.createPaymentIntent.bind(this));
+        $(document.body).on('cynder_paymongo_create_payment_method', this.createPaymentMethod.bind(this));
     }
 
     PaymongoClient.prototype.createPaymentIntent = function (e, amount, callback) {
@@ -19,9 +20,36 @@ jQuery(document).ready(function ($) {
                 'Accept': 'application/json'
             },
             data: JSON.stringify(payload),
-            success: callback,
+            success: function (data) {
+                callback(null, data);
+            },
             error: callback
         });
+    }
+
+    PaymongoClient.prototype.createPaymentMethod = function (e, payload, callback) {
+        console.log('Sending payload', payload);
+
+        return callback(null, 'Here');
+
+        // $.ajax({
+        //     url: "https://api.paymongo.com/v1/payment_methods",
+        //     data: JSON.stringify({ data: { attributes: payload } }),
+        //     method: "POST",
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //         'Accept': 'application/json'
+        //     },
+        //     headers: {
+        //         accept: "application/json",
+        //         "content-type": "application/json",
+        //         Authorization: "Basic " + btoa(cynder_paymongo_client_params.public_key),
+        //     },
+        //     success: function (response) {
+        //         paymongoForm.attachPaymentMethod(response, paymentIntent);
+        //     },
+        //     error: paymongoForm.onFail,
+        // });
     }
 
     new PaymongoClient();
