@@ -15,10 +15,7 @@ jQuery(document).ready(function ($) {
 
         $.post({
             url: cynder_paymongo_client_params.home_url + '/?wc-api=cynder_paymongo_create_intent',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
+            headers: this.getHeaders(),
             data: JSON.stringify(payload),
             success: function (data) {
                 callback(null, data);
@@ -28,28 +25,33 @@ jQuery(document).ready(function ($) {
     }
 
     PaymongoClient.prototype.createPaymentMethod = function (e, payload, callback) {
-        console.log('Sending payload', payload);
+        $.ajax({
+            url: "https://api.paymongo.com/v1/payment_methods",
+            data: this.buildPayload(payload),
+            method: "POST",
+            headers: this.getHeaders(),
+            success: function (response) {
+                return callback(null, response);
+            },
+            error: callback,
+        });
+    }
 
-        return callback(null, 'Here');
+    PaymongoClient.prototype.getHeaders = function(hasKey) {
+        var headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        };
 
-        // $.ajax({
-        //     url: "https://api.paymongo.com/v1/payment_methods",
-        //     data: JSON.stringify({ data: { attributes: payload } }),
-        //     method: "POST",
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //         'Accept': 'application/json'
-        //     },
-        //     headers: {
-        //         accept: "application/json",
-        //         "content-type": "application/json",
-        //         Authorization: "Basic " + btoa(cynder_paymongo_client_params.public_key),
-        //     },
-        //     success: function (response) {
-        //         paymongoForm.attachPaymentMethod(response, paymentIntent);
-        //     },
-        //     error: paymongoForm.onFail,
-        // });
+        if (!hasKey) {
+            headers['Authorization'] = "Basic " + btoa(cynder_paymongo_client_params.public_key)
+        }
+
+        return headers;
+    }
+
+    PaymongoClient.prototype.buildPayload = function (payload) {
+        return JSON.stringify({ data: { attributes: payload } });
     }
 
     new PaymongoClient();

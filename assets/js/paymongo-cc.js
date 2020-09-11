@@ -65,9 +65,53 @@ jQuery(document).ready(function ($) {
     CCForm.prototype.createPaymentMethod = function (e) {
         e.preventDefault(e);
 
-        console.log('Creating payment method');
+        const ccNo = $("#paymongo_ccNo").val();
+        const [expMonth, expYear] = $("#paymongo_expdate").val().split("/");
+        const cvc = $("#paymongo_cvv").val();
 
-        var payload = {};
+        const line1 =
+            cynder_paymongo_cc_params.billing_address_1 ||
+            $("#billing_address_1").val();
+        const line2 =
+            cynder_paymongo_cc_params.billing_address_2 ||
+            $("#billing_address_2").val();
+        const city =
+            cynder_paymongo_cc_params.billing_city || $("#billing_city").val();
+        const state =
+            cynder_paymongo_cc_params.billing_state || $("#billing_state").val();
+        const country =
+            cynder_paymongo_cc_params.billing_country || $("#billing_country").val();
+        const postal_code =
+            cynder_paymongo_cc_params.billing_postcode ||
+            $("#billing_postcode").val();
+        const name = this.getName();
+        const email =
+            cynder_paymongo_cc_params.billing_email || $("#billing_email").val();
+        const phone =
+            cynder_paymongo_cc_params.billing_phone || $("#billing_phone").val();
+
+        const payload = {
+            type: "card",
+            details: {
+                card_number: ccNo.replace(/ /g, ""),
+                exp_month: parseInt(expMonth),
+                exp_year: parseInt(expYear),
+                cvc: cvc,
+            },
+            billing: {
+                address: {
+                    line1: line1,
+                    line2: line2,
+                    city: city,
+                    state: state,
+                    country: country,
+                    postal_code: postal_code,
+                },
+                name: name,
+                email: email,
+                phone: phone,
+            },
+        };
 
         var args = [
             payload,
@@ -81,10 +125,29 @@ jQuery(document).ready(function ($) {
         return false;
     }
 
+    CCForm.prototype.getName = function () {
+        const firstName =
+            cynder_paymongo_cc_params.billing_first_name ||
+            $("#billing_first_name").val();
+        const lastName =
+            cynder_paymongo_cc_params.billing_last_name ||
+            $("#billing_last_name").val();
+
+        let name = firstName + " " + lastName;
+        let companyName =
+            cynder_paymongo_cc_params.billing_company || $("#billing_company").val();
+
+        if (companyName && companyName.length) {
+            name = name + " - " + companyName;
+        }
+
+        return name;
+    }
+
     CCForm.prototype.onPaymentMethodCreationResponse = function (err, response) {
         this.removeLoader();
 
-        /** Needs better error handling */
+        /** Needs better error handling: get error from responseJSON */
         if (err) return console.log(err);
 
         console.log(response);
