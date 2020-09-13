@@ -455,10 +455,75 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
     {
         global $woocommerce;
 
-        wc_get_logger()->log('info', 'Payment Intent ID ' . $_POST['cynder_paymongo_intent_id']);
-        wc_get_logger()->log('info', 'Payment Method ID ' . $_POST['cynder_paymongo_method_id']);
+        $paymentIntentId = $_POST['cynder_paymongo_intent_id'];
+        $paymentMethodId = $_POST['cynder_paymongo_method_id'];
 
-        return array('result' => 'failure',);
+        if (!isset($paymentIntentId) || !isset($paymentMethodId)) {
+            $missingPayload = !isset($paymentIntentId) ? 'payment intent ID' : 'payment method ID';
+
+            $errorMessage = 'No ' . $missingPayload . ' found.';
+            wc_get_logger()->log('error', $errorMessage);
+            return wc_add_notice($errorMessage, 'error');
+        }
+
+        $order = wc_get_order($orderId);
+
+        $payload = json_encode(
+            array(
+                'data' => array(
+                    'attributes' =>array(
+                        'payment_method' => $paymentMethodId,
+                        'return_url' => $this->get_return_url($order)
+                    ),
+                ),
+            )
+        );
+        
+        $args = array(
+            'body' => $payload,
+            'method' => "POST",
+            'headers' => array(
+                'Authorization' => 'Basic ' . base64_encode($this->secret_key),
+                'accept' => 'application/json',
+                'content-type' => 'application/json'
+            ),
+        );
+
+        $response = wp_remote_post(
+            CYNDER_PAYMONGO_BASE_URL . '/payment_intents/' . $paymentIntentId . '/attach',
+            $args
+        );
+
+        if (!is_wp_error($response)) {
+            /** Enable for debugging purposes */
+            // wc_get_logger()->log('info', 'Response ' . json_encode($response));
+
+            $body = json_decode($response['body'], true);
+            $responseAttr = $body['data']['attributes'];
+            $status = $responseAttr['status'];
+
+            if ($status == 'succeeded') {
+                // we received the payment
+                $payments = $responseAttr['payments'];
+                $order->payment_complete($payments[0]['id']);
+                wc_reduce_stock_levels($orderId);
+
+                // Sending invoice after successful payment
+                $woocommerce->mailer()->emails['WC_Email_Customer_Invoice']->trigger($orderId);
+
+                // Empty cart
+                $woocommerce->cart->empty_cart();
+
+                // Redirect to the thank you page
+                return array(
+                    'result' => 'success',
+                    'redirect' => $this->get_return_url($order)
+                );
+            }
+        } else {
+            wc_get_logger()->log('error', '[Attaching Payment Intent] ID: ' . $paymentIntentId . ' - Response error ' . json_encode($response));
+            return wc_add_notice('Connection error. Check logs.', 'error');
+        }
 
         // // we need it to get any order details
         // $order = wc_get_order($orderId);
