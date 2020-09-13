@@ -86,6 +86,7 @@ jQuery(document).ready(function ($) {
         const hasMethod = form.find(this.method_field_selector).length;
 
         if (hasIntent && hasMethod) {
+            this.removeLoader();
             return true;
         }
 
@@ -186,8 +187,6 @@ jQuery(document).ready(function ($) {
         form.append('<input type="hidden" id="' + this.method_field_name + '" name="' + this.method_field_name + '"/>');
         form.find(this.intent_field_selector).val(this.payment_intent_id);
         form.find(this.method_field_selector).val(data.id);
-
-        console.log('Appended input');
 
         form.submit();
     }

@@ -461,7 +461,7 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
         if (!isset($paymentIntentId) || !isset($paymentMethodId)) {
             $missingPayload = !isset($paymentIntentId) ? 'payment intent ID' : 'payment method ID';
 
-            $errorMessage = 'No ' . $missingPayload . ' found.';
+            $errorMessage = '[Processing Payment] No ' . $missingPayload . ' found.';
             wc_get_logger()->log('error', $errorMessage);
             return wc_add_notice($errorMessage, 'error');
         }
@@ -496,12 +496,22 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
 
         if (!is_wp_error($response)) {
             /** Enable for debugging purposes */
-            // wc_get_logger()->log('info', 'Response ' . json_encode($response));
+            wc_get_logger()->log('info', 'Response ' . json_encode($response));
 
             $body = json_decode($response['body'], true);
+
+            if (isset($body['errors'])) {
+                for ($i = 0; $i < count($body['errors']); $i++) {
+                    wc_add_notice($body['errors'][$i]['detail'], 'error');
+                }
+
+                return;
+            }
+
             $responseAttr = $body['data']['attributes'];
             $status = $responseAttr['status'];
 
+            /** For regular payments, process as is */
             if ($status == 'succeeded') {
                 // we received the payment
                 $payments = $responseAttr['payments'];
@@ -519,9 +529,15 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
                     'result' => 'success',
                     'redirect' => $this->get_return_url($order)
                 );
+            } else if ($status === 'awaiting_next_action') {
+                /** For 3DS-enabled cards, redirect to authorization page */
+                return array(
+                    'result' => 'success',
+                    'redirect' => $responseAttr['next_action']['redirect']['url']
+                );
             }
         } else {
-            wc_get_logger()->log('error', '[Attaching Payment Intent] ID: ' . $paymentIntentId . ' - Response error ' . json_encode($response));
+            wc_get_logger()->log('error', '[Processing Payment] ID: ' . $paymentIntentId . ' - Response error ' . json_encode($response));
             return wc_add_notice('Connection error. Check logs.', 'error');
         }
 
