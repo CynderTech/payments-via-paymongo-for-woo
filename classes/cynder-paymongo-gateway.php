@@ -146,18 +146,6 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
                 'title'       => 'Live Secret Key',
                 'type'        => 'password'
             ),
-            'webhook_secret' => array(
-                'title'       => 'Webhook Secret Key',
-                'type'        => 'password',
-                'description' => 'Provide a secret key to enable'
-                    . ' <b>GCash</b> or <b>GrabPay</b> Payments<br>'
-                    . '<a target="_blank" href="https://paymongo-webhook-tool.meeco.dev?url=' 
-                    . $webhookUrl
-                    . '">Click this to generate a webhook secret</a>'
-                    . ' or use this URL: <b>'
-                    . $webhookUrl,
-                'default'     => '',
-            ),
             'test_env' => array(
                 'title' => 'Test Environment',
                 'type' => 'title',
@@ -179,19 +167,6 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
             'test_secret_key' => array(
                 'title'       => 'Test Secret Key',
                 'type'        => 'password',
-            ),
-           
-            'test_webhook_secret' => array(
-                'title'       => 'Test Webhook Secret Key',
-                'type'        => 'password',
-                'description' => 'Provide a secret key to enable'
-                    . ' <b>GCash</b> or <b>GrabPay</b> Payments<br>'
-                    . '<a target="_blank" href="https://paymongo-webhook-tool.meeco.dev?url=' 
-                    . $webhookUrl
-                    . '">Click this to generate a webhook secret</a>'
-                    . ' or use this URL: <b>'
-                    . $webhookUrl,
-                'default'     => '',
             ),
         );
     }
@@ -231,21 +206,30 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
         $paymongoVar = array();
         $paymongoVar['publicKey'] = $this->public_key;
 
+        $paymongoClient = array();
+        $paymongoClient['home_url'] = get_home_url();
+        $paymongoClient['public_key'] = $this->public_key;
+
+        $paymongoCc = array();
+        $paymongoCc['isCheckout'] = is_checkout() && !is_checkout_pay_page();
+        $paymongoCc['isOrderPay'] = is_checkout_pay_page();
+
         // Order Pay Page
         if (isset($_GET['pay_for_order']) && 'true' === $_GET['pay_for_order']) {
             $orderId = wc_get_order_id_by_order_key(urldecode($_GET['key']));
             $order = wc_get_order($orderId);
-            $paymongoVar['order_pay_url'] = $order->get_checkout_payment_url();
-            $paymongoVar['billing_first_name'] = $order->get_billing_first_name();
-            $paymongoVar['billing_last_name'] = $order->get_billing_last_name();
-            $paymongoVar['billing_address_1'] = $order->get_billing_address_1();
-            $paymongoVar['billing_address_2'] = $order->get_billing_address_2();
-            $paymongoVar['billing_state'] = $order->get_billing_state();
-            $paymongoVar['billing_city'] = $order->get_billing_city();
-            $paymongoVar['billing_postcode'] = $order->get_billing_postcode();
-            $paymongoVar['billing_country'] = $order->get_billing_country();
-            $paymongoVar['billing_email'] = $order->get_billing_email();
-            $paymongoVar['billing_phone'] = $order->get_billing_phone();
+            $paymongoCc['order_pay_url'] = $order->get_checkout_payment_url();
+            $paymongoCc['total_amount'] = floatval($order->get_total());
+            $paymongoCc['billing_first_name'] = $order->get_billing_first_name();
+            $paymongoCc['billing_last_name'] = $order->get_billing_last_name();
+            $paymongoCc['billing_address_1'] = $order->get_billing_address_1();
+            $paymongoCc['billing_address_2'] = $order->get_billing_address_2();
+            $paymongoCc['billing_state'] = $order->get_billing_state();
+            $paymongoCc['billing_city'] = $order->get_billing_city();
+            $paymongoCc['billing_postcode'] = $order->get_billing_postcode();
+            $paymongoCc['billing_country'] = $order->get_billing_country();
+            $paymongoCc['billing_email'] = $order->get_billing_email();
+            $paymongoCc['billing_phone'] = $order->get_billing_phone();
         }
 
         wp_register_style(
@@ -271,16 +255,32 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
             'jqueryModal',
             plugins_url('assets/js/jquery.modal.min.js', CYNDER_PAYMONGO_MAIN_FILE)
         );
+
         wp_register_script(
-            'woocommerce_paymongo',
-            plugins_url('assets/js/paymongo.js', CYNDER_PAYMONGO_MAIN_FILE),
-            array('jquery', 'cleave', 'jqueryModal')
+            'woocommerce_paymongo_checkout',
+            plugins_url('assets/js/paymongo-checkout.js', CYNDER_PAYMONGO_MAIN_FILE),
+            array('jquery')
         );
-        wp_localize_script('woocommerce_paymongo', 'paymongo_params', $paymongoVar);
+
+        wp_register_script(
+            'woocommerce_paymongo_cc',
+            plugins_url('assets/js/paymongo-cc.js', CYNDER_PAYMONGO_MAIN_FILE),
+            array('jquery', 'cleave')
+        );
+        wp_localize_script('woocommerce_paymongo_cc', 'cynder_paymongo_cc_params', $paymongoCc);
+
+        wp_register_script(
+            'woocommerce_paymongo_client',
+            plugins_url('assets/js/paymongo-client.js', CYNDER_PAYMONGO_MAIN_FILE),
+            array('jquery')
+        );
+        wp_localize_script('woocommerce_paymongo_client', 'cynder_paymongo_client_params', $paymongoClient);
 
         wp_enqueue_style('paymongo');
         wp_enqueue_style('jqueryModal');
-        wp_enqueue_script('woocommerce_paymongo');
+        wp_enqueue_script('woocommerce_paymongo_checkout');
+        wp_enqueue_script('woocommerce_paymongo_client');
+        wp_enqueue_script('woocommerce_paymongo_cc');
     }
 
 
@@ -337,86 +337,6 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
     }
 
     /**
-     * Creates PayMongo Payment Intent
-     *
-     * @param string $orderId WooCommerce Order ID
-     *
-     * @return void
-     *
-     * @link  https://developers.paymongo.com/reference#the-payment-intent-object
-     * @since 1.0.0
-     */
-    public function createPaymentIntent($orderId)
-    {
-        $order = wc_get_order($orderId);
-        $payload = json_encode(
-            array(
-                'data' => array(
-                    'attributes' =>array(
-                        'amount' => intval($order->get_total() * 100, 32),
-                        'payment_method_allowed' => array('card'),
-                        'currency' => $order->get_currency(),
-                        'description' => $order->get_order_key(),
-                    ),
-                ),
-            )
-        );
-
-        $args = array(
-            'body' => $payload,
-            'method' => "POST",
-            'headers' => array(
-                'Authorization' => 'Basic ' . base64_encode($this->secret_key),
-                'accept' => 'application/json',
-                'content-type' => 'application/json'
-            ),
-        );
-
-        $response = wp_remote_post(
-            CYNDER_PAYMONGO_BASE_URL . '/payment_intents',
-            $args
-        );
-
-        if (!is_wp_error($response)) {
-            $body = json_decode($response['body'], true);
-
-            if ($body
-                && array_key_exists('data', $body)
-                && array_key_exists('attributes', $body['data'])
-                && array_key_exists('status', $body['data']['attributes'])
-                && $body['data']['attributes']['status'] == 'awaiting_payment_method'
-            ) {
-                $clientKey = $body['data']['attributes']['client_key'];
-                wp_send_json(
-                    array(
-                        'result' => 'success',
-                        'payment_client_key' => $clientKey,
-                        'payment_intent_id' => $body['data']['id'],
-                    )
-                );
-
-                return;
-            } else {
-                wp_send_json(
-                    array(
-                        'result' => 'error',
-                        'errors' => $body['errors'],
-                    )
-                );
-                return;
-            }
-        } else {
-            wp_send_json(
-                array(
-                    'result' => 'failure',
-                    'messages' => $response->get_error_messages(),
-                )
-            );
-            return;
-        }
-    }
-
-    /**
      * Process PayMongo Payment
      *
      * @param string $orderId WooCommerce Order ID
@@ -430,17 +350,33 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
     {
         global $woocommerce;
 
-        if (!isset($_POST['paymongo_client_key'])
-            || !isset($_POST['paymongo_intent_id'])
-        ) {
-            return $this->createPaymentIntent($orderId);
+        $paymentIntentId = $_POST['cynder_paymongo_intent_id'];
+        $paymentMethodId = $_POST['cynder_paymongo_method_id'];
+
+        if (!isset($paymentIntentId) || !isset($paymentMethodId)) {
+            $missingPayload = !isset($paymentIntentId) ? 'payment intent ID' : 'payment method ID';
+
+            $errorMessage = '[Processing Payment] No ' . $missingPayload . ' found.';
+            wc_get_logger()->log('error', $errorMessage);
+            return wc_add_notice($errorMessage, 'error');
         }
 
-        // we need it to get any order details
         $order = wc_get_order($orderId);
 
+        $payload = json_encode(
+            array(
+                'data' => array(
+                    'attributes' =>array(
+                        'payment_method' => $paymentMethodId,
+                        'return_url' => get_home_url() . '/?wc-api=cynder_paymongo_catch_redirect&order=' . $orderId . '&intent=' . $paymentIntentId
+                    ),
+                ),
+            )
+        );
+        
         $args = array(
-            'method' => "GET",
+            'body' => $payload,
+            'method' => "POST",
             'headers' => array(
                 'Authorization' => 'Basic ' . base64_encode($this->secret_key),
                 'accept' => 'application/json',
@@ -448,18 +384,29 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
             ),
         );
 
-        // get payment intent status
-        $response = wp_remote_get(
-            CYNDER_PAYMONGO_BASE_URL . '/payment_intents/' .
-            $_POST['paymongo_intent_id'],
+        $response = wp_remote_post(
+            CYNDER_PAYMONGO_BASE_URL . '/payment_intents/' . $paymentIntentId . '/attach',
             $args
         );
 
         if (!is_wp_error($response)) {
+            /** Enable for debugging purposes */
+            wc_get_logger()->log('info', 'Response ' . json_encode($response));
+
             $body = json_decode($response['body'], true);
+
+            if (isset($body['errors'])) {
+                for ($i = 0; $i < count($body['errors']); $i++) {
+                    wc_add_notice($body['errors'][$i]['detail'], 'error');
+                }
+
+                return;
+            }
+
             $responseAttr = $body['data']['attributes'];
             $status = $responseAttr['status'];
 
+            /** For regular payments, process as is */
             if ($status == 'succeeded') {
                 // we received the payment
                 $payments = $responseAttr['payments'];
@@ -477,24 +424,16 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
                     'result' => 'success',
                     'redirect' => $this->get_return_url($order)
                 );
-            } else {
-                wc_get_logger()->log('error', json_encode($body));
-                // $messages = Cynder_PayMongo_Error_Handler::parseErrors(
-                //     $body['errors']
-                // );
-                $errors = array_map(function ($error) {
-                    return Cynder_PayMongo_Error_Handler::parseError($error);
-                }, $body['errors']);
-
-                $messages = Cynder_PayMongo_Error_Handler::printErrors($errors);
-
-                wc_add_notice($messages, 'error');
-                return;
+            } else if ($status === 'awaiting_next_action') {
+                /** For 3DS-enabled cards, redirect to authorization page */
+                return array(
+                    'result' => 'success',
+                    'redirect' => $responseAttr['next_action']['redirect']['url']
+                );
             }
-
         } else {
-            wc_add_notice('Connection error.', 'error');
-            return;
+            wc_get_logger()->log('error', '[Processing Payment] ID: ' . $paymentIntentId . ' - Response error ' . json_encode($response));
+            return wc_add_notice('Connection error. Check logs.', 'error');
         }
     }
     
@@ -526,8 +465,7 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
     {
         if ($order && $this->id === $order->get_payment_method()) {
             return esc_html__(
-                'Thank You! Order has been received.'
-                .' Waiting for Credit Card Confirmation',
+                'Thank You! Order has been received.',
                 'woocommerce'
             );
         }
