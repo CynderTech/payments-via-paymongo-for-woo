@@ -473,7 +473,7 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
                 'data' => array(
                     'attributes' =>array(
                         'payment_method' => $paymentMethodId,
-                        'return_url' => $this->get_return_url($order)
+                        'return_url' => get_home_url() . '/?wc-api=cynder_paymongo_catch_redirect&order=' . $orderId . '&intent=' . $paymentIntentId
                     ),
                 ),
             )

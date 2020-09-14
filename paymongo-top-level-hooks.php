@@ -94,3 +94,74 @@ add_action(
     'woocommerce_api_cynder_paymongo_create_intent',
     'cynder_paymongo_create_intent'
 );
+
+function cynder_paymongo_catch_redirect() {
+    global $woocommerce;
+
+    wc_get_logger()->log('info', 'Params ' . json_encode($_GET));
+
+    $paymentIntentId = $_GET['intent'];
+
+    if (!isset($paymentIntentId)) {
+        /** Check payment intent ID */
+    }
+
+    $paymentGatewaId = 'paymongo';
+    $paymentGateways = WC_Payment_Gateways::instance();
+
+    $paymongoGateway = $paymentGateways->payment_gateways()[$paymentGatewaId];
+    $testMode = $paymongoGateway->get_option('testmode');
+    $authOptionKey = $testMode === 'yes' ? 'test_secret_key' : 'secret_key';
+    $authKey = $paymongoGateway->get_option($authOptionKey);
+
+    $args = array(
+        'method' => 'GET',
+        'headers' => array(
+            'Authorization' => 'Basic ' . base64_encode($authKey),
+            'accept' => 'application/json',
+            'content-type' => 'application/json'
+        ),
+    );
+
+    $response = wp_remote_get(
+        CYNDER_PAYMONGO_BASE_URL . '/payment_intents/' . $paymentIntentId,
+        $args
+    );
+
+    /** Enable for debugging */
+    // wc_get_logger()->log('info', '[Catch Redirect][Response] ' . json_encode($response));
+
+    if (is_wp_error($response)) {
+        /** Handle errors */
+        return;
+    }
+
+    $body = json_decode($response['body'], true);
+
+    $responseAttr = $body['data']['attributes'];
+    $status = $responseAttr['status'];
+
+    $orderId = $_GET['order'];
+    $order = wc_get_order($orderId);
+
+    if ($status === 'succeeded') {
+        // we received the payment
+        $payments = $responseAttr['payments'];
+        $order->payment_complete($payments[0]['id']);
+        wc_reduce_stock_levels($orderId);
+
+        // Sending invoice after successful payment
+        $woocommerce->mailer()->emails['WC_Email_Customer_Invoice']->trigger($orderId);
+
+        // Empty cart
+        $woocommerce->cart->empty_cart();
+
+        // Redirect to the thank you page
+        wp_redirect($paymongoGateway->get_return_url($order));
+    }
+}
+
+add_action(
+    'woocommerce_api_cynder_paymongo_catch_redirect',
+    'cynder_paymongo_catch_redirect'
+);
