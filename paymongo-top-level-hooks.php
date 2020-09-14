@@ -129,7 +129,7 @@ function cynder_paymongo_catch_redirect() {
     );
 
     /** Enable for debugging */
-    // wc_get_logger()->log('info', '[Catch Redirect][Response] ' . json_encode($response));
+    wc_get_logger()->log('info', '[Catch Redirect][Response] ' . json_encode($response));
 
     if (is_wp_error($response)) {
         /** Handle errors */
@@ -157,7 +157,10 @@ function cynder_paymongo_catch_redirect() {
         $woocommerce->cart->empty_cart();
 
         // Redirect to the thank you page
-        wp_redirect($paymongoGateway->get_return_url($order));
+        wp_redirect($order->get_checkout_order_received_url());
+    } else if ($status === 'awaiting_payment_method') {
+        wc_add_notice('Something went wrong with the payment. Please check your PayMongo dashboard for details.', 'error');
+        wp_redirect($order->get_checkout_payment_url());
     }
 }
 
