@@ -160,7 +160,7 @@ function cynder_paymongo_catch_redirect() {
     $orderId = $_GET['order'];
     $order = wc_get_order($orderId);
 
-    if ($status === 'succeeded') {
+    if ($status === 'succeeded' || $status === 'processing') {
         // we received the payment
         $payments = $responseAttr['payments'];
         $order->payment_complete($payments[0]['id']);
