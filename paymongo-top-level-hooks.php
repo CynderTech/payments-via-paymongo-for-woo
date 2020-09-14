@@ -1,4 +1,19 @@
 <?php
+/**
+ * PHP version 7
+ * 
+ * PayMongo - Top Level Hooks File
+ * 
+ * @category Plugin
+ * @package  PayMongo
+ * @author   PayMongo <devops@cynder.io>
+ * @license  n/a (http://127.0.0.0)
+ * @link     n/a
+ */
+
+if (!defined('ABSPATH')) {
+    exit; // Exit if accessed directly
+}
 
 function cynder_paymongo_create_intent() {
     $requestBody = file_get_contents('php://input');
