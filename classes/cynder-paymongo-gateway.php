@@ -337,88 +337,6 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
     }
 
     /**
-     * Creates PayMongo Payment Intent
-     *
-     * @param string $orderId WooCommerce Order ID
-     *
-     * @return void
-     *
-     * @link  https://developers.paymongo.com/reference#the-payment-intent-object
-     * @since 1.0.0
-     */
-    public function createPaymentIntent($orderId)
-    {
-        $order = wc_get_order($orderId);
-        $payload = json_encode(
-            array(
-                'data' => array(
-                    'attributes' =>array(
-                        'amount' => intval($order->get_total() * 100, 32),
-                        'payment_method_allowed' => array('card'),
-                        'currency' => $order->get_currency(),
-                        'description' => $order->get_order_key(),
-                    ),
-                ),
-            )
-        );
-
-        $args = array(
-            'body' => $payload,
-            'method' => "POST",
-            'headers' => array(
-                'Authorization' => 'Basic ' . base64_encode($this->secret_key),
-                'accept' => 'application/json',
-                'content-type' => 'application/json'
-            ),
-        );
-
-        $response = wp_remote_post(
-            CYNDER_PAYMONGO_BASE_URL . '/payment_intents',
-            $args
-        );
-
-        if (!is_wp_error($response)) {
-            $body = json_decode($response['body'], true);
-
-            if ($body
-                && array_key_exists('data', $body)
-                && array_key_exists('attributes', $body['data'])
-                && array_key_exists('status', $body['data']['attributes'])
-                && $body['data']['attributes']['status'] == 'awaiting_payment_method'
-            ) {
-                $clientKey = $body['data']['attributes']['client_key'];
-                wp_send_json(
-                    array(
-                        'result' => 'success',
-                        'payment_client_key' => $clientKey,
-                        'payment_intent_id' => $body['data']['id'],
-                    )
-                );
-
-                return;
-            } else {
-                wp_send_json(
-                    array(
-                        'result' => 'error',
-                        'messages' => $body['errors'],
-                    )
-                );
-                return;
-            }
-        } else {
-            wc_get_logger()->log('error', '[Create Payment Intent][Failure] ' . json_encode($response->get_error_messages()));
-            
-            wp_send_json(
-                array(
-                    'result' => 'failure',
-                    'messages' => ['Something went wrong. Please check WooCommerce logs for more info.'],
-                )
-            );
-            return;
-        }
-    }
-
-    /**
      * Process PayMongo Payment
      *
      * @param string $orderId WooCommerce Order ID
@@ -547,8 +465,7 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
     {
         if ($order && $this->id === $order->get_payment_method()) {
             return esc_html__(
-                'Thank You! Order has been received.'
-                .' Waiting for Credit Card Confirmation',
+                'Thank You! Order has been received.',
                 'woocommerce'
             );
         }
