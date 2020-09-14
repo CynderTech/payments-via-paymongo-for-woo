@@ -4,13 +4,15 @@ Tags: payments, credit card, gcash, grabpay
 Requires at least: 5.0
 Tested up to: 5.5
 Requires PHP: 5.6
-Stable tag: 1.1.3
+Stable tag: 1.2.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
 Take credit card payments on your store using PayMongo.
 
 == Description ==
+
+*NOTICE: Due to ongoing fixes for critical issues, e-wallet transactions are temporarily disabled on the current update. Fixes for the e-wallet transactions will be deployed on September 18, 2020. Apologies for the inconvenience.*
 
 Accept Visa, MasterCard, GCash and GrabPay directly on your store with the PayMongo Payment Gateway for WooCommerce
 
@@ -82,6 +84,13 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 5. Checking out with GrabPay.
 
 == Changelog ==
+
+= 1.2.0 =
+*Release Date - 15 September 2020*
+
+* [REFACTOR] Credit card workflow refactor fixing a couple of issues, including a critical issue for double-charging
+* [REFACTOR] 3DS payment authorization is now redirect-based instead of being shown in a modal; jQuery modal removed as a dependency
+* [REFACTOR] Broken up JS assets to several files, decoupling logic from UI manipulations
 
 = 1.1.5 =
 *Release Date - 12 August 2020*
