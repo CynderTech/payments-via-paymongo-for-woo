@@ -8,6 +8,7 @@ jQuery(document).ready(function ($) {
     PaymongoClient.prototype.init = function () {
         $(document.body).on('cynder_paymongo_create_payment_intent', this.createPaymentIntent.bind(this));
         $(document.body).on('cynder_paymongo_create_payment_method', this.createPaymentMethod.bind(this));
+        $(document.body).on('cynder_paymongo_parse_client_errors', this.parseErrors.bind(this));
     }
 
     PaymongoClient.prototype.createPaymentIntent = function (e, amount, callback) {
@@ -71,6 +72,48 @@ jQuery(document).ready(function ($) {
 
     PaymongoClient.prototype.buildPayload = function (payload) {
         return JSON.stringify({ data: { attributes: payload } });
+    }
+
+    PaymongoClient.prototype.parseErrors = function (e, errors, callback) {
+        const errorMessages = errors.map(({ detail, sub_code }) => {
+            const invalidSubcodes = [
+                'processor_blocked',
+                'lost_card',
+                'stolen_card',
+                'blocked'
+            ];
+
+            if (invalidSubcodes.includes(sub_code)) return 'Something went wrong. Please try again.';
+            
+            if (!detail.includes('details.')) return detail;
+
+            return detail
+                .split(' ')
+                .reduce((message, part) => {
+                    if (!part.includes('details.')) {
+                        if (!message) {
+                            return part;
+                        } else {
+                            return message + ' ' + part;
+                        }
+                    }
+
+                    const field = part
+                        .split('.')
+                        .pop()
+                        .split('_')
+                        .map((fieldPart, index) => {
+                            if (index === 0) return fieldPart[0].toUpperCase() + fieldPart.slice(1);
+
+                            return fieldPart;
+                        })
+                        .join(' ');
+                    
+                    return message + ' ' + field;
+                }, '');
+        });
+
+        return callback(errorMessages);
     }
 
     new PaymongoClient();

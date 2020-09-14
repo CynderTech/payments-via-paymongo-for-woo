@@ -159,7 +159,7 @@ function cynder_paymongo_catch_redirect() {
         // Redirect to the thank you page
         wp_redirect($order->get_checkout_order_received_url());
     } else if ($status === 'awaiting_payment_method') {
-        wc_add_notice('Something went wrong with the payment. Please check your PayMongo dashboard for details.', 'error');
+        wc_add_notice('Something went wrong with the payment. Please try another payment method. If issue persist, contact support.', 'error');
         wp_redirect($order->get_checkout_payment_url());
     }
 }

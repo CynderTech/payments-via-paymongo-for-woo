@@ -280,12 +280,12 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
             'jqueryModal',
             plugins_url('assets/js/jquery.modal.min.js', CYNDER_PAYMONGO_MAIN_FILE)
         );
-        // wp_register_script(
-        //     'woocommerce_paymongo',
-        //     plugins_url('assets/js/paymongo.js', CYNDER_PAYMONGO_MAIN_FILE),
-        //     array('jquery', 'cleave', 'jqueryModal')
-        // );
-        // wp_localize_script('woocommerce_paymongo', 'paymongo_params', $paymongoVar);
+
+        wp_register_script(
+            'woocommerce_paymongo_checkout',
+            plugins_url('assets/js/paymongo-checkout.js', CYNDER_PAYMONGO_MAIN_FILE),
+            array('jquery')
+        );
 
         wp_register_script(
             'woocommerce_paymongo_cc',
@@ -303,7 +303,7 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
 
         wp_enqueue_style('paymongo');
         wp_enqueue_style('jqueryModal');
-        // wp_enqueue_script('woocommerce_paymongo');
+        wp_enqueue_script('woocommerce_paymongo_checkout');
         wp_enqueue_script('woocommerce_paymongo_client');
         wp_enqueue_script('woocommerce_paymongo_cc');
     }
@@ -425,16 +425,18 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
                 wp_send_json(
                     array(
                         'result' => 'error',
-                        'errors' => $body['errors'],
+                        'messages' => $body['errors'],
                     )
                 );
                 return;
             }
         } else {
+            wc_get_logger()->log('error', '[Create Payment Intent][Failure] ' . json_encode($response->get_error_messages()));
+            
             wp_send_json(
                 array(
                     'result' => 'failure',
-                    'messages' => $response->get_error_messages(),
+                    'messages' => ['Something went wrong. Please check WooCommerce logs for more info.'],
                 )
             );
             return;
@@ -540,67 +542,6 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
             wc_get_logger()->log('error', '[Processing Payment] ID: ' . $paymentIntentId . ' - Response error ' . json_encode($response));
             return wc_add_notice('Connection error. Check logs.', 'error');
         }
-
-        // // we need it to get any order details
-        // $order = wc_get_order($orderId);
-
-        // $args = array(
-        //     'method' => "GET",
-        //     'headers' => array(
-        //         'Authorization' => 'Basic ' . base64_encode($this->secret_key),
-        //         'accept' => 'application/json',
-        //         'content-type' => 'application/json'
-        //     ),
-        // );
-
-        // // get payment intent status
-        // $response = wp_remote_get(
-        //     CYNDER_PAYMONGO_BASE_URL . '/payment_intents/' .
-        //     $_POST['paymongo_intent_id'],
-        //     $args
-        // );
-
-        // if (!is_wp_error($response)) {
-        //     $body = json_decode($response['body'], true);
-        //     $responseAttr = $body['data']['attributes'];
-        //     $status = $responseAttr['status'];
-
-        //     if ($status == 'succeeded') {
-        //         // we received the payment
-        //         $payments = $responseAttr['payments'];
-        //         $order->payment_complete($payments[0]['id']);
-        //         wc_reduce_stock_levels($orderId);
-
-        //         // Sending invoice after successful payment
-        //         $woocommerce->mailer()->emails['WC_Email_Customer_Invoice']->trigger($orderId);
-
-        //         // Empty cart
-        //         $woocommerce->cart->empty_cart();
-
-        //         // Redirect to the thank you page
-        //         return array(
-        //             'result' => 'success',
-        //             'redirect' => $this->get_return_url($order)
-        //         );
-        //     } else {
-        //         wc_get_logger()->log('error', json_encode($body));
-        //         // $messages = Cynder_PayMongo_Error_Handler::parseErrors(
-        //         //     $body['errors']
-        //         // );
-        //         $errors = array_map(function ($error) {
-        //             return Cynder_PayMongo_Error_Handler::parseError($error);
-        //         }, $body['errors']);
-
-        //         $messages = Cynder_PayMongo_Error_Handler::printErrors($errors);
-
-        //         wc_add_notice($messages, 'error');
-        //         return;
-        //     }
-
-        // } else {
-        //     wc_add_notice('Connection error.', 'error');
-        //     return;
-        // }
     }
     
     /**
