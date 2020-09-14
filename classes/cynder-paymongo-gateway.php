@@ -290,7 +290,7 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
         wp_register_script(
             'woocommerce_paymongo_cc',
             plugins_url('assets/js/paymongo-cc.js', CYNDER_PAYMONGO_MAIN_FILE),
-            array('jquery')
+            array('jquery', 'cleave')
         );
         wp_localize_script('woocommerce_paymongo_cc', 'cynder_paymongo_cc_params', $paymongoCc);
 

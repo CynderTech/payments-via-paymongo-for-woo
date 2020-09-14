@@ -38,6 +38,27 @@ jQuery(document).ready(function ($) {
         }
     }
 
+    CCForm.prototype.initCleave = function () {
+        if ($("#paymongo_ccNo").length) {
+            var ccNo = new Cleave("#paymongo_ccNo", {
+                creditCard: true,
+            });
+        }
+
+        if ($("#paymongo_expdate").length) {
+            var expDate = new Cleave("#paymongo_expdate", {
+                date: true,
+                datePattern: ["m", "y"],
+            });
+        }
+
+        if ($("#paymongo_cvv").length) {
+            var cvv = new Cleave("#paymongo_cvv", {
+                blocks: [4],
+            });
+        }
+    }
+
     CCForm.prototype.paymentMethodSelected = function () {
         var paymentMethod = $('input[name=payment_method]:checked').val(); 
 
@@ -77,6 +98,8 @@ jQuery(document).ready(function ($) {
         var data = this.parseWcResponse(response);
 
         this.payment_intent_id = data.payment_intent_id;
+
+        this.initCleave();
     }
 
     CCForm.prototype.onSubmit = function (e) {
