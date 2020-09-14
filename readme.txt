@@ -4,7 +4,7 @@ Tags: payments, credit card, gcash, grabpay
 Requires at least: 5.0
 Tested up to: 5.5
 Requires PHP: 5.6
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -84,6 +84,11 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 5. Checking out with GrabPay.
 
 == Changelog ==
+
+= 1.2.1 =
+* Release Date - 15 September 2020*
+
+[FIX] Fixed issue on payment status while processing
 
 = 1.2.0 =
 *Release Date - 15 September 2020*
