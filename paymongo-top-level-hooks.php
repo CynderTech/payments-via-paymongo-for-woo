@@ -51,7 +51,8 @@ function cynder_paymongo_create_intent() {
         $args
     );
 
-    wc_get_logger()->log('info', json_encode($response));
+    /** Enable for debugging purposes */
+    // wc_get_logger()->log('info', json_encode($response));
 
     if (!is_wp_error($response)) {
         $body = json_decode($response['body'], true);
