@@ -14,8 +14,6 @@ if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
 
-include_once 'cynder-paymongo-ewallet-base.php';
-
 /**
  * PayMongo - GCash Payment Method Class
  * 
@@ -76,25 +74,5 @@ class Cynder_PayMongo_Gcash_Gateway extends Cynder_PayMongo_Ewallet_Gateway
                 'default'     => 'Simple and easy payments via GCash.',
             ),
         );
-    }
-
-    /**
-     * Custom GCash order received text.
-     *
-     * @param string       $text  Default text.
-     * @param Cynder_Order $order Order data.
-     * 
-     * @return string
-     */
-    public function orderReceivedText( $text, $order )
-    {
-        if ($order && $this->id === $order->get_payment_method()) {
-            return esc_html__(
-                'Thank You! Order has been received.',
-                'woocommerce'
-            );
-        }
-
-        return $text;
     }
 }

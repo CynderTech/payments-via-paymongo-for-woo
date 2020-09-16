@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
 }
 
 /**
- * PayMongo - GCash Payment Method Class
+ * PayMongo - Ewallet Payment Method Class
  * 
  * @category Class
  * @package  PayMongo
@@ -26,7 +26,7 @@ if (!defined('ABSPATH')) {
 class Cynder_PayMongo_Ewallet_Gateway extends WC_Payment_Gateway
 {
     /**
-     * GCash Singleton instance
+     * Ewallet Singleton instance
      * 
      * @var Singleton The reference the *Singleton* instance of this class
      */
@@ -189,5 +189,25 @@ class Cynder_PayMongo_Ewallet_Gateway extends WC_Payment_Gateway
             . $this->title .'" />';
 
         return apply_filters('woocommerce_gateway_icon', $icons_str, $this->id);
+    }
+
+    /**
+     * Custom E-wallet order received text.
+     *
+     * @param string       $text  Default text.
+     * @param Cynder_Order $order Order data.
+     * 
+     * @return string
+     */
+    public function orderReceivedText( $text, $order )
+    {
+        if ($order && $this->id === $order->get_payment_method()) {
+            return esc_html__(
+                'Thank You! Order has been received.',
+                'woocommerce'
+            );
+        }
+
+        return $text;
     }
 }
