@@ -184,3 +184,23 @@ add_action(
     'woocommerce_api_cynder_paymongo_catch_redirect',
     'cynder_paymongo_catch_redirect'
 );
+
+
+function cynder_paymongo_catch_source_redirect() {
+    $orderId = $_GET['order'];
+    $status = $_GET['status'];
+
+    $order = wc_get_order($orderId);
+
+    if ($status === 'success') {
+        wp_redirect($order->get_checkout_order_received_url());
+    } else if ($status === 'failed') {
+        wc_add_notice('Something went wrong with the payment. Please try another payment method. If issue persist, contact support.', 'error');
+        wp_redirect($order->get_checkout_payment_url());
+    }
+}
+
+add_action(
+    'woocommerce_api_cynder_paymongo_catch_source_redirect',
+    'cynder_paymongo_catch_source_redirect'
+);
