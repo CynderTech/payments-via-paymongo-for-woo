@@ -144,6 +144,7 @@ function Paymongo_Init_Gateway_class()
             {
                 $fileDir = dirname(__FILE__);
                 include_once $fileDir.'/classes/cynder-paymongo-gateway.php';
+                include_once $fileDir.'/classes/cynder-paymongo-gcash-gateway.php';
                 include_once 'paymongo-top-level-hooks.php';
 
                 add_filter(
@@ -171,6 +172,7 @@ function Paymongo_Init_Gateway_class()
             public function addGateways($methods)
             {
                 $methods[] = 'Cynder_PayMongo_Gateway';
+                $methods[] = 'Cynder_PayMongo_Gcash_Gateway';
                 
                 return $methods;
             }
@@ -187,10 +189,16 @@ function Paymongo_Init_Gateway_class()
             public function filterGatewayOrderAdmin($sections) 
             {
                 unset($sections['paymongo']);
+                unset($sections['paymongo_gcash']);
 
                 $gatewayName = 'woocommerce-gateway-paymongo';
                 $sections['paymongo'] = __(
                     'Credit/Debit Card via PayMongo',
+                    $gatewayName
+                );
+
+                $sections['paymongo_gcash'] = __(
+                    'GCash via PayMongo',
                     $gatewayName
                 );
 
