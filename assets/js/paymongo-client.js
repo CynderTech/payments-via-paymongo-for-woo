@@ -75,7 +75,7 @@ jQuery(document).ready(function ($) {
     }
 
     PaymongoClient.prototype.parseErrors = function (e, errors, callback) {
-        const errorMessages = errors.map(({ detail, sub_code }) => {
+        const errorMessages = errors.map(({ code, detail, sub_code }) => {
             const invalidSubcodes = [
                 'processor_blocked',
                 'lost_card',
@@ -84,6 +84,11 @@ jQuery(document).ready(function ($) {
             ];
 
             if (invalidSubcodes.includes(sub_code)) return 'Something went wrong. Please try again.';
+
+            /** Hardcoded value for now */
+            if (detail.includes('10000') && code === 'parameter_below_minimum') {
+                return 'Amount cannot be below than P100.00';
+            }
             
             if (!detail.includes('details.')) return detail;
 
