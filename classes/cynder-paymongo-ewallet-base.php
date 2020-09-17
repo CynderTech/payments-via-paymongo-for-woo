@@ -183,9 +183,11 @@ class Cynder_PayMongo_Ewallet_Gateway extends WC_Payment_Gateway
      */
     public function get_icon() // phpcs:ignore
     {
+        $icon_name = isset($this->icon_name) ? $this->icon_name : $this->ewallet_type;
+
         $icons_str = '<img src="' 
             . CYNDER_PAYMONGO_PLUGIN_URL
-            . '/assets/images/' . $this->ewallet_type . '.png" class="paymongo-method-logo paymongo-cards-icon" alt="'
+            . '/assets/images/' . $icon_name . '.png" class="paymongo-method-logo paymongo-cards-icon" alt="'
             . $this->title .'" />';
 
         return apply_filters('woocommerce_gateway_icon', $icons_str, $this->id);
