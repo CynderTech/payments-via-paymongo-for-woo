@@ -65,13 +65,15 @@ Before accepting actual payments for transactions, it is ideal to test payment w
 
 **E-wallets Configuration**
 
-1. For e-wallet transactions, you need to specify a webhook secret key [^1][^2] in the e-wallet settings. You can generate one using Cynder's [Webhook Secret Key Generator](https://paymongo-webhook-tool.meeco.dev). A convenience link is provided just below the field. After generating a webhook secret key using the key generator, paste it on the webhook secret key field.
-    * **Note:** The key generator requires a specific URL provided to you by the plugin under the webhook secret key field (ex. ***https://example.com/?wc-api=cynder_paymongo***), as well as your test secret key.
-    * **Note:** If you've generated a key for the same domain prior to the current update, you can retrieve it using the Retrieve section of the key generator.
+For e-wallet transactions, you need to specify a webhook secret key in the e-wallet settings. You can generate one using Cynder's [Webhook Secret Key Generator](https://paymongo-webhook-tool.meeco.dev). A convenience link is provided just below the field. After generating a webhook secret key using the key generator, paste it on the webhook secret key field.
 
-[^1]: The webhook secret key field is **ONLY REQUIRED** if you would be enabling GCash and/or GrabPay as payment method/s for your platform. This allows PayMongo to notify WooCommerce about payment processing using these methods after payment has been authorized by the customer.
+* **Note:** The webhook secret key field is **ONLY REQUIRED** if you would be enabling GCash and/or GrabPay as payment method/s for your platform. This allows PayMongo to notify WooCommerce about payment processing using these methods after payment has been authorized by the customer.
 
-[^2]: Setting the webhook secret key for either GCash or GrabPay configures both options. You can just enable or disable each payment option depending on your needs.
+* **Note:** The key generator requires a specific URL provided to you by the plugin under the webhook secret key field (ex. ***https://example.com/?wc-api=cynder_paymongo***), as well as your test secret key.
+
+* **Note:** If you've generated a key for the same domain prior to the current update, you can retrieve it using the Retrieve section of the key generator.
+
+* **Note:** Setting the webhook secret key for either GCash or GrabPay configures both options. You can just enable or disable each payment option depending on your needs.
 
 = Updating =
 
