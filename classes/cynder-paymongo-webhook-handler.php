@@ -62,10 +62,9 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
         $this->secret_key = $this->testmode ? 
             $main_settings['test_secret_key']
             : $main_settings['secret_key'];
-        $webhook_secret_key = ($this->testmode ? 'test_' : '') . 'webhook_secret';
-        $this->webhook_secret = !empty($main_settings[$webhook_secret_key]) ?
-            $main_settings[$webhook_secret_key]
-            : false;
+        $this->webhook_secret = $this->testmode ?
+            get_option('paymongo_test_webhook_secret_key')
+            : get_option('paymongo_webhook_secret_key');
 
         add_action(
             'woocommerce_api_cynder_paymongo',

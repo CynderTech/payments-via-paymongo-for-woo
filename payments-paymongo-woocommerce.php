@@ -147,6 +147,7 @@ function Paymongo_Init_Gateway_class()
                 include_once $fileDir.'/classes/cynder-paymongo-ewallet-base.php';
                 include_once $fileDir.'/classes/cynder-paymongo-gcash-gateway.php';
                 include_once $fileDir.'/classes/cynder-paymongo-grabpay-gateway.php';
+                include_once $fileDir.'/classes/cynder-paymongo-webhook-handler.php';
                 include_once 'paymongo-top-level-hooks.php';
 
                 add_filter(
