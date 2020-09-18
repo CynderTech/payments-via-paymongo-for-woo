@@ -87,7 +87,7 @@ jQuery(document).ready(function ($) {
 
             /** Hardcoded value for now */
             if (detail.includes('10000') && code === 'parameter_below_minimum') {
-                return 'Amount cannot be below than P100.00';
+                return 'Amount cannot be less than P100.00';
             }
             
             if (!detail.includes('details.')) return detail;
