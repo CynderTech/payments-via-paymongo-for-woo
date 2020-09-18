@@ -167,8 +167,18 @@ class Cynder_PayMongo_Ewallet_Gateway extends WC_Payment_Gateway
                 );
             } else {
                 for ($i = 0; $i < count($body['errors']); $i++) {
-                    wc_add_notice($body['errors'][$i]['detail'], 'error');
+                    $error = $body['errors'][$i];
+                    $code = $error['code'];
+                    $message = $error['detail'];
+
+                    if ($code == 'parameter_below_minimum') {
+                        $message = 'Amount cannot be less than P100.00';
+                    }
+
+                    wc_add_notice($message, 'error');
                 }
+
+                return;
             }
         } else {
             wc_get_logger()->log('error', '[Processing Payment] Response error ' . json_encode($response));
