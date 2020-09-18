@@ -86,7 +86,14 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 == Changelog ==
 
 = 1.2.1 =
-* Release Date - 15 September 2020*
+*Release Date - 18 September 2020*
+
+[FIX] Re-enabled e-wallet (GCash/GrabPay) functionality
+[FIX] Proper handling for amount validation which causes infinite loading for credit card payment option
+[REFACTOR] Resectioning of webhook secret key field to e-wallet section (shared for both GCash and GrabPay)
+
+= 1.2.1 =
+*Release Date - 15 September 2020*
 
 [FIX] Fixed issue on payment status while processing
 

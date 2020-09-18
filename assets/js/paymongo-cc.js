@@ -263,7 +263,7 @@ jQuery(document).ready(function ($) {
 
         if (result && result === 'error') {
             const args = [
-                response.messages,
+                response.errors,
                 this.onClientErrorParsed.bind(this)
             ];
 

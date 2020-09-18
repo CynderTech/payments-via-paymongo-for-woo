@@ -6,7 +6,7 @@
  * Description: Take credit card, GCash and GrabPay payments via PayMongo.
  * Author: CynderTech
  * Author URI: http://cynder.io
- * Version: 1.2.1
+ * Version: 1.3.0
  * Requires at least: 5.3.2
  * Tested up to: 5.5
  * WC requires at least: 3.9.3
@@ -54,7 +54,7 @@ function Paymongo_Init_Gateway_class()
     }
 
     define('CYNDER_PAYMONGO_MAIN_FILE', __FILE__);
-    define('CYNDER_PAYMONGO_VERSION', '1.2.1');
+    define('CYNDER_PAYMONGO_VERSION', '1.3.0');
     define('CYNDER_PAYMONGO_BASE_URL',  'https://api.paymongo.com/v1');
     define(
         'CYNDER_PAYMONGO_PLUGIN_URL',
@@ -144,6 +144,10 @@ function Paymongo_Init_Gateway_class()
             {
                 $fileDir = dirname(__FILE__);
                 include_once $fileDir.'/classes/cynder-paymongo-gateway.php';
+                include_once $fileDir.'/classes/cynder-paymongo-ewallet-base.php';
+                include_once $fileDir.'/classes/cynder-paymongo-gcash-gateway.php';
+                include_once $fileDir.'/classes/cynder-paymongo-grabpay-gateway.php';
+                include_once $fileDir.'/classes/cynder-paymongo-webhook-handler.php';
                 include_once 'paymongo-top-level-hooks.php';
 
                 add_filter(
@@ -171,6 +175,8 @@ function Paymongo_Init_Gateway_class()
             public function addGateways($methods)
             {
                 $methods[] = 'Cynder_PayMongo_Gateway';
+                $methods[] = 'Cynder_PayMongo_Gcash_Gateway';
+                $methods[] = 'Cynder_PayMongo_GrabPay_Gateway';
                 
                 return $methods;
             }
@@ -187,10 +193,22 @@ function Paymongo_Init_Gateway_class()
             public function filterGatewayOrderAdmin($sections) 
             {
                 unset($sections['paymongo']);
+                unset($sections['paymongo_gcash']);
+                unset($sections['paymongo_grab_pay']);
 
                 $gatewayName = 'woocommerce-gateway-paymongo';
                 $sections['paymongo'] = __(
                     'Credit/Debit Card via PayMongo',
+                    $gatewayName
+                );
+
+                $sections['paymongo_gcash'] = __(
+                    'GCash via PayMongo',
+                    $gatewayName
+                );
+
+                $sections['paymongo_grab_pay'] = __(
+                    'GrabPay via PayMongo',
                     $gatewayName
                 );
 

@@ -184,3 +184,82 @@ add_action(
     'woocommerce_api_cynder_paymongo_catch_redirect',
     'cynder_paymongo_catch_redirect'
 );
+
+
+function cynder_paymongo_catch_source_redirect() {
+    $orderId = $_GET['order'];
+    $status = $_GET['status'];
+
+    $order = wc_get_order($orderId);
+
+    if ($status === 'success') {
+        wp_redirect($order->get_checkout_order_received_url());
+    } else if ($status === 'failed') {
+        wc_add_notice('Something went wrong with the payment. Please try another payment method. If issue persist, contact support.', 'error');
+        wp_redirect($order->get_checkout_payment_url());
+    }
+}
+
+add_action(
+    'woocommerce_api_cynder_paymongo_catch_source_redirect',
+    'cynder_paymongo_catch_source_redirect'
+);
+
+function add_webhook_settings($settings, $current_section) {
+    if ($current_section === 'paymongo_gcash' || $current_section === 'paymongo_grab_pay') {
+        $webhookUrl = add_query_arg(
+            'wc-api',
+            'cynder_paymongo',
+            trailingslashit(get_home_url())
+        );
+
+        $settings_webhooks = array(
+            array(
+                'name' => 'Webhook Secret',
+                'id' => 'paymongo_webhook_secret_key_title',
+                'type' => 'title',
+                'desc' => 'Provide a secret key to enable'	
+                . ' <b>GCash</b> or <b>GrabPay</b> Payments.',
+            ),
+            array(
+                'name' => 'Webhook Secret',
+                'id' => 'paymongo_webhook_secret_key',
+                'type' => 'text',
+                'desc' => 'Provide a secret key to enable'	
+                . ' <b>GCash</b> or <b>GrabPay</b> Payments<br>'	
+                . '<a target="_blank" href="https://paymongo-webhook-tool.meeco.dev?url=' 	
+                . $webhookUrl	
+                . '">Click this to generate a webhook secret</a>'	
+                . ' or use this URL: <b>'	
+                . $webhookUrl,
+            ),
+            array(
+                'name' => 'Test Webhook Secret',
+                'id' => 'paymongo_test_webhook_secret_key',
+                'type' => 'text',
+                'desc' => 'Provide a secret key to enable'	
+                . ' <b>GCash</b> or <b>GrabPay</b> Payments<br>'	
+                . '<a target="_blank" href="https://paymongo-webhook-tool.meeco.dev?url=' 	
+                . $webhookUrl	
+                . '">Click this to generate a webhook secret</a>'	
+                . ' or use this URL: <b>'	
+                . $webhookUrl,
+            ),
+            array(
+                'type' => 'sectionend',
+                'id' => 'webhook_section_end',
+            )
+        );
+
+        return $settings_webhooks;
+    } else {
+        return $settings;
+    }
+}
+
+add_filter(
+    'woocommerce_get_settings_checkout',
+    'add_webhook_settings',
+    10,
+    2
+);

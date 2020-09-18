@@ -104,12 +104,6 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
      */
     public function initFormFields()
     {
-        $webhookUrl = add_query_arg(
-            'wc-api',
-            'cynder_paymongo',
-            trailingslashit(get_home_url())
-        );
-
         $this->form_fields = array(
             'enabled' => array(
                 'title'       => 'Enable/Disable',
@@ -166,7 +160,7 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
             ),
             'test_secret_key' => array(
                 'title'       => 'Test Secret Key',
-                'type'        => 'password',
+                'type'        => 'text',
             ),
         );
     }
