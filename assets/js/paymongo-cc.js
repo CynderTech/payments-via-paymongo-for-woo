@@ -75,7 +75,7 @@ jQuery(document).ready(function ($) {
         let amount;
 
         if (cynder_paymongo_cc_params.isCheckout) {
-            amount = $('tr.order-total > td').text().slice(1);
+            amount = $('tr.order-total > td').text().slice(1).replace(/,/g, '');
         } else if (cynder_paymongo_cc_params.isOrderPay) {
             amount = cynder_paymongo_cc_params.total_amount;
         } else {
