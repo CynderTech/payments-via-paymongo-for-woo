@@ -73,14 +73,8 @@ jQuery(document).ready(function ($) {
 
     CCForm.prototype.createPaymentIntent = function () {
         let amount;
-
-        if (cynder_paymongo_cc_params.isCheckout) {
-            amount = $('tr.order-total > td').text().slice(1).replace(/,/g, '');
-        } else if (cynder_paymongo_cc_params.isOrderPay) {
-            amount = cynder_paymongo_cc_params.total_amount;
-        } else {
-            alert('Paymongo cannot find the total amount to create the payment intent');
-        }
+        
+        amount = cynder_paymongo_cc_params.total_amount;
 
         var args = [
             Number(amount),

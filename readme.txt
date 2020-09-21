@@ -4,17 +4,19 @@ Tags: payments, credit card, gcash, grabpay
 Requires at least: 5.0
 Tested up to: 5.5
 Requires PHP: 5.6
-Stable tag: 1.3.6
+Stable tag: 1.3.7
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
-Take credit card payments on your store using PayMongo.
+Take payments on your store using PayMongo.
 
 == Description ==
 
 Accept Visa, MasterCard, GCash and GrabPay directly on your store with the PayMongo Payment Gateway for WooCommerce
 
-**Note:** PayMongo API has a limitation of at least P100.00 for the total amount to be paid.
+**Notes:**
+* Paymongo API **only** supports the **PHP (Philippine Peso)** currency at the moment. Prices for your shop should be configured to PHP for the plugin to work.
+* Paymongo API can **only** process at least P100.00 for the total amount to be paid.
 
 == Disclaimer ==
 
@@ -90,6 +92,11 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 5. Checking out with GrabPay.
 
 == Changelog ==
+
+= 1.3.7 =
+*Release Date - 21 September 2020*
+
+[FIX] Total amount is now based on cart totals
 
 = 1.3.6 =
 *Release Date - 19 September 2020*

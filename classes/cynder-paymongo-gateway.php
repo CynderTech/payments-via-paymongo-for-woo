@@ -207,6 +207,7 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
         $paymongoCc = array();
         $paymongoCc['isCheckout'] = is_checkout() && !is_checkout_pay_page();
         $paymongoCc['isOrderPay'] = is_checkout_pay_page();
+        $paymongoCc['total_amount'] = WC()->cart->get_total(null);
 
         // Order Pay Page
         if (isset($_GET['pay_for_order']) && 'true' === $_GET['pay_for_order']) {
