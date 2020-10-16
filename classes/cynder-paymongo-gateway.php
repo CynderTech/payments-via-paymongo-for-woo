@@ -345,18 +345,16 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
     {
         global $woocommerce;
 
-        $paymentIntentId = $_POST['cynder_paymongo_intent_id'];
         $paymentMethodId = $_POST['cynder_paymongo_method_id'];
 
-        if (!isset($paymentIntentId) || !isset($paymentMethodId)) {
-            $missingPayload = !isset($paymentIntentId) ? 'payment intent ID' : 'payment method ID';
-
-            $errorMessage = '[Processing Payment] No ' . $missingPayload . ' found.';
+        if (!isset($paymentMethodId)) {
+            $errorMessage = '[Processing Payment] No payment method ID found.';
             wc_get_logger()->log('error', $errorMessage);
             return wc_add_notice($errorMessage, 'error');
         }
 
         $order = wc_get_order($orderId);
+        $paymentIntentId = $order->get_meta('paymongo_payment_intent_id');
 
         $payload = json_encode(
             array(
