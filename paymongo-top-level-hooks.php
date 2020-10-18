@@ -27,7 +27,7 @@ function cynder_paymongo_create_intent($orderId) {
     if (!is_float($amount)) {
         $errorMessage = 'Invalid amount';
         wc_get_logger()->log('error', '[Create Payment Intent] ' . $errorMessage);
-        return wc_add_notice($errorMessage, 'error');
+        throw new Exception(__($errorMessage, 'woocommerce'));
     }
 
     $secretKeyProp = $pluginSettings['testmode'] === 'yes' ? 'test_secret_key' : 'secret_key';
@@ -64,6 +64,8 @@ function cynder_paymongo_create_intent($orderId) {
     /** Enable for debugging purposes */
     // wc_get_logger()->log('info', json_encode($response));
 
+    $genericErrorMessage = 'Something went wrong with the payment. Please try another payment method. If issue persist, contact support.';
+
     if (!is_wp_error($response)) {
         $body = json_decode($response['body'], true);
 
@@ -78,12 +80,12 @@ function cynder_paymongo_create_intent($orderId) {
             $order->add_meta_data('paymongo_client_key', $clientKey);
             $order->save_meta_data();
         } else {
-            wc_add_notice('Something went wrong with the payment. Please try another payment method. If issue persist, contact support.', 'error');
             wc_get_logger()->log('error', '[Create Payment Intent] ' . json_encode($body['errors']));
+            throw new Exception(__($genericErrorMessage, 'woocommerce'));
         }
     } else {
-        wc_add_notice('Something went wrong with the payment. Please try another payment method. If issue persist, contact support.', 'error');
         wc_get_logger()->log('error', '[Create Payment Intent] ' . json_encode($response->get_error_messages()));
+        throw new Exception(__($genericErrorMessage, 'woocommerce'));
     }
 }
 
