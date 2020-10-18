@@ -15,25 +15,19 @@ if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
 
-function cynder_paymongo_create_intent() {
-    $requestBody = file_get_contents('php://input');
-    $decoded = json_decode($requestBody, true);
-    $amount = floatval($decoded['amount']);
-
-    if (!is_float($amount)) {
-        return wp_send_json(
-            array('error' => 'Invalid amount'),
-            400
-        );
-    }
-
+function cynder_paymongo_create_intent($orderId) {
     $pluginSettings = get_option('woocommerce_paymongo_settings');
 
-    if ($pluginSettings['enabled'] !== 'yes') {
-        return wp_send_json(
-            array('error' => 'Payment gateway must be enabled'),
-            400
-        );
+    /** If the plugin isn't enabled, don't create a payment intent */
+    if ($pluginSettings['enabled'] !== 'yes') return;
+
+    $order = wc_get_order($orderId);
+    $amount = floatval($order->get_total());
+
+    if (!is_float($amount)) {
+        $errorMessage = 'Invalid amount';
+        wc_get_logger()->log('error', '[Create Payment Intent] ' . $errorMessage);
+        return wc_add_notice($errorMessage, 'error');
     }
 
     $secretKeyProp = $pluginSettings['testmode'] === 'yes' ? 'test_secret_key' : 'secret_key';
@@ -46,6 +40,7 @@ function cynder_paymongo_create_intent() {
                     'amount' => floatval($amount * 100),
                     'payment_method_allowed' => array('card'),
                     'currency' => 'PHP', // hard-coded for now
+                    'description' => 'Payment for WooCommerce Order ID ' . $orderId
                 ),
             ),
         )
@@ -79,37 +74,20 @@ function cynder_paymongo_create_intent() {
             && $body['data']['attributes']['status'] == 'awaiting_payment_method'
         ) {
             $clientKey = $body['data']['attributes']['client_key'];
-            return wp_send_json(
-                array(
-                    'result' => 'success',
-                    'payment_client_key' => $clientKey,
-                    'payment_intent_id' => $body['data']['id'],
-                )
-            );
+            $order->add_meta_data('paymongo_payment_intent_id', $body['data']['id']);
+            $order->add_meta_data('paymongo_client_key', $clientKey);
+            $order->save_meta_data();
         } else {
-            wp_send_json(
-                array(
-                    'result' => 'error',
-                    'errors' => $body['errors'],
-                )
-            );
-            return;
+            wc_add_notice('Something went wrong with the payment. Please try another payment method. If issue persist, contact support.', 'error');
+            wc_get_logger()->log('error', '[Create Payment Intent] ' . json_encode($body['errors']));
         }
     } else {
-        wp_send_json(
-            array(
-                'result' => 'failure',
-                'messages' => $response->get_error_messages(),
-            )
-        );
-        return;
+        wc_add_notice('Something went wrong with the payment. Please try another payment method. If issue persist, contact support.', 'error');
+        wc_get_logger()->log('error', '[Create Payment Intent] ' . json_encode($response->get_error_messages()));
     }
 }
 
-add_action(
-    'woocommerce_api_cynder_paymongo_create_intent',
-    'cynder_paymongo_create_intent'
-);
+add_action('woocommerce_checkout_order_processed', 'cynder_paymongo_create_intent');
 
 function cynder_paymongo_catch_redirect() {
     global $woocommerce;
