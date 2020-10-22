@@ -93,6 +93,12 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 == Changelog ==
 
+= 1.4.2 =
+*Release Date - 22 October 2020*
+
+[FIX] Fixed redirect for failed e-wallet transactions
+[FIX] Fixed credit card validation on order pay page
+
 = 1.4.1 =
 *Release Date - 18 October 2020*
 
