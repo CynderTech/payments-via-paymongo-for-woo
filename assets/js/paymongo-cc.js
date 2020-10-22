@@ -38,7 +38,7 @@ jQuery(document).ready(function ($) {
     }
 
     CCForm.prototype.paymentMethodSelected = function () {
-        var paymentMethod = $('input[name=payment_method]:checked').val(); 
+        var paymentMethod = $('input[name=payment_method]:checked').val();
 
         /** If payment method is not CC, don't initialize form */
         if (paymentMethod !== 'paymongo') return;
@@ -71,6 +71,12 @@ jQuery(document).ready(function ($) {
 
     CCForm.prototype.onSubmit = function (e) {
         const form = this.form;
+
+        var paymentMethod = $('input[name=payment_method]:checked').val();
+
+        if (paymentMethod !== 'paymongo') {
+            return form.submit();
+        }
 
         const hasMethod = form.find(this.method_field_selector).length;
 

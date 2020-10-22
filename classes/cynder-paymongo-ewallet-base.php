@@ -124,7 +124,7 @@ class Cynder_PayMongo_Ewallet_Gateway extends WC_Payment_Gateway
                         ),
                         'redirect' => array(
                             'success' => get_home_url() . '/?wc-api=cynder_paymongo_catch_source_redirect&order=' . $orderId . '&status=success',
-                            'failed' => get_home_url() . '/?wc-api=cynder_paymongo_catch_source_redirect&order=' . $orderId . '$status=failed',
+                            'failed' => get_home_url() . '/?wc-api=cynder_paymongo_catch_source_redirect&order=' . $orderId . '&status=failed',
                         ),
                     ),
                 ),
