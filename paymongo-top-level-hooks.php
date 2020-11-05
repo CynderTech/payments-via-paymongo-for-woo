@@ -40,7 +40,7 @@ function cynder_paymongo_create_intent($orderId) {
                     'amount' => floatval($amount * 100),
                     'payment_method_allowed' => array('card'),
                     'currency' => 'PHP', // hard-coded for now
-                    'description' => 'Payment for WooCommerce Order ID ' . $orderId
+                    'description' => get_bloginfo('name') . ' - ' . $orderId
                 ),
             ),
         )
