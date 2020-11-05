@@ -158,7 +158,7 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
                 'attributes' => array(
                     'amount' => intval($order->get_total() * 100, 32),
                     'currency' => $order->get_currency(),
-                    'description' => $order->get_order_key(),
+                    'description' => get_bloginfo('name') . ' - ' . $order->get_id(),
                     'source' => array(
                         'id' => $source['id'],
                         'type' => 'source'

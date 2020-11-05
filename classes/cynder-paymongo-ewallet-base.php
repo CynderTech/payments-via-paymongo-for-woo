@@ -107,7 +107,7 @@ class Cynder_PayMongo_Ewallet_Gateway extends WC_Payment_Gateway
                         'type' => $this->ewallet_type,
                         'amount' => intval($order->get_total() * 100, 32),
                         'currency' => $order->get_currency(),
-                        'description' => $order->get_order_key(),
+                        'description' => get_bloginfo('name') . ' - ' . $orderId,
                         'billing' => array(
                             'address' => array(
                                 'line1' => $order->get_billing_address_1(),
