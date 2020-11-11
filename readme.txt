@@ -4,7 +4,7 @@ Tags: payments, credit card, gcash, grabpay
 Requires at least: 5.0
 Tested up to: 5.5
 Requires PHP: 5.6
-Stable tag: 1.4.3
+Stable tag: 1.4.4
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -92,6 +92,11 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 5. Checking out with GrabPay.
 
 == Changelog ==
+
+= 1.4.4 =
+*Release Date - 11 November 2020*
+
+[CHANGE] Error message for payment method ID not found is changed to a user-friendly text
 
 = 1.4.3 =
 *Release Date - 5 November 2020*
