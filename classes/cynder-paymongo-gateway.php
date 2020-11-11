@@ -349,8 +349,9 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
 
         if (!isset($paymentMethodId)) {
             $errorMessage = '[Processing Payment] No payment method ID found.';
+            $userMessage = 'Your payment did not proceed due to an error. Rest assured that no payment was made. You may refresh this page and try again.';
             wc_get_logger()->log('error', $errorMessage);
-            return wc_add_notice($errorMessage, 'error');
+            return wc_add_notice($userMessage, 'error');
         }
 
         $order = wc_get_order($orderId);
