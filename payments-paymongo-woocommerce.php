@@ -8,9 +8,9 @@
  * Author URI: http://cynder.io
  * Version: 1.4.4
  * Requires at least: 5.3.2
- * Tested up to: 5.5
+ * Tested up to: 5.6
  * WC requires at least: 3.9.3
- * WC tested up to: 4.6.0
+ * WC tested up to: 4.9.2
  *
  * @category Plugin
  * @package  CynderTech
@@ -54,7 +54,7 @@ function Paymongo_Init_Gateway_class()
     }
 
     define('CYNDER_PAYMONGO_MAIN_FILE', __FILE__);
-    define('CYNDER_PAYMONGO_VERSION', '1.4.4');
+    define('CYNDER_PAYMONGO_VERSION', '1.4.5');
     define('CYNDER_PAYMONGO_BASE_URL',  'https://api.paymongo.com/v1');
     define(
         'CYNDER_PAYMONGO_PLUGIN_URL',
