@@ -86,6 +86,10 @@ class Cynder_PayMongo_Ewallet_Gateway extends WC_Payment_Gateway
         );
     }
 
+    public function is_billing_value_set($value) {
+        return isset($value) && $value !== '';
+    } 
+
     /**
      * Creates E-Wallet source
      * 
@@ -100,33 +104,101 @@ class Cynder_PayMongo_Ewallet_Gateway extends WC_Payment_Gateway
     {
         $order = wc_get_order($orderId);
 
+        $billing = array();
+
+        $billing_first_name = $order->get_billing_first_name();
+        $billing_last_name = $order->get_billing_last_name();
+        $has_billing_first_name = $this->is_billing_value_set($billing_first_name);
+        $has_billing_last_name = $this->is_billing_value_set($billing_last_name);
+
+        if ($has_billing_first_name && $has_billing_last_name) {
+            $billing['name'] = $billing_first_name . ' ' . $billing_last_name;
+        }
+
+        $billing_email = $order->get_billing_email();
+        $has_billing_email = $this->is_billing_value_set($billing_email);
+
+        if ($has_billing_email) {
+            $billing['email'] = $billing_email;
+        }
+
+        $billing_phone = $order->get_billing_phone();
+        $has_billing_phone = $this->is_billing_value_set($billing_phone);
+
+        if ($has_billing_phone) {
+            $billing['phone'] = $billing_phone;
+        }
+
+        $billing_address = array();
+
+        $billing_address_1 = $order->get_billing_address_1();
+        $has_billing_address_1 = $this->is_billing_value_set($billing_address_1);
+
+        if ($has_billing_address_1) {
+            $billing_address['line1'] = $billing_address_1;
+        }
+
+        $billing_address_2 = $order->get_billing_address_2();
+        $has_billing_address_2 = $this->is_billing_value_set($billing_address_2);
+
+        if ($has_billing_address_2) {
+            $billing_address['line2'] = $billing_address_2;
+        }
+
+        $billing_city = $order->get_billing_city();
+        $has_billing_city = $this->is_billing_value_set($billing_city);
+
+        if ($has_billing_city) {
+            $billing_address['city'] = $billing_city;
+        }
+
+        $billing_state = $order->get_billing_state();
+        $has_billing_state = $this->is_billing_value_set($billing_state);
+
+        if ($has_billing_state) {
+            $billing_address['state'] = $billing_state;
+        }
+
+        $billing_country = $order->get_billing_country();
+        $has_billing_country = $this->is_billing_value_set($billing_country);
+
+        if ($has_billing_country) {
+            $billing_address['country'] = $billing_country;
+        }
+
+        $billing_postcode = $order->get_billing_postcode();
+        $has_billing_postcode = $this->is_billing_value_set($billing_postcode);
+
+        if ($has_billing_postcode) {
+            $billing_address['postal_code'] = $billing_postcode;
+        }
+
+
+        if (count($billing_address) > 0) {
+            $billing['address'] = $billing_address;
+        }
+
+        $attributes = array(
+            'type' => $this->ewallet_type,
+            'amount' => intval($order->get_total() * 100, 32),
+            'currency' => $order->get_currency(),
+            'description' => get_bloginfo('name') . ' - ' . $orderId,
+            'redirect' => array(
+                'success' => get_home_url() . '/?wc-api=cynder_paymongo_catch_source_redirect&order=' . $orderId . '&status=success',
+                'failed' => get_home_url() . '/?wc-api=cynder_paymongo_catch_source_redirect&order=' . $orderId . '&status=failed',
+            ),
+        );
+
+        if (count($billing) > 0) {
+            $attributes['billing'] = $billing;
+        }
+
+        wc_get_logger()->log('info', 'Attributes ' . json_encode($attributes));
+
         $payload = json_encode(
             array(
                 'data' => array(
-                    'attributes' =>array(
-                        'type' => $this->ewallet_type,
-                        'amount' => intval($order->get_total() * 100, 32),
-                        'currency' => $order->get_currency(),
-                        'description' => get_bloginfo('name') . ' - ' . $orderId,
-                        'billing' => array(
-                            'address' => array(
-                                'line1' => $order->get_billing_address_1(),
-                                'line2' => $order->get_billing_address_2(),
-                                'city' => $order->get_billing_city(),
-                                'state' => $order->get_billing_state(),
-                                'country' => $order->get_billing_country(),
-                                'postal_code' => $order->get_billing_postcode(),
-                            ),
-                            'name' => $order->get_billing_first_name() 
-                                . ' ' . $order->get_billing_last_name(),
-                            'email' => $order->get_billing_email(),
-                            'phone' => $order->get_billing_phone(),
-                        ),
-                        'redirect' => array(
-                            'success' => get_home_url() . '/?wc-api=cynder_paymongo_catch_source_redirect&order=' . $orderId . '&status=success',
-                            'failed' => get_home_url() . '/?wc-api=cynder_paymongo_catch_source_redirect&order=' . $orderId . '&status=failed',
-                        ),
-                    ),
+                    'attributes' => $attributes,
                 ),
             )
         );
