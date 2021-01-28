@@ -2,9 +2,9 @@
 Contributors: pickmeshop
 Tags: payments, credit card, gcash, grabpay
 Requires at least: 5.0
-Tested up to: 5.5
+Tested up to: 5.6
 Requires PHP: 5.6
-Stable tag: 1.4.4
+Stable tag: 1.4.5
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -92,6 +92,12 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 5. Checking out with GrabPay.
 
 == Changelog ==
+
+= 1.4.5 =
+*Release Date - 28 January 2021*
+
+[FIX] Optional fields for Paymongo source creation have been modified for e-wallet transactions
+[FIX] JS front-end assets are only being loaded on checkout and order pay pages
 
 = 1.4.4 =
 *Release Date - 11 November 2020*
