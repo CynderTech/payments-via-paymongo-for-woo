@@ -174,8 +174,11 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
      */
     public function paymentScripts()
     {
+        $isCheckout = is_checkout() && !is_checkout_pay_page();
+        $isOrderPay = is_checkout_pay_page();
+
         // we need JavaScript to process a token only on cart/checkout pages, right?
-        if (!is_cart() && !is_checkout() && !isset($_GET['pay_for_order'])) {
+        if (!$isCheckout && !$isOrderPay) {
             return;
         }
 
@@ -205,8 +208,8 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
         $paymongoClient['public_key'] = $this->public_key;
 
         $paymongoCc = array();
-        $paymongoCc['isCheckout'] = is_checkout() && !is_checkout_pay_page();
-        $paymongoCc['isOrderPay'] = is_checkout_pay_page();
+        $paymongoCc['isCheckout'] = $isCheckout;
+        $paymongoCc['isOrderPay'] = $isOrderPay;
         $paymongoCc['total_amount'] = WC()->cart->get_totals()['total'];
 
         // Order Pay Page
