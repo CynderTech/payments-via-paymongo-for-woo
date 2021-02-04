@@ -17,11 +17,21 @@ if (!defined('ABSPATH')) {
 
 function cynder_paymongo_create_intent($orderId) {
     $pluginSettings = get_option('woocommerce_paymongo_settings');
-
-    /** If the plugin isn't enabled, don't create a payment intent */
-    if ($pluginSettings['enabled'] !== 'yes') return;
-
     $order = wc_get_order($orderId);
+
+    $paymentMethod = $order->get_payment_method();
+
+    $hasPaymentMethod = isset($paymentMethod) && $paymentMethod !== '' && $paymentMethod !== null;
+
+    /**
+     * Don't create a payment intent for the following scenarios:
+     * 
+     * 1. Paymongo plugin is disabled
+     * 2. Has no payment method (ex. 100% discounts)
+     * 3. Payment method is not Paymongo credit card
+     */
+    if ($pluginSettings['enabled'] !== 'yes' || !$hasPaymentMethod || $paymentMethod !== 'paymongo') return;
+
     $amount = floatval($order->get_total());
 
     if (!is_float($amount)) {
