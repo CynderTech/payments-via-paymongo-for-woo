@@ -195,9 +195,11 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
             return;
         }
 
-        // disable without SSL unless your website is in a test mode
-        if (!$this->testmode && ! is_ssl()) {
-            return;
+        $unsecure = !$this->testmode && !is_ssl();
+
+        // if unsecure and in live mode, show warning
+        if ($unsecure) {
+            wc_add_notice('WARNING: This website is not secured to transact using PayMongo.', 'error');
         }
 
         $paymongoVar = array();
@@ -310,19 +312,9 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
 
         do_action('woocommerce_credit_card_form_start', $this->id);
 
-        echo '<div class="form-row form-row-wide">';
-        echo '<label>Card Number <span class="required">*</span></label>';
-        echo '<input id="paymongo_ccNo" class="paymongo_ccNo" type="text"' .
-            ' autocomplete="off"></div>';
-        echo '<div class="form-row form-row-first">';
-        echo '<label>Expiry Date <span class="required">*</span></label>';
-        echo '<input id="paymongo_expdate" class="paymongo_expdate" ' .
-            'type="text" autocomplete="off" placeholder="MM / YY"></div>';
-        echo '<div class="form-row form-row-last">';
-        echo '<label>Card Code (CVC) <span class="required">*</span></label>';
-        echo '<input id="paymongo_cvv" class="paymongo_cvv"' .
-            ' type="password" autocomplete="off" placeholder="CVC">';
-        echo '</div><div class="clear"></div>';
+        $pluginDir = plugin_dir_path(CYNDER_PAYMONGO_MAIN_FILE);
+
+        include $pluginDir . '/classes/cc-fields.php';
 
         do_action('woocommerce_credit_card_form_end', $this->id);
 
