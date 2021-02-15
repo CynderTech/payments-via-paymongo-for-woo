@@ -6,7 +6,7 @@
  * Description: Take credit card, GCash and GrabPay payments via PayMongo.
  * Author: CynderTech
  * Author URI: http://cynder.io
- * Version: 1.4.6
+ * Version: 1.4.7
  * Requires at least: 5.3.2
  * Tested up to: 5.6
  * WC requires at least: 3.9.3
