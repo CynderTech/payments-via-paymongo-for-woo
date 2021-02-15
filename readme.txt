@@ -4,7 +4,7 @@ Tags: payments, credit card, gcash, grabpay
 Requires at least: 5.0
 Tested up to: 5.6
 Requires PHP: 5.6
-Stable tag: 1.4.6
+Stable tag: 1.4.7
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -92,6 +92,12 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 5. Checking out with GrabPay.
 
 == Changelog ==
+
+= 1.4.7 =
+*Release Date - 15 February 2021*
+
+[CHORE] Tested for WooCommerce v5.0.0
+[FIX] Enable scripts for unsecured live environment but display a warning
 
 = 1.4.6 =
 *Release Date - 4 February 2021*
