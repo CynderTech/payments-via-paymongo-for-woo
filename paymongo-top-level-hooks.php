@@ -150,15 +150,8 @@ function cynder_paymongo_catch_redirect() {
     $orderId = $_GET['order'];
     $order = wc_get_order($orderId);
 
+    /** If payment intent status is succeeded or processing, just empty cart and redirect to confirmation page */
     if ($status === 'succeeded' || $status === 'processing') {
-        // we received the payment
-        $payments = $responseAttr['payments'];
-        $order->payment_complete($payments[0]['id']);
-        wc_reduce_stock_levels($orderId);
-
-        // Sending invoice after successful payment
-        $woocommerce->mailer()->emails['WC_Email_Customer_Invoice']->trigger($orderId);
-
         // Empty cart
         $woocommerce->cart->empty_cart();
 

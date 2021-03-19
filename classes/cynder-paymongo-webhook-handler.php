@@ -98,9 +98,7 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
             status_header(200);
             die();
         } else {
-            Cynder_PayMongo_Logger::log(
-                'Incoming webhook failed validation: ' . print_r($requestBody, true)
-            );
+            wc_get_logger()->log('error', '[checkForWebhook] ' . ' ' . wc_print_r($requestBody, true));
             status_header(400);
             die();
         }
@@ -118,22 +116,53 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
      */
     public function processWebhook($payload)
     {
+        global $woocommerce;
+
         $decoded = json_decode($payload, true);
         $eventData = $decoded['data']['attributes'];
-        $sourceData = $eventData['data'];
+        $resourceData = $eventData['data'];
 
-        if ($eventData['type'] == 'source.chargeable') {
-            $order = $this->getOrderBySource($sourceData);
+        // wc_get_logger()->log('info', '[processWebhook] Webhook payload ' . wc_print_r($decoded, true));
 
-            if (!order) {
-                status_header(404);
-                die();
+        $validEventTypes = [
+            'source.chargeable',
+            'payment.paid',
+            'payment.failed',
+        ];
+
+        if (in_array($eventData['type'], $validEventTypes)) {
+            if ($eventData['type'] === 'source.chargeable') {
+                $order = $this->getOrderByMeta('source_id', $resourceData['id']);
+
+                return $this->createPaymentRecord($resourceData, $order);
             }
 
-            return $this->createPaymentRecord($sourceData, $order);
+            $sourceType = $resourceData['attributes']['source']['type'];
+
+            if ($eventData['type'] === 'payment.paid' && $sourceType !== 'gcash' && $sourceType !== 'grab_pay') {
+                $order = $this->getOrderByMeta('paymongo_payment_intent_id', $resourceData['attributes']['payment_intent_id']);
+
+                $order->payment_complete($resourceData['id']);
+                $orderId = $order->get_id();
+                wc_reduce_stock_levels($orderId);
+        
+                // Sending invoice after successful payment
+                $woocommerce->mailer()->emails['WC_Email_Customer_Invoice']->trigger($orderId);
+                return;
+            }
+
+            if ($eventData['type'] === 'payment.failed' && $sourceType !== 'gcash' && $sourceType !== 'grab_pay') {
+                $order = $this->getOrderByMeta('paymongo_payment_intent_id', $resourceData['attributes']['payment_intent_id']);
+
+                $order->update_status('failed', 'Payment failed', true);
+                return;
+            }
+
+            wc_get_logger()->log('info', '[processWebhook] Passthrough event type ' . $eventData['type'] . ' with source type ' . $sourceType);
+            return;
         }
 
-        Cynder_PayMongo_Logger::log('Invalid event type = ' . $source_id);
+        wc_get_logger()->log('error', '[processWebhook] Invalid event type = ' . $eventData['type']);
         status_header(422);
         die();
     }
@@ -328,31 +357,27 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
     }
 
     /** 
-     * Get Order by source record
+     * Get Order by meta values
      *
-     * @param string $source Source object from $payload
+     * @param string $metaKey Metadata key
+     * @param string $metaValue Metadata value
      *
      * @return object,bool
      *
-     * @since 1.0.0
+     * @since 1.5.0
      */
-    public function getOrderBySource($source)
+    public function getOrderByMeta($metaKey, $metaValue)
     {
-        $source_id = $source['id'];
-
         $orders = wc_get_orders(
             array(
                 'limit' => 1, // Query all orders
-                'meta_key' => 'source_id', // The postmeta key field
-                'meta_value' => $source_id, // The comparison argument
+                'meta_key' => $metaKey, // The postmeta key field
+                'meta_value' => $$metaValue, // The comparison argument
             )
         );
 
         if (empty($orders)) {
-            Cynder_PayMongo_Logger::log(
-                'Failed to find order with source_id = ' . $source_id
-            );
-            
+            wc_get_logger()->log('error', '[getOrderBySource] Failed to find order with metadata ID ' . $metaKeyParam . ' ' . $metaValueParam);
             return false;
         }
             
