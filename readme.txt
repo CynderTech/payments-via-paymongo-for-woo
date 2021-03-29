@@ -4,7 +4,7 @@ Tags: payments, credit card, gcash, grabpay
 Requires at least: 5.0
 Tested up to: 5.6
 Requires PHP: 5.6
-Stable tag: 1.4.7
+Stable tag: 1.5.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -17,6 +17,7 @@ Accept Visa, MasterCard, GCash and GrabPay directly on your store with the PayMo
 **Notes:**
 * Paymongo API **only** supports the **PHP (Philippine Peso)** currency at the moment. Prices for your shop should be configured to PHP for the plugin to work.
 * Paymongo API can **only** process at least P100.00 for the total amount to be paid.
+* Some WordPress themes/plugins may not be compatible with this plugin. To isolate which theme/plugin, you may follow [this guide](https://docs.woocommerce.com/document/woocommerce-self-service-guide/#section-4). Once isolated, you may contact CynderTech [here](https://cynder.atlassian.net/servicedesk/customer/portal/1/group/1/create/1) to address your concerns.
 
 == Disclaimer ==
 
@@ -92,6 +93,14 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 5. Checking out with GrabPay.
 
 == Changelog ==
+
+= 1.5.0 =
+*Release Date - 15 February 2021*
+
+[FIX] Order statuses now reflect payment statuses (ex. failed payments now marks orders as failed)
+[FIX] Credit card fields not properly initializing on checkout load
+[CHANGE] Updated settings interface for all PayMongo payment methods
+[CHORE] Remove unnecessary files
 
 = 1.4.7 =
 *Release Date - 15 February 2021*

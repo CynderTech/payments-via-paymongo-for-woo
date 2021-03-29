@@ -16,7 +16,11 @@ if (!defined('ABSPATH')) {
 }
 
 function cynder_paymongo_create_intent($orderId) {
-    $pluginSettings = get_option('woocommerce_paymongo_settings');
+    $ccSettings = get_option('woocommerce_paymongo_settings');
+    
+    $testMode = get_option('woocommerce_cynder_paymongo_test_mode');
+    $testMode = (!empty($testMode) && $testMode === 'yes') ? true : false;
+
     $order = wc_get_order($orderId);
 
     $paymentMethod = $order->get_payment_method();
@@ -30,7 +34,7 @@ function cynder_paymongo_create_intent($orderId) {
      * 2. Has no payment method (ex. 100% discounts)
      * 3. Payment method is not Paymongo credit card
      */
-    if ($pluginSettings['enabled'] !== 'yes' || !$hasPaymentMethod || $paymentMethod !== 'paymongo') return;
+    if ($ccSettings['enabled'] !== 'yes' || !$hasPaymentMethod || $paymentMethod !== 'paymongo') return;
 
     $amount = floatval($order->get_total());
 
@@ -40,8 +44,8 @@ function cynder_paymongo_create_intent($orderId) {
         throw new Exception(__($errorMessage, 'woocommerce'));
     }
 
-    $secretKeyProp = $pluginSettings['testmode'] === 'yes' ? 'test_secret_key' : 'secret_key';
-    $secretKey = $pluginSettings[$secretKeyProp];
+    $skKey = $testMode ? 'woocommerce_cynder_paymongo_test_secret_key' : 'woocommerce_cynder_paymongo_secret_key';
+    $secretKey = get_option($skKey);
 
     $payload = json_encode(
         array(
@@ -112,18 +116,16 @@ function cynder_paymongo_catch_redirect() {
         /** Check payment intent ID */
     }
 
-    $paymentGatewaId = 'paymongo';
-    $paymentGateways = WC_Payment_Gateways::instance();
+    $testMode = get_option('woocommerce_cynder_paymongo_test_mode');
+    $testMode = (!empty($testMode) && $testMode === 'yes') ? true : false;
 
-    $paymongoGateway = $paymentGateways->payment_gateways()[$paymentGatewaId];
-    $testMode = $paymongoGateway->get_option('testmode');
-    $authOptionKey = $testMode === 'yes' ? 'test_secret_key' : 'secret_key';
-    $authKey = $paymongoGateway->get_option($authOptionKey);
+    $skKey = $testMode ? 'woocommerce_cynder_paymongo_test_secret_key' : 'woocommerce_cynder_paymongo_secret_key';
+    $secretKey = get_option($skKey);
 
     $args = array(
         'method' => 'GET',
         'headers' => array(
-            'Authorization' => 'Basic ' . base64_encode($authKey),
+            'Authorization' => 'Basic ' . base64_encode($secretKey),
             'accept' => 'application/json',
             'content-type' => 'application/json'
         ),
@@ -189,7 +191,7 @@ add_action(
 );
 
 function add_webhook_settings($settings, $current_section) {
-    if ($current_section === 'paymongo_gcash' || $current_section === 'paymongo_grab_pay') {
+    if ($current_section === 'paymongo_gcash' || $current_section === 'paymongo_grab_pay' || $current_section === 'paymongo') {
         $webhookUrl = add_query_arg(
             'wc-api',
             'cynder_paymongo',
@@ -197,6 +199,60 @@ function add_webhook_settings($settings, $current_section) {
         );
 
         $settings_webhooks = array(
+            array(
+                'name' => 'API Settings',
+                'id' => 'paymongo_api_settings_title',
+                'type' => 'title',
+                'desc' => 'PayMongo API settings'
+            ),
+            array(
+                'id' => 'live_env',
+                'title' => 'Live Environment',
+                'type' => 'title',
+                'description' => 'Use live keys for actual payments'
+            ),
+            array(
+                'id'          => 'woocommerce_cynder_paymongo_public_key',
+                'title'       => 'Live Public Key',
+                'type'        => 'text'
+            ),
+            array(
+                'id'          => 'woocommerce_cynder_paymongo_secret_key',
+                'title'       => 'Live Public Key',
+                'type'        => 'text'
+            ),
+            array(
+                'id' => 'live_env_end',
+                'type' => 'sectionend'
+            ),
+            array(
+                'id' => 'test_env',
+                'title' => 'Test Environment',
+                'type' => 'title',
+                'description' => 'Use test keys the PayMongo payments without actual transactions'
+            ),
+            array(
+                'id' => 'woocommerce_cynder_paymongo_test_mode',
+                'title'       => 'Test mode',
+                'label'       => 'Enable Test Mode',
+                'type'        => 'checkbox',
+                'description' => 'Place the payment gateway in test mode using <b>Test API keys</b>',
+                'default'     => 'yes',
+            ),
+            array(
+                'id'          => 'woocommerce_cynder_paymongo_test_public_key',
+                'title'       => 'Test Public Key',
+                'type'        => 'text'
+            ),
+            array(
+                'id'          => 'woocommerce_cynder_paymongo_test_secret_key',
+                'title'       => 'Test Public Key',
+                'type'        => 'text'
+            ),
+            array(
+                'type' => 'sectionend',
+                'id' => 'paymongo_api_settings',
+            ),
             array(
                 'name' => 'Webhook Secret',
                 'id' => 'paymongo_webhook_secret_key_title',
@@ -246,3 +302,25 @@ add_filter(
     10,
     2
 );
+
+function update_cynder_paymongo_plugin() {
+    /**
+     * Prior to 1.4.8, API settings are in credit/debit card screen only
+     * 
+     * Updating the plugin to 1.4.8 or higher moves the settings as shared ones on
+     * all PayMongo payment methods
+     */
+    if (version_compare(CYNDER_PAYMONGO_VERSION, '1.5.0', '<')) {
+        $mainPluginSettings = get_option('woocommerce_paymongo_settings', null);
+
+        // wc_get_logger()->log('info', 'Old settings' . ' ' . wc_print_r($mainPluginSettings, true));
+
+        update_option('woocommerce_cynder_paymongo_public_key', $mainPluginSettings['public_key'], true);
+        update_option('woocommerce_cynder_paymongo_secret_key', $mainPluginSettings['secret_key'], true);
+        update_option('woocommerce_cynder_paymongo_test_public_key', $mainPluginSettings['test_public_key'], true);
+        update_option('woocommerce_cynder_paymongo_test_secret_key', $mainPluginSettings['test_secret_key'], true);
+        update_option('woocommerce_cynder_paymongo_test_mode', $mainPluginSettings['testmode'], true);
+    }
+}
+
+add_action('woocommerce_paymongo_updated', 'update_cynder_paymongo_plugin');

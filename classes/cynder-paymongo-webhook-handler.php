@@ -54,21 +54,26 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
      */
     public function __construct()
     {
-        $main_settings = get_option('woocommerce_paymongo_settings');
-        $this->testmode = (
-            !empty($main_settings['testmode'])
-            && 'yes' === $main_settings['testmode']
-        ) ? true : false;
-        $this->secret_key = $this->testmode ? 
-            $main_settings['test_secret_key']
-            : $main_settings['secret_key'];
-        $this->webhook_secret = $this->testmode ?
-            get_option('paymongo_test_webhook_secret_key')
-            : get_option('paymongo_webhook_secret_key');
+        $testMode = get_option('woocommerce_cynder_paymongo_test_mode');
+        $this->testmode = (!empty($testMode) && $testMode === 'yes') ? true : false;
+
+        $skKey = $this->testmode ? 'woocommerce_cynder_paymongo_test_secret_key' : 'woocommerce_cynder_paymongo_secret_key';
+        $this->secret_key = get_option($skKey);
+
+        $wsKey = $this->testmode ? 'paymongo_test_webhook_secret_key' : 'paymongo_webhook_secret_key';
+
+        $this->webhook_secret = get_option($wsKey);
 
         add_action(
             'woocommerce_api_cynder_paymongo',
             array($this, 'checkForWebhook')
+        );
+
+        add_filter(
+            'woocommerce_order_data_store_cpt_get_orders_query',
+            array($this, 'queryOrderBySource'),
+            10,
+            2
         );
     }
 
@@ -196,6 +201,8 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
             ),
         );
 
+        // wc_get_logger()->log('info', 'Payment payload ' . wc_print_r($createPaymentPayload, true));
+
         $args = array(
             'body' => json_encode($createPaymentPayload),
             'method' => "POST",
@@ -213,7 +220,7 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
             
             if (array_key_exists('errors', $body) && $body['errors'][0]) {
                 status_header($response['response']['code']);
-                Cynder_PayMongo_Logger::log('Payment failed: ' . $body);
+                wc_get_logger()->log('Payment failed: ' . $body);
                 die();
             }
 
@@ -230,7 +237,7 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
             }
 
             if ($status == 'failed') {
-                Cynder_PayMongo_Logger::log('Payment failed: ' . $response['body']);
+                wc_get_logger()->log('Payment failed: ' . $response['body']);
                 $order->update_status($status);
                 status_header(400);
                 die();
@@ -368,20 +375,37 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
      */
     public function getOrderByMeta($metaKey, $metaValue)
     {
-        $orders = wc_get_orders(
-            array(
-                'limit' => 1, // Query all orders
-                'meta_key' => $metaKey, // The postmeta key field
-                'meta_value' => $$metaValue, // The comparison argument
-            )
-        );
+        // wc_get_logger()->log('info', 'Meta key ' . $metaKey);
+        // wc_get_logger()->log('info', 'Meta value ' . $metaValue);
+
+        $queryParams = array('limit' => 1);
+        $queryParams[$metaKey] = $metaValue;
+
+        $orders = wc_get_orders($queryParams);
 
         if (empty($orders)) {
-            wc_get_logger()->log('error', '[getOrderBySource] Failed to find order with metadata ID ' . $metaKeyParam . ' ' . $metaValueParam);
+            wc_get_logger()->log('error', '[getOrderBySource] Failed to find order with metadata ID ' . $metaKey . ' ' . $metaValue);
             return false;
         }
-            
+
         return $orders[0];
+    }
+
+    public function queryOrderBySource($query, $query_vars) {
+        $validPaymongoMeta = ['source_id', 'paymongo_payment_intent_id'];
+
+        foreach ($validPaymongoMeta as $metaKey) {
+            if ( ! empty( $query_vars[$metaKey] ) ) {
+                $query['meta_query'][] = array(
+                    'key' => $metaKey,
+                    'value' => esc_attr( $query_vars[$metaKey] ),
+                );
+            }
+        }
+
+        // wc_get_logger()->log('info', 'Query ' . wc_print_r($query, true));
+
+        return $query;
     }
 }
 
