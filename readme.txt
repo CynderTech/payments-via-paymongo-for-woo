@@ -95,7 +95,7 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 == Changelog ==
 
 = 1.5.0 =
-*Release Date - 15 February 2021*
+*Release Date - 31 March 2021*
 
 [FIX] Order statuses now reflect payment statuses (ex. failed payments now marks orders as failed)
 [FIX] Credit card fields not properly initializing on checkout load
