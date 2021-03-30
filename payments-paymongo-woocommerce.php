@@ -231,11 +231,11 @@ function Paymongo_Init_Gateway_class()
                 if (!defined('IFRAME_REQUEST')) {
                     do_action('woocommerce_paymongo_updated');
 
-                    // if (!defined('CYNDER_PAYMONGO_INSTALLING')) {
-                    //     define('CYNDER_PAYMONGO_INSTALLING', true);
-                    // }
+                    if (!defined('CYNDER_PAYMONGO_INSTALLING')) {
+                        define('CYNDER_PAYMONGO_INSTALLING', true);
+                    }
 
-                    // $this->updatePluginVersion();
+                    $this->updatePluginVersion();
                 }
             }
 

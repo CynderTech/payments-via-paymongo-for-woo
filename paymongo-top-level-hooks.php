@@ -287,13 +287,15 @@ add_filter(
 );
 
 function update_cynder_paymongo_plugin() {
+    $oldVersion = get_option('cynder_paymongo_version');
+
     /**
      * Prior to 1.4.8, API settings are in credit/debit card screen only
      * 
      * Updating the plugin to 1.4.8 or higher moves the settings as shared ones on
      * all PayMongo payment methods
      */
-    if (version_compare(CYNDER_PAYMONGO_VERSION, '1.5.0', '>=')) {
+    if (version_compare($oldVersion, '1.5.0', '<')) {
         $mainPluginSettings = get_option('woocommerce_paymongo_settings');
 
         /** Migrate old settings to new settings */
