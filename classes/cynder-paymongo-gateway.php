@@ -70,13 +70,15 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
         $this->enabled = $this->get_option('enabled');
         $this->title = $this->get_option('title');
         $this->description = $this->get_option('description');
-        $this->testmode = 'yes' === $this->get_option('testmode');
-        $this->secret_key = $this->testmode ?
-            $this->get_option('test_secret_key')
-            : $this->get_option('secret_key');
-        $this->public_key = $this->testmode ?
-            $this->get_option('test_public_key')
-            : $this->get_option('public_key');
+        
+        $testMode = get_option('woocommerce_cynder_paymongo_test_mode');
+        $this->testmode = (!empty($testMode) && $testMode === 'yes') ? true : false;
+
+        $skKey = $this->testmode ? 'woocommerce_cynder_paymongo_test_secret_key' : 'woocommerce_cynder_paymongo_secret_key';
+        $this->secret_key = get_option($skKey);
+
+        $pkKey = $this->testmode ? 'woocommerce_cynder_paymongo_test_public_key' : 'woocommerce_cynder_paymongo_public_key';
+        $this->public_key = get_option($pkKey);
 
         add_action(
             'woocommerce_update_options_payment_gateways_' . $this->id,
@@ -126,41 +128,6 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
                 'description' => 'This controls the description that ' .
                                  'the user sees during checkout.',
                 'default'     => 'Simple and easy payments.',
-            ),
-            'live_env' => array(
-                'title' => 'Live Environment',
-                'type' => 'title',
-                'description' => 'Use live keys for actual payments'
-            ),
-            'public_key' => array(
-                'title'       => 'Live Public Key',
-                'type'        => 'text'
-            ),
-            'secret_key' => array(
-                'title'       => 'Live Secret Key',
-                'type'        => 'password'
-            ),
-            'test_env' => array(
-                'title' => 'Test Environment',
-                'type' => 'title',
-                'description' => 'Use test keys the PayMongo payments'
-                    .' without actual transactions'
-            ),
-            'testmode' => array(
-                'title'       => 'Test mode',
-                'label'       => 'Enable Test Mode',
-                'type'        => 'checkbox',
-                'description' => 'Place the payment gateway in' .
-                                 ' test mode using <b>Test API keys</b>.',
-                'default'     => 'yes',
-            ),
-            'test_public_key' => array(
-                'title'       => 'Test Public Key',
-                'type'        => 'text'
-            ),
-            'test_secret_key' => array(
-                'title'       => 'Test Secret Key',
-                'type'        => 'text',
             ),
         );
     }
@@ -238,22 +205,9 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
             array(),
             CYNDER_PAYMONGO_VERSION
         );
-        wp_register_style(
-            'jqueryModal',
-            plugins_url(
-                'assets/css/jquery.modal.min.css',
-                CYNDER_PAYMONGO_MAIN_FILE
-            ),
-            array(),
-            CYNDER_PAYMONGO_VERSION
-        );
         wp_enqueue_script(
             'cleave',
             plugins_url('assets/js/cleave.min.js', CYNDER_PAYMONGO_MAIN_FILE)
-        );
-        wp_enqueue_script(
-            'jqueryModal',
-            plugins_url('assets/js/jquery.modal.min.js', CYNDER_PAYMONGO_MAIN_FILE)
         );
 
         wp_register_script(
@@ -277,7 +231,6 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
         wp_localize_script('woocommerce_paymongo_client', 'cynder_paymongo_client_params', $paymongoClient);
 
         wp_enqueue_style('paymongo');
-        wp_enqueue_style('jqueryModal');
         wp_enqueue_script('woocommerce_paymongo_checkout');
         wp_enqueue_script('woocommerce_paymongo_client');
         wp_enqueue_script('woocommerce_paymongo_cc');

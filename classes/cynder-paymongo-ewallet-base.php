@@ -56,23 +56,14 @@ class Cynder_PayMongo_Ewallet_Gateway extends WC_Payment_Gateway
             'products'
         );
 
-        $mainSettings = get_option('woocommerce_paymongo_settings');
+        $testMode = get_option('woocommerce_cynder_paymongo_test_mode');
+        $this->testmode = (!empty($testMode) && $testMode === 'yes') ? true : false;
 
-        $this->testmode = (
-            !empty($mainSettings['testmode']) 
-            && 'yes' === $mainSettings['testmode']
-        ) ? true : false;
-        $this->public_key = !empty($mainSettings['public_key']) ?
-            $mainSettings['public_key'] : '';
-        $this->secret_key = !empty($mainSettings['secret_key']) ?
-            $mainSettings['secret_key'] : '';
+        $skKey = $this->testmode ? 'woocommerce_cynder_paymongo_test_secret_key' : 'woocommerce_cynder_paymongo_secret_key';
+        $this->secret_key = get_option($skKey);
 
-        if ($this->testmode) {
-            $this->public_key = !empty($mainSettings['test_public_key']) ?
-                $mainSettings['test_public_key'] : '';
-            $this->secret_key = !empty($mainSettings['test_secret_key']) ?
-                $mainSettings['test_secret_key'] : '';
-        }
+        $pkKey = $this->testmode ? 'woocommerce_cynder_paymongo_test_public_key' : 'woocommerce_cynder_paymongo_public_key';
+        $this->public_key = get_option($pkKey);
 
         $this->title = $this->get_option('title');
         $this->description = $this->get_option('description');

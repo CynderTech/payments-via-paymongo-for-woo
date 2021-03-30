@@ -15,7 +15,7 @@ jQuery(document).ready(function ($) {
     }
 
     CCForm.prototype.init = function () {
-        $(document.body).on('payment_method_selected', this.paymentMethodSelected.bind(this));
+        $(document.body).on('updated_checkout', this.updatedCheckout.bind(this));
 
         let form;
         
@@ -37,15 +37,17 @@ jQuery(document).ready(function ($) {
         }
     }
 
-    CCForm.prototype.paymentMethodSelected = function () {
+    CCForm.prototype.updatedCheckout = function () {
         var paymentMethod = $('input[name=payment_method]:checked').val();
 
         /** If payment method is not CC, don't initialize form */
         if (paymentMethod !== 'paymongo') return;
 
+        this.addLoader();
+        
         setTimeout(function () {
             this.initCleave();
-        }.bind(this), 100);
+        }.bind(this), 500);
     }
 
     CCForm.prototype.initCleave = function () {
@@ -67,6 +69,8 @@ jQuery(document).ready(function ($) {
                 blocks: [4],
             });
         }
+
+        this.removeLoader();
     }
 
     CCForm.prototype.onSubmit = function (e) {
@@ -218,7 +222,7 @@ jQuery(document).ready(function ($) {
     }
 
     CCForm.prototype.addLoader = function () {
-        $(".wc_payment_method .payment_box.payment_method_paymongo").append(
+        $(".wc_payment_method > .payment_box").append(
             '<div class="paymongo-loading"><div class="paymongo-roller"><div /><div /><div /><div /><div /><div /><div /><div /></div></div>'
         );
     }
