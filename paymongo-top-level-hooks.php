@@ -296,18 +296,21 @@ function update_cynder_paymongo_plugin() {
     if (version_compare(CYNDER_PAYMONGO_VERSION, '1.5.0', '>=')) {
         $mainPluginSettings = get_option('woocommerce_paymongo_settings');
 
-        if ($mainPluginSettings) {
-            /** Migrate old settings to new settings */
-            update_option('woocommerce_cynder_paymongo_public_key', $mainPluginSettings['public_key'], true);
-            update_option('woocommerce_cynder_paymongo_secret_key', $mainPluginSettings['secret_key'], true);
-            update_option('woocommerce_cynder_paymongo_test_public_key', $mainPluginSettings['test_public_key'], true);
-            update_option('woocommerce_cynder_paymongo_test_secret_key', $mainPluginSettings['test_secret_key'], true);
-            update_option('woocommerce_cynder_paymongo_test_mode', $mainPluginSettings['testmode'], true);
+        /** Migrate old settings to new settings */
+        $settingsToMigrage = array(
+            'public_key' => 'woocommerce_cynder_paymongo_public_key',
+            'secret_key' => 'woocommerce_cynder_paymongo_secret_key',
+            'test_public_key' => 'woocommerce_cynder_paymongo_test_public_key',
+            'test_secret_key' => 'woocommerce_cynder_paymongo_test_secret_key',
+            'testmode' => 'woocommerce_cynder_paymongo_test_mode'
+        );
 
-            /** Remove old settings */
-            delete_option('woocommerce_paymongo_settings');
-            delete_option('woocommerce_paymongo_gcash_settings');
-            delete_option('woocommerce_paymongo_grab_pay_settings');
+        foreach ($settingsToMigrage as $oldKey => $newKey) {
+            $newSetting = get_option($newKey);
+
+            if (!$newSetting) {
+                update_option($newKey, $mainPluginSettings[$oldKey], true);
+            }
         }
     }
 }
