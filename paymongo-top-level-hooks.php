@@ -293,16 +293,22 @@ function update_cynder_paymongo_plugin() {
      * Updating the plugin to 1.4.8 or higher moves the settings as shared ones on
      * all PayMongo payment methods
      */
-    if (version_compare(CYNDER_PAYMONGO_VERSION, '1.5.0', '<')) {
-        $mainPluginSettings = get_option('woocommerce_paymongo_settings', null);
+    if (version_compare(CYNDER_PAYMONGO_VERSION, '1.5.0', '>=')) {
+        $mainPluginSettings = get_option('woocommerce_paymongo_settings');
 
-        // wc_get_logger()->log('info', 'Old settings' . ' ' . wc_print_r($mainPluginSettings, true));
+        if ($mainPluginSettings) {
+            /** Migrate old settings to new settings */
+            update_option('woocommerce_cynder_paymongo_public_key', $mainPluginSettings['public_key'], true);
+            update_option('woocommerce_cynder_paymongo_secret_key', $mainPluginSettings['secret_key'], true);
+            update_option('woocommerce_cynder_paymongo_test_public_key', $mainPluginSettings['test_public_key'], true);
+            update_option('woocommerce_cynder_paymongo_test_secret_key', $mainPluginSettings['test_secret_key'], true);
+            update_option('woocommerce_cynder_paymongo_test_mode', $mainPluginSettings['testmode'], true);
 
-        update_option('woocommerce_cynder_paymongo_public_key', $mainPluginSettings['public_key'], true);
-        update_option('woocommerce_cynder_paymongo_secret_key', $mainPluginSettings['secret_key'], true);
-        update_option('woocommerce_cynder_paymongo_test_public_key', $mainPluginSettings['test_public_key'], true);
-        update_option('woocommerce_cynder_paymongo_test_secret_key', $mainPluginSettings['test_secret_key'], true);
-        update_option('woocommerce_cynder_paymongo_test_mode', $mainPluginSettings['testmode'], true);
+            /** Remove old settings */
+            delete_option('woocommerce_paymongo_settings');
+            delete_option('woocommerce_paymongo_gcash_settings');
+            delete_option('woocommerce_paymongo_grab_pay_settings');
+        }
     }
 }
 
