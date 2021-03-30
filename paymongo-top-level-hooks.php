@@ -218,8 +218,17 @@ function add_webhook_settings($settings, $current_section) {
             ),
             array(
                 'id'          => 'woocommerce_cynder_paymongo_secret_key',
-                'title'       => 'Live Public Key',
+                'title'       => 'Live Secret Key',
                 'type'        => 'text'
+            ),
+            array(
+                'name' => 'Live Webhook Secret',
+                'id' => 'paymongo_webhook_secret_key',
+                'type' => 'text',
+                'desc_tip' => 'This is required to properly process payments and update order statuses accordingly',
+                'desc' => '<a target="_blank" href="https://paymongo-webhook-tool.meeco.dev?url=' 	
+                . $webhookUrl	
+                . '">Go here to generate a webhook secret</a>',
             ),
             array(
                 'id' => 'live_env_end',
@@ -229,14 +238,14 @@ function add_webhook_settings($settings, $current_section) {
                 'id' => 'test_env',
                 'title' => 'Test Environment',
                 'type' => 'title',
-                'description' => 'Use test keys the PayMongo payments without actual transactions'
+                'desc' => 'Use the plugin in <b>Test Mode</b><br/>In test mode, you can transact using the PayMongo payment methods in checkout without actual payments'
             ),
             array(
                 'id' => 'woocommerce_cynder_paymongo_test_mode',
                 'title'       => 'Test mode',
                 'label'       => 'Enable Test Mode',
                 'type'        => 'checkbox',
-                'description' => 'Place the payment gateway in test mode using <b>Test API keys</b>',
+                'desc' => 'Place the payment gateway in test mode using <b>Test API keys</b>',
                 'default'     => 'yes',
             ),
             array(
@@ -246,48 +255,22 @@ function add_webhook_settings($settings, $current_section) {
             ),
             array(
                 'id'          => 'woocommerce_cynder_paymongo_test_secret_key',
-                'title'       => 'Test Public Key',
+                'title'       => 'Test Secret Key',
                 'type'        => 'text'
-            ),
-            array(
-                'type' => 'sectionend',
-                'id' => 'paymongo_api_settings',
-            ),
-            array(
-                'name' => 'Webhook Secret',
-                'id' => 'paymongo_webhook_secret_key_title',
-                'type' => 'title',
-                'desc' => 'Provide a secret key to enable'	
-                . ' <b>GCash</b> or <b>GrabPay</b> Payments.',
-            ),
-            array(
-                'name' => 'Webhook Secret',
-                'id' => 'paymongo_webhook_secret_key',
-                'type' => 'text',
-                'desc' => 'Provide a secret key to enable'	
-                . ' <b>GCash</b> or <b>GrabPay</b> Payments<br>'	
-                . '<a target="_blank" href="https://paymongo-webhook-tool.meeco.dev?url=' 	
-                . $webhookUrl	
-                . '">Click this to generate a webhook secret</a>'	
-                . ' or use this URL: <b>'	
-                . $webhookUrl,
             ),
             array(
                 'name' => 'Test Webhook Secret',
                 'id' => 'paymongo_test_webhook_secret_key',
                 'type' => 'text',
-                'desc' => 'Provide a secret key to enable'	
-                . ' <b>GCash</b> or <b>GrabPay</b> Payments<br>'	
-                . '<a target="_blank" href="https://paymongo-webhook-tool.meeco.dev?url=' 	
+                'desc_tip' => 'This is required to properly process payments and update order statuses accordingly',
+                'desc' => '<a target="_blank" href="https://paymongo-webhook-tool.meeco.dev?url=' 	
                 . $webhookUrl	
-                . '">Click this to generate a webhook secret</a>'	
-                . ' or use this URL: <b>'	
-                . $webhookUrl,
+                . '">Go here to generate a webhook secret</a>',
             ),
             array(
                 'type' => 'sectionend',
-                'id' => 'webhook_section_end',
-            )
+                'id' => 'paymongo_api_settings',
+            ),
         );
 
         return $settings_webhooks;
