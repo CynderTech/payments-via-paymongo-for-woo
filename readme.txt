@@ -2,9 +2,9 @@
 Contributors: pickmeshop
 Tags: payments, credit card, gcash, grabpay
 Requires at least: 5.0
-Tested up to: 5.6
+Tested up to: 5.7
 Requires PHP: 5.6
-Stable tag: 1.5.0
+Stable tag: 1.5.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -13,6 +13,16 @@ Take payments on your store using PayMongo.
 == Description ==
 
 Accept Visa, MasterCard, GCash and GrabPay directly on your store with the PayMongo Payment Gateway for WooCommerce
+
+** 1.5.x UPDATE INSTRUCTIONS **
+
+If you are coming from a plugin version lower than 1.5.0, you need to do the following for the plugin to work properly.
+
+1. Go to the [webhook tool](https://paymongo-webhook-tool.meeco.dev).
+2. On the Retrieve tab, enter your PayMongo secret key and click on the Retrieve Webhooks button.
+3. Get the corresponding hook ID (starts with hook_) for your domain and copy it.
+4. On the Update tab, enter your PayMongo secret key on the first field and the hook ID on the second field.
+5. Click on Update Webhook.
 
 **Notes:**
 * Paymongo API **only** supports the **PHP (Philippine Peso)** currency at the moment. Prices for your shop should be configured to PHP for the plugin to work.
@@ -94,7 +104,7 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 == Changelog ==
 
-= 1.5.0 =
+= 1.5.1 =
 *Release Date - 31 March 2021*
 
 [FIX] Order statuses now reflect payment statuses (ex. failed payments now marks orders as failed)
