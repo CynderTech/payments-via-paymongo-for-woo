@@ -202,6 +202,7 @@ class Cynder_PayMongo_Ewallet_Gateway extends WC_Payment_Gateway
                 'accept' => 'application/json',
                 'content-type' => 'application/json'
             ),
+            'timeout' => 60,
         );
 
         wc_get_logger()->log('info', 'Request Args ' . json_encode($args));

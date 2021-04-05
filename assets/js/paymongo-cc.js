@@ -15,7 +15,8 @@ jQuery(document).ready(function ($) {
     }
 
     CCForm.prototype.init = function () {
-        $(document.body).on('updated_checkout', this.updatedCheckout.bind(this));
+        $(document.body).on('payment_method_selected', this.initializeCcFields.bind(this));
+        $(document.body).on('updated_checkout', this.initializeCcFields.bind(this));
 
         let form;
         
@@ -37,7 +38,7 @@ jQuery(document).ready(function ($) {
         }
     }
 
-    CCForm.prototype.updatedCheckout = function () {
+    CCForm.prototype.initializeCcFields = function () {
         var paymentMethod = $('input[name=payment_method]:checked').val();
 
         /** If payment method is not CC, don't initialize form */
