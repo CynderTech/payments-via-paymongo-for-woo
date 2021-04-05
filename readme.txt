@@ -4,7 +4,7 @@ Tags: payments, credit card, gcash, grabpay
 Requires at least: 5.0
 Tested up to: 5.7
 Requires PHP: 5.6
-Stable tag: 1.5.1
+Stable tag: 1.5.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -103,6 +103,13 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 5. Checking out with GrabPay.
 
 == Changelog ==
+
+= 1.5.2 =
+*Release Date - 6 April 2021*
+
+[FIX] Increase timeout for Paymongo API requests from default 5sec to 60sec
+[CHANGE] Added redundancy initializer for CC fields in checkout
+[CHORE] Removed unnecessary logs
 
 = 1.5.1 =
 *Release Date - 31 March 2021*

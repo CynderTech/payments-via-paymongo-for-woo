@@ -50,8 +50,6 @@ class Cynder_PayMongo_Gcash_Gateway extends Cynder_PayMongo_Ewallet_Gateway
      */
     public function initFormFields()
     {
-        wc_get_logger()->log('info', 'Shitbrix ' . wc_print_r($this->form_fields, true));
-
         $this->form_fields = array(
             'enabled' => array(
                 'title'       => 'Enable/Disable',

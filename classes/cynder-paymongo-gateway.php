@@ -324,6 +324,7 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
                 'accept' => 'application/json',
                 'content-type' => 'application/json'
             ),
+            'timeout' => 60,
         );
 
         $response = wp_remote_post(
