@@ -137,7 +137,10 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
 
         if (in_array($eventData['type'], $validEventTypes)) {
             if ($eventData['type'] === 'source.chargeable') {
-                $order = $this->getOrderByMeta('source_id', $resourceData['id']);
+                $sourceId = $resourceData['id'];
+                $order = $this->getOrderByMeta('source_id', $sourceId);
+
+                wc_get_logger()->log('info', '[processWebhook] event: source.chargeable with source ID ' . $sourceId);
 
                 return $this->createPaymentRecord($resourceData, $order);
             }
@@ -145,7 +148,10 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
             $sourceType = $resourceData['attributes']['source']['type'];
 
             if ($eventData['type'] === 'payment.paid' && $sourceType !== 'gcash' && $sourceType !== 'grab_pay') {
-                $order = $this->getOrderByMeta('paymongo_payment_intent_id', $resourceData['attributes']['payment_intent_id']);
+                $paymentIntentId = $resourceData['attributes']['payment_intent_id'];
+                $order = $this->getOrderByMeta('paymongo_payment_intent_id', $paymentIntentId);
+
+                wc_get_logger()->log('info', '[processWebhook] event: payment.paid with payment intent ID ' . $paymentIntentId);
 
                 /**
                  * Only process unpaid orders -- this would happen if payment intent has processing
@@ -168,7 +174,10 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
             }
 
             if ($eventData['type'] === 'payment.failed' && $sourceType !== 'gcash' && $sourceType !== 'grab_pay') {
-                $order = $this->getOrderByMeta('paymongo_payment_intent_id', $resourceData['attributes']['payment_intent_id']);
+                $paymentIntentId = $resourceData['attributes']['payment_intent_id'];
+                $order = $this->getOrderByMeta('paymongo_payment_intent_id', $paymentIntentId);
+
+                wc_get_logger()->log('info', '[processWebhook] event: payment.failed with payment intent ID ' . $paymentIntentId);
 
                 $order->update_status('failed', 'Payment failed', true);
                 return;
