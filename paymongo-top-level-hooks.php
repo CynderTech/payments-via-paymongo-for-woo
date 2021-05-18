@@ -352,3 +352,16 @@ function update_cynder_paymongo_plugin() {
 }
 
 add_action('woocommerce_paymongo_updated', 'update_cynder_paymongo_plugin');
+
+function cynder_paymongo_notices() {
+    $version = get_option('cynder_paymongo_version');
+
+    if (version_compare($version, '1.5.0', '<')) {
+        echo '<div class="notice notice-warning">'
+        . '<p><strong>You are using an outdated version of the PayMongo payment plugin</strong>. Please upgrade immediately using '
+        . '<a target="_blank" href="https://cynder.atlassian.net/servicedesk/customer/portal/1/article/709656577">this guide</a>.</p>'
+        . '</div>';
+    }
+}
+
+add_action('admin_notices', 'cynder_paymongo_notices');
