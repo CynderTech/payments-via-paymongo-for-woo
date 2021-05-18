@@ -147,12 +147,23 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
             if ($eventData['type'] === 'payment.paid' && $sourceType !== 'gcash' && $sourceType !== 'grab_pay') {
                 $order = $this->getOrderByMeta('paymongo_payment_intent_id', $resourceData['attributes']['payment_intent_id']);
 
-                $order->payment_complete($resourceData['id']);
-                $orderId = $order->get_id();
-                wc_reduce_stock_levels($orderId);
-        
-                // Sending invoice after successful payment
-                $woocommerce->mailer()->emails['WC_Email_Customer_Invoice']->trigger($orderId);
+                /**
+                 * Only process unpaid orders -- this would happen if payment intent has processing
+                 * status on redirect from the payment authorization page back to the woocommerce shop
+                 * 
+                 * Any paid orders should be ignored
+                 */
+                if (!$order->is_paid()) {
+                    $orderId = $order->get_id();
+
+                    wc_get_logger()->log('info', 'Paying order ID ' . $orderId . ' from payment webhook.');
+
+                    $order->payment_complete($resourceData['id']);
+                    wc_reduce_stock_levels($orderId);
+            
+                    // Sending invoice after successful payment
+                    $woocommerce->mailer()->emails['WC_Email_Customer_Invoice']->trigger($orderId);
+                }
                 return;
             }
 
