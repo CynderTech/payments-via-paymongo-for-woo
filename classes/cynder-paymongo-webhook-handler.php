@@ -64,6 +64,9 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
 
         $this->webhook_secret = get_option($wsKey);
 
+        $debugMode = get_option('woocommerce_cynder_paymongo_debug_mode');
+        $this->debugMode = (!empty($debugMode) && $debugMode === 'yes') ? true : false;
+
         add_action(
             'woocommerce_api_cynder_paymongo',
             array($this, 'checkForWebhook')
@@ -127,7 +130,9 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
         $eventData = $decoded['data']['attributes'];
         $resourceData = $eventData['data'];
 
-        // wc_get_logger()->log('info', '[processWebhook] Webhook payload ' . wc_print_r($decoded, true));
+        if ($this->debugMode) {
+            wc_get_logger()->log('info', '[processWebhook] Webhook payload ' . wc_print_r($decoded, true));
+        }
 
         $validEventTypes = [
             'source.chargeable',

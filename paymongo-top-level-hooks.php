@@ -278,6 +278,24 @@ function add_webhook_settings($settings, $current_section) {
                 . '">Go here to generate a webhook secret</a>',
             ),
             array(
+                'id' => 'test_env_end',
+                'type' => 'sectionend'
+            ),
+            array(
+                'id' => 'paymongo_misc',
+                'title' => 'Other Options',
+                'type' => 'title',
+            ),
+            array(
+                'id' => 'woocommerce_cynder_paymongo_debug_mode',
+                'title'       => 'Debug mode',
+                'label'       => 'Enable Debug Mode',
+                'type'        => 'checkbox',
+                'desc_tip' => 'This enables additional logs in WC logger for developer analysis',
+                'desc' => 'Enable additional logs',
+                'default'     => 'no',
+            ),
+            array(
                 'type' => 'sectionend',
                 'id' => 'paymongo_api_settings',
             ),
