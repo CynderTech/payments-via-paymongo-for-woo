@@ -80,6 +80,9 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
         $pkKey = $this->testmode ? 'woocommerce_cynder_paymongo_test_public_key' : 'woocommerce_cynder_paymongo_public_key';
         $this->public_key = get_option($pkKey);
 
+        $debugMode = get_option('woocommerce_cynder_paymongo_debug_mode');
+        $this->debugMode = (!empty($debugMode) && $debugMode === 'yes') ? true : false;
+
         add_action(
             'woocommerce_update_options_payment_gateways_' . $this->id,
             array($this, 'process_admin_options')
@@ -333,8 +336,9 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
         );
 
         if (!is_wp_error($response)) {
-            /** Enable for debugging purposes */
-            wc_get_logger()->log('info', 'Response ' . json_encode($response));
+            if ($this->debugMode) {
+                wc_get_logger()->log('info', '[process_payment] Response ' . wc_print_r($response, true));
+            }
 
             $body = json_decode($response['body'], true);
 

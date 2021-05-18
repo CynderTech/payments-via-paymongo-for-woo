@@ -108,7 +108,12 @@ add_action('woocommerce_checkout_order_processed', 'cynder_paymongo_create_inten
 function cynder_paymongo_catch_redirect() {
     global $woocommerce;
 
-    wc_get_logger()->log('info', 'Params ' . json_encode($_GET));
+    $debugMode = get_option('woocommerce_cynder_paymongo_debug_mode');
+    $debugMode = (!empty($debugMode) && $debugMode === 'yes') ? true : false;
+
+    if ($debugMode) {
+        wc_get_logger()->log('info', '[Catch Redirect][Payload] ' . wc_print_r($_GET, true));
+    }
 
     $paymentIntentId = $_GET['intent'];
 
@@ -136,8 +141,9 @@ function cynder_paymongo_catch_redirect() {
         $args
     );
 
-    /** Enable for debugging */
-    wc_get_logger()->log('info', '[Catch Redirect][Response] ' . json_encode($response));
+    if ($debugMode) {
+        wc_get_logger()->log('info', '[Catch Redirect][Response] ' . json_encode($response));
+    }
 
     if (is_wp_error($response)) {
         /** Handle errors */
