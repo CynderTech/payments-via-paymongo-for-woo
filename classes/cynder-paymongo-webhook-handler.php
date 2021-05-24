@@ -64,6 +64,9 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
 
         $this->webhook_secret = get_option($wsKey);
 
+        $debugMode = get_option('woocommerce_cynder_paymongo_debug_mode');
+        $this->debugMode = (!empty($debugMode) && $debugMode === 'yes') ? true : false;
+
         add_action(
             'woocommerce_api_cynder_paymongo',
             array($this, 'checkForWebhook')
@@ -127,7 +130,9 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
         $eventData = $decoded['data']['attributes'];
         $resourceData = $eventData['data'];
 
-        // wc_get_logger()->log('info', '[processWebhook] Webhook payload ' . wc_print_r($decoded, true));
+        if ($this->debugMode) {
+            wc_get_logger()->log('info', '[processWebhook] Webhook payload ' . wc_print_r($decoded, true));
+        }
 
         $validEventTypes = [
             'source.chargeable',
@@ -137,7 +142,10 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
 
         if (in_array($eventData['type'], $validEventTypes)) {
             if ($eventData['type'] === 'source.chargeable') {
-                $order = $this->getOrderByMeta('source_id', $resourceData['id']);
+                $sourceId = $resourceData['id'];
+                $order = $this->getOrderByMeta('source_id', $sourceId);
+
+                wc_get_logger()->log('info', '[processWebhook] event: source.chargeable with source ID ' . $sourceId);
 
                 return $this->createPaymentRecord($resourceData, $order);
             }
@@ -145,19 +153,36 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
             $sourceType = $resourceData['attributes']['source']['type'];
 
             if ($eventData['type'] === 'payment.paid' && $sourceType !== 'gcash' && $sourceType !== 'grab_pay') {
-                $order = $this->getOrderByMeta('paymongo_payment_intent_id', $resourceData['attributes']['payment_intent_id']);
+                $paymentIntentId = $resourceData['attributes']['payment_intent_id'];
+                $order = $this->getOrderByMeta('paymongo_payment_intent_id', $paymentIntentId);
 
-                $order->payment_complete($resourceData['id']);
-                $orderId = $order->get_id();
-                wc_reduce_stock_levels($orderId);
-        
-                // Sending invoice after successful payment
-                $woocommerce->mailer()->emails['WC_Email_Customer_Invoice']->trigger($orderId);
+                wc_get_logger()->log('info', '[processWebhook] event: payment.paid with payment intent ID ' . $paymentIntentId);
+
+                /**
+                 * Only process unpaid orders -- this would happen if payment intent has processing
+                 * status on redirect from the payment authorization page back to the woocommerce shop
+                 * 
+                 * Any paid orders should be ignored
+                 */
+                if (!$order->is_paid()) {
+                    $orderId = $order->get_id();
+
+                    wc_get_logger()->log('info', 'Paying order ID ' . $orderId . ' from payment webhook.');
+
+                    $order->payment_complete($resourceData['id']);
+                    wc_reduce_stock_levels($orderId);
+            
+                    // Sending invoice after successful payment
+                    $woocommerce->mailer()->emails['WC_Email_Customer_Invoice']->trigger($orderId);
+                }
                 return;
             }
 
             if ($eventData['type'] === 'payment.failed' && $sourceType !== 'gcash' && $sourceType !== 'grab_pay') {
-                $order = $this->getOrderByMeta('paymongo_payment_intent_id', $resourceData['attributes']['payment_intent_id']);
+                $paymentIntentId = $resourceData['attributes']['payment_intent_id'];
+                $order = $this->getOrderByMeta('paymongo_payment_intent_id', $paymentIntentId);
+
+                wc_get_logger()->log('info', '[processWebhook] event: payment.failed with payment intent ID ' . $paymentIntentId);
 
                 $order->update_status('failed', 'Payment failed', true);
                 return;

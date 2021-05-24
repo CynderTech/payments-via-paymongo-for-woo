@@ -65,6 +65,9 @@ class Cynder_PayMongo_Ewallet_Gateway extends WC_Payment_Gateway
         $pkKey = $this->testmode ? 'woocommerce_cynder_paymongo_test_public_key' : 'woocommerce_cynder_paymongo_public_key';
         $this->public_key = get_option($pkKey);
 
+        $debugMode = get_option('woocommerce_cynder_paymongo_debug_mode');
+        $this->debugMode = (!empty($debugMode) && $debugMode === 'yes') ? true : false;
+
         $this->title = $this->get_option('title');
         $this->description = $this->get_option('description');
 
@@ -184,7 +187,9 @@ class Cynder_PayMongo_Ewallet_Gateway extends WC_Payment_Gateway
             $attributes['billing'] = $billing;
         }
 
-        wc_get_logger()->log('info', 'Attributes ' . json_encode($attributes));
+        if ($this->debugMode) {
+            wc_get_logger()->log('info', '[Process Payment][E-wallet] Attributes ' . wc_print_r($attributes, true));
+        }
 
         $payload = json_encode(
             array(
@@ -205,7 +210,9 @@ class Cynder_PayMongo_Ewallet_Gateway extends WC_Payment_Gateway
             'timeout' => 60,
         );
 
-        wc_get_logger()->log('info', 'Request Args ' . json_encode($args));
+        if ($this->debugMode) {
+            wc_get_logger()->log('info', '[Process Payment][E-wallet] Request Payload ' . wc_print_r($args, true));
+        }
 
         $response = wp_remote_post(CYNDER_PAYMONGO_BASE_URL . '/sources', $args);
 

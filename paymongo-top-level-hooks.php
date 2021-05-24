@@ -108,7 +108,12 @@ add_action('woocommerce_checkout_order_processed', 'cynder_paymongo_create_inten
 function cynder_paymongo_catch_redirect() {
     global $woocommerce;
 
-    wc_get_logger()->log('info', 'Params ' . json_encode($_GET));
+    $debugMode = get_option('woocommerce_cynder_paymongo_debug_mode');
+    $debugMode = (!empty($debugMode) && $debugMode === 'yes') ? true : false;
+
+    if ($debugMode) {
+        wc_get_logger()->log('info', '[Catch Redirect][Payload] ' . wc_print_r($_GET, true));
+    }
 
     $paymentIntentId = $_GET['intent'];
 
@@ -136,8 +141,9 @@ function cynder_paymongo_catch_redirect() {
         $args
     );
 
-    /** Enable for debugging */
-    wc_get_logger()->log('info', '[Catch Redirect][Response] ' . json_encode($response));
+    if ($debugMode) {
+        wc_get_logger()->log('info', '[Catch Redirect][Response] ' . json_encode($response));
+    }
 
     if (is_wp_error($response)) {
         /** Handle errors */
@@ -154,6 +160,16 @@ function cynder_paymongo_catch_redirect() {
 
     /** If payment intent status is succeeded or processing, just empty cart and redirect to confirmation page */
     if ($status === 'succeeded' || $status === 'processing') {
+        if ($status === 'succeeded') {
+            $payment = $responseAttr['payments'][0];
+            $order->payment_complete($payment['id']);
+            $orderId = $order->get_id();
+            wc_reduce_stock_levels($orderId);
+
+            // Sending invoice after successful payment
+            $woocommerce->mailer()->emails['WC_Email_Customer_Invoice']->trigger($orderId);
+        }
+
         // Empty cart
         $woocommerce->cart->empty_cart();
 
@@ -268,6 +284,24 @@ function add_webhook_settings($settings, $current_section) {
                 . '">Go here to generate a webhook secret</a>',
             ),
             array(
+                'id' => 'test_env_end',
+                'type' => 'sectionend'
+            ),
+            array(
+                'id' => 'paymongo_misc',
+                'title' => 'Other Options',
+                'type' => 'title',
+            ),
+            array(
+                'id' => 'woocommerce_cynder_paymongo_debug_mode',
+                'title'       => 'Debug mode',
+                'label'       => 'Enable Debug Mode',
+                'type'        => 'checkbox',
+                'desc_tip' => 'This enables additional logs in WC logger for developer analysis',
+                'desc' => 'Enable additional logs',
+                'default'     => 'no',
+            ),
+            array(
                 'type' => 'sectionend',
                 'id' => 'paymongo_api_settings',
             ),
@@ -318,3 +352,16 @@ function update_cynder_paymongo_plugin() {
 }
 
 add_action('woocommerce_paymongo_updated', 'update_cynder_paymongo_plugin');
+
+function cynder_paymongo_notices() {
+    $version = get_option('cynder_paymongo_version');
+
+    if (version_compare($version, '1.5.0', '<')) {
+        echo '<div class="notice notice-warning">'
+        . '<p><strong>You are using an outdated version of the PayMongo payment plugin</strong>. Please upgrade immediately using '
+        . '<a target="_blank" href="https://cynder.atlassian.net/servicedesk/customer/portal/1/article/709656577">this guide</a>.</p>'
+        . '</div>';
+    }
+}
+
+add_action('admin_notices', 'cynder_paymongo_notices');

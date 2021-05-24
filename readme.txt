@@ -4,7 +4,7 @@ Tags: payments, credit card, gcash, grabpay
 Requires at least: 5.0
 Tested up to: 5.7
 Requires PHP: 5.6
-Stable tag: 1.5.2
+Stable tag: 1.6.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -16,13 +16,7 @@ Accept Visa, MasterCard, GCash and GrabPay directly on your store with the PayMo
 
 ** 1.5.x UPDATE INSTRUCTIONS **
 
-If you are coming from a plugin version lower than 1.5.0, you need to do the following for the plugin to work properly.
-
-1. Go to the [webhook tool](https://paymongo-webhook-tool.meeco.dev).
-2. On the Retrieve tab, enter your PayMongo secret key and click on the Retrieve Webhooks button.
-3. Get the corresponding hook ID (starts with hook_) for your domain and copy it.
-4. On the Update tab, enter your PayMongo secret key on the first field and the hook ID on the second field.
-5. Click on Update Webhook.
+If you are coming from a plugin version lower than 1.5.0, please follow [this guide](https://cynder.atlassian.net/servicedesk/customer/portal/1/article/709656577).
 
 **Notes:**
 * Paymongo API **only** supports the **PHP (Philippine Peso)** currency at the moment. Prices for your shop should be configured to PHP for the plugin to work.
@@ -103,6 +97,13 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 5. Checking out with GrabPay.
 
 == Changelog ==
+
+= 1.6.0 =
+*Release Date - 24 May 2021*
+
+[FIX] Added payment resolution redundancy for credit card payments
+[FEATURE] Added debug mode toggle in admin dashboard settings, including debug messages for analysis
+[CHORE] Added admin dashboard notice for 1.5.x update
 
 = 1.5.2 =
 *Release Date - 6 April 2021*
