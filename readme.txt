@@ -14,9 +14,9 @@ Take payments on your store using PayMongo.
 
 Accept Visa, MasterCard, GCash and GrabPay directly on your store with the PayMongo Payment Gateway for WooCommerce
 
-** 1.5.x UPDATE INSTRUCTIONS **
+** 1.6.x UPDATE INSTRUCTIONS **
 
-If you are coming from a plugin version lower than 1.5.0, please follow [this guide](https://cynder.atlassian.net/servicedesk/customer/portal/1/article/709656577).
+If you are coming from a plugin version lower than 1.6.x, please follow [this guide](https://cynder.atlassian.net/servicedesk/customer/portal/1/article/709656577).
 
 **Notes:**
 * Paymongo API **only** supports the **PHP (Philippine Peso)** currency at the moment. Prices for your shop should be configured to PHP for the plugin to work.
