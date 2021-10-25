@@ -249,7 +249,7 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
             
             if (array_key_exists('errors', $body) && $body['errors'][0]) {
                 status_header($response['response']['code']);
-                wc_get_logger()->log('Payment failed: ' . $body);
+                wc_get_logger()->log('info', 'Payment failed: ' . wc_print_r($body, true));
                 die();
             }
 
@@ -266,7 +266,7 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
             }
 
             if ($status == 'failed') {
-                wc_get_logger()->log('Payment failed: ' . $response['body']);
+                wc_get_logger()->log('info', 'Payment failed: ' . wc_print_r($response['body'], true));
                 $order->update_status($status);
                 status_header(400);
                 die();
