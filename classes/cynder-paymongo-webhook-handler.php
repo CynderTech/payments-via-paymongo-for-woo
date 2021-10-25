@@ -353,7 +353,7 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
      */
     public function getFromPayMongoSignature($key, $headers)
     {
-        $signature = $headers["Paymongo-Signature"];
+        $signature = $headers["paymongo-signature"];
         $explodedSignature = explode(',', $signature);
 
         if ($key == 'timestamp') {
@@ -396,11 +396,15 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
                     $headers[$headerKey] = $value;
                 }
             }
-
-            return $headers;
         } else {
-            return getallheaders();
+            $originalHeaders = getallheaders();
+
+            foreach($originalHeaders as $key => $value) {
+                $headers[strtolower($key)] = $value;
+            }
         }
+
+        return $headers;
     }
 
     /** 
