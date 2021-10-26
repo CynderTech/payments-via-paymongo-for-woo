@@ -100,6 +100,10 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
         $requestBody = file_get_contents('php://input');
         $requestHeaders = $this->getRequestHeaders();
 
+        if ($this->debugMode) {
+            wc_get_logger()->log('info', '[checkForWebhook] Headers ' . ' ' . wc_print_r($requestHeaders, true));
+        }
+
         // Validate it to make sure it is legit.
         if ($this->isValidRequest($requestBody, $requestHeaders)) {
             $this->processWebhook($requestBody);
@@ -245,7 +249,7 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
             
             if (array_key_exists('errors', $body) && $body['errors'][0]) {
                 status_header($response['response']['code']);
-                wc_get_logger()->log('Payment failed: ' . $body);
+                wc_get_logger()->log('info', 'Payment failed: ' . wc_print_r($body, true));
                 die();
             }
 
@@ -262,7 +266,7 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
             }
 
             if ($status == 'failed') {
-                wc_get_logger()->log('Payment failed: ' . $response['body']);
+                wc_get_logger()->log('info', 'Payment failed: ' . wc_print_r($response['body'], true));
                 $order->update_status($status);
                 status_header(400);
                 die();
@@ -291,16 +295,27 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
         // manually created raw signature
         $rawSignature = $this->assembleSignature($payload, $headers);
 
+        if ($this->debugMode) {
+            wc_get_logger()->log('info', '[isValidRequest] Raw Signature ' . wc_print_r($rawSignature, true));
+        }
+
         // get saved webhook secret
         $webhookSecret = $this->webhook_secret;
         
         // hashed rawSignature
         $encryptedSignature = hash_hmac('sha256', $rawSignature, $webhookSecret);
 
+        if ($this->debugMode) {
+            wc_get_logger()->log('info', '[isValidRequest] Encrypted Signature ' . wc_print_r($encryptedSignature, true));
+        }
+
         $requestSignature = $this->testmode ?
             $this->getFromPayMongoSignature('test', $headers)
             : $this->getFromPayMongoSignature('live', $headers);
-        
+
+        if ($this->debugMode) {
+            wc_get_logger()->log('info', '[isValidRequest] Request Signature ' . wc_print_r($requestSignature, true));
+        }
 
         return $encryptedSignature == $requestSignature;
     }
@@ -338,7 +353,7 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
      */
     public function getFromPayMongoSignature($key, $headers)
     {
-        $signature = $headers["Paymongo-Signature"];
+        $signature = $headers["paymongo-signature"];
         $explodedSignature = explode(',', $signature);
 
         if ($key == 'timestamp') {
@@ -381,11 +396,15 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
                     $headers[$headerKey] = $value;
                 }
             }
-
-            return $headers;
         } else {
-            return getallheaders();
+            $originalHeaders = getallheaders();
+
+            foreach($originalHeaders as $key => $value) {
+                $headers[strtolower($key)] = $value;
+            }
         }
+
+        return $headers;
     }
 
     /** 
