@@ -272,6 +272,11 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
                 die();
             }
         } else {
+            /** Mark order as failed */
+            $order->update_status('failed', 'PayMongo payment creation failed. See logs for details.', true);
+            $sourceId = $source['id'];
+
+            wc_get_logger()->log('error', "Payment creation failed for: ${sourceId} " . wc_print_r($response->get_error_message(), true));
             status_header(422);
             die();
         }
