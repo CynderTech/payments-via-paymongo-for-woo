@@ -98,6 +98,11 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 == Changelog ==
 
+= 1.6.2 =
+*Release Date - 10 November 2021*
+
+[FIX] Error handling for e-wallet webhooks
+
 = 1.6.1 =
 *Release Date - 26 October 2021*
 
