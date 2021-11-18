@@ -17,6 +17,7 @@ if (!defined('ABSPATH')) {
 
 function cynder_paymongo_create_intent($orderId) {
     $ccSettings = get_option('woocommerce_paymongo_settings');
+    $paymayaSettings = get_option('woocommerce_paymongo_paymaya_settings');
     
     $testMode = get_option('woocommerce_cynder_paymongo_test_mode');
     $testMode = (!empty($testMode) && $testMode === 'yes') ? true : false;
@@ -34,7 +35,11 @@ function cynder_paymongo_create_intent($orderId) {
      * 2. Has no payment method (ex. 100% discounts)
      * 3. Payment method is not Paymongo credit card
      */
-    if ($ccSettings['enabled'] !== 'yes' || !$hasPaymentMethod || $paymentMethod !== 'paymongo') return;
+    if (
+        ($ccSettings['enabled'] !== 'yes' && $paymayaSettings['enabled'] !== 'yes') ||
+        !$hasPaymentMethod ||
+        ($paymentMethod !== 'paymongo' && $paymentMethod !== 'paymongo_paymaya')
+    ) return;
 
     $amount = floatval($order->get_total());
 
@@ -47,12 +52,14 @@ function cynder_paymongo_create_intent($orderId) {
     $skKey = $testMode ? 'woocommerce_cynder_paymongo_test_secret_key' : 'woocommerce_cynder_paymongo_secret_key';
     $secretKey = get_option($skKey);
 
+    $method = $paymentMethod === 'paymongo' ? 'card' : 'paymaya';
+
     $payload = json_encode(
         array(
             'data' => array(
                 'attributes' =>array(
                     'amount' => floatval($amount * 100),
-                    'payment_method_allowed' => array('card'),
+                    'payment_method_allowed' => array($method),
                     'currency' => 'PHP', // hard-coded for now
                     'description' => get_bloginfo('name') . ' - ' . $orderId
                 ),
@@ -207,7 +214,7 @@ add_action(
 );
 
 function add_webhook_settings($settings, $current_section) {
-    if ($current_section === 'paymongo_gcash' || $current_section === 'paymongo_grab_pay' || $current_section === 'paymongo') {
+    if ($current_section === 'paymongo_gcash' || $current_section === 'paymongo_grab_pay' || $current_section === 'paymongo' || $current_section === 'paymongo_paymaya') {
         $webhookUrl = add_query_arg(
             'wc-api',
             'cynder_paymongo',

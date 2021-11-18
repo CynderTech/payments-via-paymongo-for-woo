@@ -144,6 +144,7 @@ function Paymongo_Init_Gateway_class()
             {
                 $fileDir = dirname(__FILE__);
                 include_once $fileDir.'/classes/cynder-paymongo-gateway.php';
+                include_once $fileDir.'/classes/cynder-paymongo-paymaya.php';
                 include_once $fileDir.'/classes/cynder-paymongo-ewallet-base.php';
                 include_once $fileDir.'/classes/cynder-paymongo-gcash-gateway.php';
                 include_once $fileDir.'/classes/cynder-paymongo-grabpay-gateway.php';
@@ -177,6 +178,7 @@ function Paymongo_Init_Gateway_class()
                 $methods[] = 'Cynder_PayMongo_Gateway';
                 $methods[] = 'Cynder_PayMongo_Gcash_Gateway';
                 $methods[] = 'Cynder_PayMongo_GrabPay_Gateway';
+                $methods[] = 'Cynder_PayMongo_PayMaya';
                 
                 return $methods;
             }
@@ -195,6 +197,7 @@ function Paymongo_Init_Gateway_class()
                 unset($sections['paymongo']);
                 unset($sections['paymongo_gcash']);
                 unset($sections['paymongo_grab_pay']);
+                unset($sections['paymongo_paymaya']);
 
                 $gatewayName = 'woocommerce-gateway-paymongo';
                 $sections['paymongo'] = __(
@@ -209,6 +212,11 @@ function Paymongo_Init_Gateway_class()
 
                 $sections['paymongo_grab_pay'] = __(
                     'GrabPay via PayMongo',
+                    $gatewayName
+                );
+
+                $sections['paymongo_paymaya'] = __(
+                    'PayMaya via PayMongo',
                     $gatewayName
                 );
 
