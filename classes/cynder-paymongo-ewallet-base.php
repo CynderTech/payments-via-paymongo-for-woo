@@ -178,8 +178,8 @@ class Cynder_PayMongo_Ewallet_Gateway extends WC_Payment_Gateway
             'currency' => $order->get_currency(),
             'description' => get_bloginfo('name') . ' - ' . $orderId,
             'redirect' => array(
-                'success' => get_home_url() . '/?wc-api=cynder_paymongo_catch_source_redirect&order=' . $orderId . '&status=success',
-                'failed' => get_home_url() . '/?wc-api=cynder_paymongo_catch_source_redirect&order=' . $orderId . '&status=failed',
+                'success' => get_home_url() . '/?wc-api=cynder_paymongo_catch_source_redirect&order=' . $orderId . '&status=success&agent=cynder_woocommerce&version=' . CYNDER_PAYMONGO_VERSION,
+                'failed' => get_home_url() . '/?wc-api=cynder_paymongo_catch_source_redirect&order=' . $orderId . '&status=failed&agent=cynder_woocommerce&version=' . CYNDER_PAYMONGO_VERSION,
             ),
         );
 
