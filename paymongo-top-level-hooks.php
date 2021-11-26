@@ -61,7 +61,11 @@ function cynder_paymongo_create_intent($orderId) {
                     'amount' => floatval($amount * 100),
                     'payment_method_allowed' => array($method),
                     'currency' => 'PHP', // hard-coded for now
-                    'description' => get_bloginfo('name') . ' - ' . $orderId
+                    'description' => get_bloginfo('name') . ' - ' . $orderId,
+                    'metadata' => array(
+                        'agent' => 'cynder_woocommerce',
+                        'version' => CYNDER_PAYMONGO_VERSION,
+                    )
                 ),
             ),
         )

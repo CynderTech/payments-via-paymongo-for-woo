@@ -282,7 +282,7 @@ class Cynder_PayMongo_PayMaya extends WC_Payment_Gateway
     {
         $icons_str = '<img class="paymongo-method-logo paymongo-cards-icon" src="'
             . CYNDER_PAYMONGO_PLUGIN_URL
-            . '/assets/images/cards.png" alt="'
+            . '/assets/images/paymaya.png" alt="'
             . $this->title
             .'" />';
 
