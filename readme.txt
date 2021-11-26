@@ -102,6 +102,7 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 *Release Date - 26 November 2021*
 
 [FEATURE] Add metadata tags for PayMongo analytics
+[FIX] Fix header workaround to avoid capitalization
 [CHORE] Add PayMaya logo
 
 = 1.6.3 =
