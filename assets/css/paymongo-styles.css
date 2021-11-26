@@ -10,6 +10,10 @@
     max-width: 100px;
 }
 
+.payment_method_paymongo_paymaya > label:first-of-type img.paymongo-method-logo {
+    max-width: 80px;
+}
+
 .cynder-credit-card-form.cynder-payment-form > .form-row {
     margin-bottom: 10px;
 }

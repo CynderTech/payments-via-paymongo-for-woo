@@ -394,9 +394,7 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
                     $headerKey = str_replace(
                         ' ',
                         '-',
-                        ucwords(
-                            strtolower(str_replace('_', ' ', substr($name, 5)))
-                        )
+                        strtolower(str_replace('_', ' ', substr($name, 5)))
                     );
                     $headers[$headerKey] = $value;
                 }
