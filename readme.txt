@@ -99,7 +99,7 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 == Changelog ==
 
 = 1.7.0 =
-*Release Date - 22 November 2021*
+*Release Date - 26 November 2021*
 
 [FEATURE] Add metadata tags for PayMongo analytics
 [CHORE] Add PayMaya logo
