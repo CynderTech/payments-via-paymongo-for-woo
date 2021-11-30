@@ -157,7 +157,7 @@ class Cynder_PayMongo_PayMaya extends WC_Payment_Gateway
                         'type' => 'paymaya'
                     ),
                 ),
-            ),
+            )
         );
 
         $paymentMethodArgs = array(
