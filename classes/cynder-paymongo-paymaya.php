@@ -172,7 +172,7 @@ class Cynder_PayMongo_PayMaya extends WC_Payment_Gateway
 
         $paymentMethodResponse = wp_remote_post(
             CYNDER_PAYMONGO_BASE_URL . '/payment_methods',
-            $paymentMethodArgs,
+            $paymentMethodArgs
         );
 
         if (is_wp_error($paymentMethodResponse)) {
@@ -219,7 +219,7 @@ class Cynder_PayMongo_PayMaya extends WC_Payment_Gateway
 
         $attachResponse = wp_remote_post(
             CYNDER_PAYMONGO_BASE_URL . '/payment_intents/' . $paymentIntentId . '/attach',
-            $attachArgs,
+            $attachArgs
         );
 
         if (is_wp_error($attachResponse)) {
