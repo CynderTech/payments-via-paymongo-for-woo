@@ -4,7 +4,7 @@ Tags: payments, credit card, gcash, grabpay
 Requires at least: 5.0
 Tested up to: 5.8
 Requires PHP: 5.6
-Stable tag: 1.7.1
+Stable tag: 1.7.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -97,6 +97,10 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 5. Checking out with GrabPay.
 
 == Changelog ==
+
+= 1.7.2 =
+*Release Date - 1 December 2021*
+[FIX] Remove more dangling commas
 
 = 1.7.1 =
 *Release Date - 1 December 2021*
