@@ -2,9 +2,9 @@
 Contributors: pickmeshop
 Tags: payments, credit card, gcash, grabpay
 Requires at least: 5.0
-Tested up to: 5.8
+Tested up to: 5.9
 Requires PHP: 5.6
-Stable tag: 1.7.2
+Stable tag: 1.7.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -97,6 +97,11 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 5. Checking out with GrabPay.
 
 == Changelog ==
+
+= 1.7.3 =
+*Release Date - January 27, 2022*
+[FIX] PayMaya intent creation fix
+[CHORE] Compatibility tests for WP 5.9 and WC 6.1.1
 
 = 1.7.2 =
 *Release Date - 1 December 2021*
