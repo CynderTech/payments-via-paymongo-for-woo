@@ -52,14 +52,12 @@ function cynder_paymongo_create_intent($orderId) {
     $skKey = $testMode ? 'woocommerce_cynder_paymongo_test_secret_key' : 'woocommerce_cynder_paymongo_secret_key';
     $secretKey = get_option($skKey);
 
-    $method = $paymentMethod === 'paymongo' ? 'card' : 'paymaya';
-
     $payload = json_encode(
         array(
             'data' => array(
                 'attributes' =>array(
                     'amount' => floatval($amount * 100),
-                    'payment_method_allowed' => array($method),
+                    'payment_method_allowed' => ['card', 'paymaya'],
                     'currency' => 'PHP', // hard-coded for now
                     'description' => get_bloginfo('name') . ' - ' . $orderId,
                     'metadata' => array(
