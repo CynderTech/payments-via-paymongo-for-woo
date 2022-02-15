@@ -4,7 +4,7 @@ Tags: payments, credit card, gcash, grabpay
 Requires at least: 5.0
 Tested up to: 5.9
 Requires PHP: 5.6
-Stable tag: 1.7.3
+Stable tag: 1.7.4
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -97,6 +97,11 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 5. Checking out with GrabPay.
 
 == Changelog ==
+
+= 1.7.4 =
+*Release Date - February 15, 2022*
+[FIX] PayMaya billing details fix
+[CHORE] Compatibility tests for WC 6.2.0
 
 = 1.7.3 =
 *Release Date - January 27, 2022*
