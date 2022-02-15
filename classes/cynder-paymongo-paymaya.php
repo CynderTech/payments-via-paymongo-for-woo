@@ -133,6 +133,10 @@ class Cynder_PayMongo_PayMaya extends WC_Payment_Gateway
         );
     }
 
+    public function is_billing_value_set($value) {
+        return isset($value) && $value !== '';
+    }
+
     /**
      * Process PayMongo Payment
      *
@@ -150,11 +154,43 @@ class Cynder_PayMongo_PayMaya extends WC_Payment_Gateway
         $order = wc_get_order($orderId);
         $paymentIntentId = $order->get_meta('paymongo_payment_intent_id');
 
+        $billing_first_name = $order->get_billing_first_name();
+        $billing_last_name = $order->get_billing_last_name();
+        $has_billing_first_name = $this->is_billing_value_set($billing_first_name);
+        $has_billing_last_name = $this->is_billing_value_set($billing_last_name);
+
+        if ($has_billing_first_name && $has_billing_last_name) {
+            $billing['name'] = $billing_first_name . ' ' . $billing_last_name;
+        }
+
+        $billing_email = $order->get_billing_email();
+        $has_billing_email = $this->is_billing_value_set($billing_email);
+
+        if ($has_billing_email) {
+            $billing['email'] = $billing_email;
+        }
+
+        $billing_phone = $order->get_billing_phone();
+        $has_billing_phone = $this->is_billing_value_set($billing_phone);
+
+        if ($has_billing_phone) {
+            $billing['phone'] = $billing_phone;
+        }
+
+        $billing_address = generate_billing_address($order);
+
+        wc_get_logger()->log('info', 'Billing address ' . wc_print_r($billing_address, true));
+
+        if (count($billing_address) > 0) {
+            $billing['address'] = $billing_address;
+        }
+
         $paymentMethodPayload = json_encode(
             array(
                 'data' => array(
                     'attributes' => array(
-                        'type' => 'paymaya'
+                        'type' => 'paymaya',
+                        'billing' => $billing,
                     ),
                 ),
             )

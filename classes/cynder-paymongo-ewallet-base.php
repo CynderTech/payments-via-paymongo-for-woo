@@ -123,50 +123,7 @@ class Cynder_PayMongo_Ewallet_Gateway extends WC_Payment_Gateway
             $billing['phone'] = $billing_phone;
         }
 
-        $billing_address = array();
-
-        $billing_address_1 = $order->get_billing_address_1();
-        $has_billing_address_1 = $this->is_billing_value_set($billing_address_1);
-
-        if ($has_billing_address_1) {
-            $billing_address['line1'] = $billing_address_1;
-        }
-
-        $billing_address_2 = $order->get_billing_address_2();
-        $has_billing_address_2 = $this->is_billing_value_set($billing_address_2);
-
-        if ($has_billing_address_2) {
-            $billing_address['line2'] = $billing_address_2;
-        }
-
-        $billing_city = $order->get_billing_city();
-        $has_billing_city = $this->is_billing_value_set($billing_city);
-
-        if ($has_billing_city) {
-            $billing_address['city'] = $billing_city;
-        }
-
-        $billing_state = $order->get_billing_state();
-        $has_billing_state = $this->is_billing_value_set($billing_state);
-
-        if ($has_billing_state) {
-            $billing_address['state'] = $billing_state;
-        }
-
-        $billing_country = $order->get_billing_country();
-        $has_billing_country = $this->is_billing_value_set($billing_country);
-
-        if ($has_billing_country) {
-            $billing_address['country'] = $billing_country;
-        }
-
-        $billing_postcode = $order->get_billing_postcode();
-        $has_billing_postcode = $this->is_billing_value_set($billing_postcode);
-
-        if ($has_billing_postcode) {
-            $billing_address['postal_code'] = $billing_postcode;
-        }
-
+        $billing_address = generate_billing_address($order);
 
         if (count($billing_address) > 0) {
             $billing['address'] = $billing_address;
