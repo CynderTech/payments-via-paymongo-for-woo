@@ -80,6 +80,11 @@ class Cynder_PayMongo_Ewallet_Gateway extends WC_Payment_Gateway
         );
     }
 
+    /** Override this function on certain wallets */
+    public function initFormFields() {
+
+    }
+
     public function is_billing_value_set($value) {
         return isset($value) && $value !== '';
     } 
