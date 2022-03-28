@@ -149,6 +149,11 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
                 $sourceId = $resourceData['id'];
                 $order = $this->getOrderByMeta('source_id', $sourceId);
 
+                if (!$order) {
+                    wc_get_logger()->log('error', '[processWebhook] No order found with source ID ' . $sourceId);
+                    return;
+                }
+
                 wc_get_logger()->log('info', '[processWebhook] event: source.chargeable with source ID ' . $sourceId);
 
                 return $this->createPaymentRecord($resourceData, $order);
@@ -159,6 +164,11 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
             if ($eventData['type'] === 'payment.paid' && $sourceType !== 'gcash' && $sourceType !== 'grab_pay') {
                 $paymentIntentId = $resourceData['attributes']['payment_intent_id'];
                 $order = $this->getOrderByMeta('paymongo_payment_intent_id', $paymentIntentId);
+
+                if (!$order) {
+                    wc_get_logger()->log('error', '[processWebhook] No order found with payment intent ID ' . $paymentIntentId);
+                    return;
+                }
 
                 wc_get_logger()->log('info', '[processWebhook] event: payment.paid with payment intent ID ' . $paymentIntentId);
 

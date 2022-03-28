@@ -54,7 +54,7 @@ function Paymongo_Init_Gateway_class()
     }
 
     define('CYNDER_PAYMONGO_MAIN_FILE', __FILE__);
-    define('CYNDER_PAYMONGO_VERSION', '1.7.4');
+    define('CYNDER_PAYMONGO_VERSION', '1.7.5');
     define('CYNDER_PAYMONGO_BASE_URL',  'https://api.paymongo.com/v1');
     define(
         'CYNDER_PAYMONGO_PLUGIN_URL',
