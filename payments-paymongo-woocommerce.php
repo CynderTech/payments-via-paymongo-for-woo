@@ -142,6 +142,8 @@ function Paymongo_Init_Gateway_class()
              */
             public function init()
             {
+                include_once 'paymongo-constants.php';
+
                 $fileDir = dirname(__FILE__);
                 include_once $fileDir.'/classes/address.php';
                 include_once $fileDir.'/classes/cynder-paymongo-gateway.php';
