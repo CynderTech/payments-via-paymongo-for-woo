@@ -38,7 +38,7 @@ function cynder_paymongo_create_intent($orderId) {
     if (
         ($ccSettings['enabled'] !== 'yes' && $paymayaSettings['enabled'] !== 'yes') ||
         !$hasPaymentMethod ||
-        ($paymentMethod !== 'paymongo' && $paymentMethod !== 'paymongo_paymaya')
+        (!in_array($paymentMethod, PAYMENT_METHODS_WITH_INTENT))
     ) return;
 
     $amount = floatval($order->get_total());
@@ -57,7 +57,7 @@ function cynder_paymongo_create_intent($orderId) {
             'data' => array(
                 'attributes' =>array(
                     'amount' => floatval($amount * 100),
-                    'payment_method_allowed' => ['card', 'paymaya'],
+                    'payment_method_allowed' => ['card', 'paymaya', 'atome'],
                     'currency' => 'PHP', // hard-coded for now
                     'description' => get_bloginfo('name') . ' - ' . $orderId,
                     'metadata' => array(
