@@ -4,7 +4,7 @@ Tags: payments, credit card, gcash, grabpay
 Requires at least: 5.0
 Tested up to: 5.9
 Requires PHP: 5.6
-Stable tag: 1.8.0
+Stable tag: 1.8.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -98,10 +98,11 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 == Changelog ==
 
-= 1.8.0 =
+= 1.8.1 =
 *Release Date - May 16, 2022*
 [FEATURE] Added Atome payment method
 [CHORE] Compatibility tests for WC 6.4.1
+[CHORE] Updated PayMaya logo to Maya logo
 
 = 1.7.5 =
 *Release Date - March 28, 2022*
