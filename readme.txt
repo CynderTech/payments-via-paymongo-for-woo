@@ -12,7 +12,7 @@ Take payments on your store using PayMongo.
 
 == Description ==
 
-Accept Visa, MasterCard, GCash, GrabPay and PayMaya directly on your store with the PayMongo Payment Gateway for WooCommerce
+Accept Visa, MasterCard, GCash, GrabPay, Maya, and Atome directly on your store with the PayMongo Payment Gateway for WooCommerce
 
 ** 1.6.x UPDATE INSTRUCTIONS **
 
@@ -92,9 +92,7 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 1. PayMongo Gateways on WooCommerce Payment settings
 2. The settings panel used to configure the gateway.
-3. Normal checkout with PayMongo.
-4. Checking out with GCash.
-5. Checking out with GrabPay.
+3. Payment methods as displayed in checkout page.
 
 == Changelog ==
 
