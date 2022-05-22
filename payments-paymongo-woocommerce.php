@@ -154,6 +154,7 @@ function Paymongo_Init_Gateway_class()
                 include_once $fileDir.'/classes/cynder-paymongo-grabpay-gateway.php';
                 include_once $fileDir.'/classes/cynder-paymongo-webhook-handler.php';
                 include_once $fileDir.'/classes/cynder-paymongo-atome.php';
+                include_once $fileDir.'/classes/cynder-paymongo-bpi.php';
                 include_once 'paymongo-top-level-hooks.php';
 
                 add_filter(
@@ -185,6 +186,7 @@ function Paymongo_Init_Gateway_class()
                 $methods[] = 'Cynder_PayMongo_GrabPay_Gateway';
                 $methods[] = 'Cynder_PayMongo_PayMaya';
                 $methods[] = 'Cynder_PayMongo_Atome';
+                $methods[] = 'Cynder_PayMongo_Bpi';
                 
                 return $methods;
             }
@@ -200,37 +202,15 @@ function Paymongo_Init_Gateway_class()
              */
             public function filterGatewayOrderAdmin($sections) 
             {
-                unset($sections['paymongo']);
-                unset($sections['paymongo_gcash']);
-                unset($sections['paymongo_grab_pay']);
-                unset($sections['paymongo_paymaya']);
-                unset($sections['paymongo_atome']);
+                foreach (PAYMONGO_PAYMENT_METHODS as $method) {
+                    unset($sections[$method]);
+                }
 
                 $gatewayName = 'woocommerce-gateway-paymongo';
-                $sections['paymongo'] = __(
-                    'Credit/Debit Card via PayMongo',
-                    $gatewayName
-                );
 
-                $sections['paymongo_gcash'] = __(
-                    'GCash via PayMongo',
-                    $gatewayName
-                );
-
-                $sections['paymongo_grab_pay'] = __(
-                    'GrabPay via PayMongo',
-                    $gatewayName
-                );
-
-                $sections['paymongo_paymaya'] = __(
-                    'PayMaya via PayMongo',
-                    $gatewayName
-                );
-
-                $sections['paymongo_atome'] = __(
-                    'Atome via PayMongo',
-                    $gatewayName
-                );
+                foreach (PAYMONGO_PAYMENT_METHOD_LABELS as $method => $label) {
+                    $sections[$method] = __($label, $gatewayName);
+                }
 
                 return $sections;
             }

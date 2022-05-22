@@ -54,7 +54,7 @@ class Cynder_PayMongo_Atome extends Cynder_PayMongo_Payment_Intent_Gateway
      */
     public function __construct()
     {
-        $this->id = 'paymongo_atome';
+        $this->id = PAYMONGO_ATOME;
         $this->method_title = 'Atome Payments via PayMongo';
         $this->method_description = 'Simple and easy payments '
             . 'with Atome';

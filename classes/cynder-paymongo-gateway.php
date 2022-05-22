@@ -54,7 +54,7 @@ class Cynder_PayMongo_Gateway extends Cynder_PayMongo_Payment_Intent_Gateway
      */
     public function __construct()
     {
-        $this->id = 'paymongo';
+        $this->id = PAYMONGO_CARD;
         $this->has_fields = true;
         $this->method_title = 'Card Payments via PayMongo';
         $this->method_description = 'Simple and easy payments '
