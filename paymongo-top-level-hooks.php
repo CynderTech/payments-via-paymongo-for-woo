@@ -120,6 +120,9 @@ function cynder_paymongo_catch_redirect() {
     $debugMode = get_option('woocommerce_cynder_paymongo_debug_mode');
     $debugMode = (!empty($debugMode) && $debugMode === 'yes') ? true : false;
 
+    $sendInvoice = get_option('woocommerce_cynder_paymongo_send_invoice_after_payment');
+    $sendInvoice = (!empty($sendInvoice) && $sendInvoice === 'yes') ? true : false;
+
     if ($debugMode) {
         wc_get_logger()->log('info', '[Catch Redirect][Payload] ' . wc_print_r($_GET, true));
     }
@@ -175,8 +178,10 @@ function cynder_paymongo_catch_redirect() {
             $orderId = $order->get_id();
             wc_reduce_stock_levels($orderId);
 
-            // Sending invoice after successful payment
-            $woocommerce->mailer()->emails['WC_Email_Customer_Invoice']->trigger($orderId);
+            // Sending invoice after successful payment if setting is enabled
+            if ($sendInvoice) {
+                $woocommerce->mailer()->emails['WC_Email_Customer_Invoice']->trigger($orderId);
+            }
         }
 
         // Empty cart
@@ -216,7 +221,7 @@ add_action(
 );
 
 function add_webhook_settings($settings, $current_section) {
-    if ($current_section === 'paymongo_gcash' || $current_section === 'paymongo_grab_pay' || $current_section === 'paymongo' || $current_section === 'paymongo_paymaya') {
+    if (in_array($current_section, PAYMONGO_PAYMENT_METHODS)) {
         $webhookUrl = add_query_arg(
             'wc-api',
             'cynder_paymongo',
@@ -309,6 +314,14 @@ function add_webhook_settings($settings, $current_section) {
                 'desc_tip' => 'This enables additional logs in WC logger for developer analysis',
                 'desc' => 'Enable additional logs',
                 'default'     => 'no',
+            ),
+            array(
+                'id' => 'woocommerce_cynder_paymongo_send_invoice_after_payment',
+                'title' => 'Send Invoice',
+                'desc' => 'Enables automatic invoice sending after payment',
+                'desc_tip' => 'This enables automatic sending of an invoice to the customer via e-mail after payment is resolved',
+                'type' => 'checkbox',
+                'default' => 'yes',
             ),
             array(
                 'type' => 'sectionend',

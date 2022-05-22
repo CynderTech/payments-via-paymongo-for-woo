@@ -146,6 +146,7 @@ function Paymongo_Init_Gateway_class()
 
                 $fileDir = dirname(__FILE__);
                 include_once $fileDir.'/classes/address.php';
+                include_once $fileDir.'/classes/cynder-paymongo-payment-intent-base.php';
                 include_once $fileDir.'/classes/cynder-paymongo-gateway.php';
                 include_once $fileDir.'/classes/cynder-paymongo-paymaya.php';
                 include_once $fileDir.'/classes/cynder-paymongo-ewallet-base.php';
