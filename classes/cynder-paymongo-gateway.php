@@ -24,7 +24,7 @@ if (!defined('ABSPATH')) {
  * @license  n/a (http://127.0.0.0)
  * @link     n/a
  */
-class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
+class Cynder_PayMongo_Gateway extends Cynder_PayMongo_Payment_Intent_Gateway
 {
     /**
      * Singleton instance
@@ -60,47 +60,9 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
         $this->method_description = 'Simple and easy payments '
             . 'with Credit/Debit Card';
 
-        $this->supports = array(
-            'products'
-        );
-
-        $this->initFormFields();
-
-        $this->init_settings();
-        $this->enabled = $this->get_option('enabled');
-        $this->title = $this->get_option('title');
-        $this->description = $this->get_option('description');
-        
-        $testMode = get_option('woocommerce_cynder_paymongo_test_mode');
-        $this->testmode = (!empty($testMode) && $testMode === 'yes') ? true : false;
-
-        $skKey = $this->testmode ? 'woocommerce_cynder_paymongo_test_secret_key' : 'woocommerce_cynder_paymongo_secret_key';
-        $this->secret_key = get_option($skKey);
-
-        $pkKey = $this->testmode ? 'woocommerce_cynder_paymongo_test_public_key' : 'woocommerce_cynder_paymongo_public_key';
-        $this->public_key = get_option($pkKey);
-
-        $sendInvoice = get_option('woocommerce_cynder_paymongo_send_invoice_after_payment');
-        $this->sendInvoice = (!empty($sendInvoice) && $sendInvoice === 'yes') ? true : false;
-
-        $debugMode = get_option('woocommerce_cynder_paymongo_debug_mode');
-        $this->debugMode = (!empty($debugMode) && $debugMode === 'yes') ? true : false;
-
-        add_action(
-            'woocommerce_update_options_payment_gateways_' . $this->id,
-            array($this, 'process_admin_options')
-        );
+        parent::__construct();
 
         add_action('wp_enqueue_scripts', array($this, 'paymentScripts'));
-
-        if ('yes' === $this->enabled) {
-            add_filter(
-                'woocommerce_thankyou_order_received_text',
-                array($this, 'orderReceivedText'),
-                10,
-                2
-            );
-        }
     }
 
     /**
@@ -136,6 +98,12 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
                 'default'     => 'Simple and easy payments.',
             ),
         );
+    }
+    
+    public function getPaymentMethodId($orderId)
+    {
+        $paymentMethodId = $_POST['cynder_paymongo_method_id'];
+        return $paymentMethodId;
     }
 
     /**
@@ -283,145 +251,5 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
     public function validate_fields() // phpcs:ignore
     {
         return true;
-    }
-
-    /**
-     * Process PayMongo Payment
-     *
-     * @param string $orderId WooCommerce Order ID
-     *
-     * @return void
-     *
-     * @link  https://developers.paymongo.com/reference#the-payment-intent-object
-     * @since 1.0.0
-     */
-    public function process_payment($orderId) // phpcs:ignore
-    {
-        global $woocommerce;
-
-        $paymentMethodId = $_POST['cynder_paymongo_method_id'];
-
-        if (!isset($paymentMethodId)) {
-            $errorMessage = '[Processing Payment] No payment method ID found.';
-            $userMessage = 'Your payment did not proceed due to an error. Rest assured that no payment was made. You may refresh this page and try again.';
-            wc_get_logger()->log('error', $errorMessage);
-            return wc_add_notice($userMessage, 'error');
-        }
-
-        $order = wc_get_order($orderId);
-        $paymentIntentId = $order->get_meta('paymongo_payment_intent_id');
-
-        $payload = json_encode(
-            array(
-                'data' => array(
-                    'attributes' =>array(
-                        'payment_method' => $paymentMethodId,
-                        'return_url' => get_home_url() . '/?wc-api=cynder_paymongo_catch_redirect&order=' . $orderId . '&intent=' . $paymentIntentId . '&agent=cynder_woocommerce&version=' . CYNDER_PAYMONGO_VERSION
-                    ),
-                ),
-            )
-        );
-        
-        $args = array(
-            'body' => $payload,
-            'method' => "POST",
-            'headers' => array(
-                'Authorization' => 'Basic ' . base64_encode($this->secret_key),
-                'accept' => 'application/json',
-                'content-type' => 'application/json'
-            ),
-            'timeout' => 60,
-        );
-
-        $response = wp_remote_post(
-            CYNDER_PAYMONGO_BASE_URL . '/payment_intents/' . $paymentIntentId . '/attach',
-            $args
-        );
-
-        if (!is_wp_error($response)) {
-            if ($this->debugMode) {
-                wc_get_logger()->log('info', '[process_payment] Response ' . wc_print_r($response, true));
-            }
-
-            $body = json_decode($response['body'], true);
-
-            if (isset($body['errors'])) {
-                for ($i = 0; $i < count($body['errors']); $i++) {
-                    wc_add_notice($body['errors'][$i]['detail'], 'error');
-                }
-
-                return;
-            }
-
-            $responseAttr = $body['data']['attributes'];
-            $status = $responseAttr['status'];
-
-            /** For regular payments, process as is */
-            if ($status == 'succeeded') {
-                // we received the payment
-                $payments = $responseAttr['payments'];
-                $order->payment_complete($payments[0]['id']);
-                wc_reduce_stock_levels($orderId);
-
-                // Sending invoice after successful payment if setting is enabled
-                if ($this->sendInvoice) {
-                    $woocommerce->mailer()->emails['WC_Email_Customer_Invoice']->trigger($orderId);
-                }
-
-                // Empty cart
-                $woocommerce->cart->empty_cart();
-
-                // Redirect to the thank you page
-                return array(
-                    'result' => 'success',
-                    'redirect' => $this->get_return_url($order)
-                );
-            } else if ($status === 'awaiting_next_action') {
-                /** For 3DS-enabled cards, redirect to authorization page */
-                return array(
-                    'result' => 'success',
-                    'redirect' => $responseAttr['next_action']['redirect']['url']
-                );
-            }
-        } else {
-            wc_get_logger()->log('error', '[Processing Payment] ID: ' . $paymentIntentId . ' - Response error ' . json_encode($response));
-            return wc_add_notice('Connection error. Check logs.', 'error');
-        }
-    }
-    
-    /**
-     * Get Icon for checkout page
-     * 
-     * @return string
-     */
-    public function get_icon() // phpcs:ignore
-    {
-        $icons_str = '<img class="paymongo-method-logo paymongo-cards-icon" src="'
-            . CYNDER_PAYMONGO_PLUGIN_URL
-            . '/assets/images/cards.png" alt="'
-            . $this->title
-            .'" />';
-
-        return apply_filters('woocommerce_gateway_icon', $icons_str, $this->id);
-    }
-
-    /**
-     * Custom Credit Card order received text.
-     *
-     * @param string       $text  Default text.
-     * @param Cynder_Order $order Order data.
-     *
-     * @return string
-     */
-    public function orderReceivedText( $text, $order )
-    {
-        if ($order && $this->id === $order->get_payment_method()) {
-            return esc_html__(
-                'Thank You! Order has been received.',
-                'woocommerce'
-            );
-        }
-
-        return $text;
     }
 }

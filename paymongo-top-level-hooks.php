@@ -216,7 +216,7 @@ add_action(
 );
 
 function add_webhook_settings($settings, $current_section) {
-    if ($current_section === 'paymongo_gcash' || $current_section === 'paymongo_grab_pay' || $current_section === 'paymongo' || $current_section === 'paymongo_paymaya') {
+    if (in_array($current_section, PAYMONGO_PAYMENT_METHODS)) {
         $webhookUrl = add_query_arg(
             'wc-api',
             'cynder_paymongo',
