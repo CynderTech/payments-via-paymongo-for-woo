@@ -80,6 +80,9 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
         $pkKey = $this->testmode ? 'woocommerce_cynder_paymongo_test_public_key' : 'woocommerce_cynder_paymongo_public_key';
         $this->public_key = get_option($pkKey);
 
+        $sendInvoice = get_option('woocommerce_cynder_paymongo_send_invoice_after_payment');
+        $this->sendInvoice = (!empty($sendInvoice) && $sendInvoice === 'yes') ? true : false;
+
         $debugMode = get_option('woocommerce_cynder_paymongo_debug_mode');
         $this->debugMode = (!empty($debugMode) && $debugMode === 'yes') ? true : false;
 
@@ -360,8 +363,10 @@ class Cynder_PayMongo_Gateway extends WC_Payment_Gateway
                 $order->payment_complete($payments[0]['id']);
                 wc_reduce_stock_levels($orderId);
 
-                // Sending invoice after successful payment
-                $woocommerce->mailer()->emails['WC_Email_Customer_Invoice']->trigger($orderId);
+                // Sending invoice after successful payment if setting is enabled
+                if ($this->sendInvoice) {
+                    $woocommerce->mailer()->emails['WC_Email_Customer_Invoice']->trigger($orderId);
+                }
 
                 // Empty cart
                 $woocommerce->cart->empty_cart();

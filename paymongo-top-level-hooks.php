@@ -311,6 +311,14 @@ function add_webhook_settings($settings, $current_section) {
                 'default'     => 'no',
             ),
             array(
+                'id' => 'woocommerce_cynder_paymongo_send_invoice_after_payment',
+                'title' => 'Send Invoice',
+                'desc' => 'Enables automatic invoice sending after payment',
+                'desc_tip' => 'This enables automatic sending of an invoice to the customer via e-mail after payment is resolved',
+                'type' => 'checkbox',
+                'default' => 'yes',
+            ),
+            array(
                 'type' => 'sectionend',
                 'id' => 'paymongo_api_settings',
             ),
