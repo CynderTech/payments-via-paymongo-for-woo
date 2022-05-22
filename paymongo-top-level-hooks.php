@@ -120,6 +120,9 @@ function cynder_paymongo_catch_redirect() {
     $debugMode = get_option('woocommerce_cynder_paymongo_debug_mode');
     $debugMode = (!empty($debugMode) && $debugMode === 'yes') ? true : false;
 
+    $sendInvoice = get_option('woocommerce_cynder_paymongo_send_invoice_after_payment');
+    $sendInvoice = (!empty($sendInvoice) && $sendInvoice === 'yes') ? true : false;
+
     if ($debugMode) {
         wc_get_logger()->log('info', '[Catch Redirect][Payload] ' . wc_print_r($_GET, true));
     }
@@ -175,8 +178,10 @@ function cynder_paymongo_catch_redirect() {
             $orderId = $order->get_id();
             wc_reduce_stock_levels($orderId);
 
-            // Sending invoice after successful payment
-            $woocommerce->mailer()->emails['WC_Email_Customer_Invoice']->trigger($orderId);
+            // Sending invoice after successful payment if setting is enabled
+            if ($sendInvoice) {
+                $woocommerce->mailer()->emails['WC_Email_Customer_Invoice']->trigger($orderId);
+            }
         }
 
         // Empty cart
