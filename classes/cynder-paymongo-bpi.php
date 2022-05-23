@@ -96,6 +96,13 @@ class Cynder_PayMongo_Bpi extends Cynder_PayMongo_Payment_Intent_Gateway
             ),
         );
     }
+
+    public function generatePaymentMethodDetailsPayload($order)
+    {
+        return array(
+            'bank_code' => 'bpi'
+        );
+    }
     
     /**
      * Get Icon for checkout page

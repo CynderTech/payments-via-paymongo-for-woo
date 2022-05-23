@@ -26,7 +26,7 @@ const PAYMENT_METHODS_WITH_INTENT = array(
 const SERVER_PAYMENT_METHOD_TYPES = array(
     PAYMONGO_PAYMAYA => 'paymaya',
     PAYMONGO_ATOME => 'atome',
-    PAYMONGO_BPI => 'bpi',
+    PAYMONGO_BPI => 'dob',
 );
 
 const PAYMONGO_PAYMENT_METHOD_LABELS = array(
