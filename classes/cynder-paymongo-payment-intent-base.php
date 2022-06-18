@@ -33,6 +33,8 @@ class Cynder_PayMongo_Payment_Intent_Gateway extends WC_Payment_Gateway
      */
     private static $_instance;
 
+    public $hasDetailsPayload = false;
+
     /**
      * Returns the *Singleton* instance of this class.
      *
@@ -108,14 +110,19 @@ class Cynder_PayMongo_Payment_Intent_Gateway extends WC_Payment_Gateway
     public function getPaymentMethodId($orderId) {
         $order = wc_get_order($orderId);
 
+        $attributes = array(
+            'type' => SERVER_PAYMENT_METHOD_TYPES[$this->id],
+            'billing' => $this->generateBillingPayload($order),
+        );
+
+        if ($this->hasDetailsPayload) {
+            $attributes['details'] = $this->generatePaymentMethodDetailsPayload($order);
+        }
+
         $paymentMethodPayload = json_encode(
             array(
                 'data' => array(
-                    'attributes' => array(
-                        'type' => SERVER_PAYMENT_METHOD_TYPES[$this->id],
-                        'billing' => $this->generateBillingPayload($order),
-                        'details' => $this->generatePaymentMethodDetailsPayload($order),
-                    ),
+                    'attributes' => $attributes,
                 ),
             )
         );

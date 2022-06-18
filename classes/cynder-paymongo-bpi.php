@@ -58,6 +58,7 @@ class Cynder_PayMongo_Bpi extends Cynder_PayMongo_Payment_Intent_Gateway
         $this->method_title = 'BPI Payments via PayMongo';
         $this->method_description = 'Simple and easy payments '
             . 'with BPI Direct Online Banking';
+        $this->hasDetailsPayload = true;
 
         parent::__construct();
     }
