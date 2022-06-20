@@ -16,9 +16,6 @@ if (!defined('ABSPATH')) {
 }
 
 function cynder_paymongo_create_intent($orderId) {
-    $ccSettings = get_option('woocommerce_paymongo_settings');
-    $paymayaSettings = get_option('woocommerce_paymongo_paymaya_settings');
-    
     $testMode = get_option('woocommerce_cynder_paymongo_test_mode');
     $testMode = (!empty($testMode) && $testMode === 'yes') ? true : false;
 
@@ -27,16 +24,17 @@ function cynder_paymongo_create_intent($orderId) {
     $paymentMethod = $order->get_payment_method();
 
     $hasPaymentMethod = isset($paymentMethod) && $paymentMethod !== '' && $paymentMethod !== null;
+    $paymentMethodSettings = get_option("woocommerce_{$paymentMethod}_settings");
 
     /**
      * Don't create a payment intent for the following scenarios:
      * 
-     * 1. Paymongo plugin is disabled
+     * 1. Payment method setting is disabled
      * 2. Has no payment method (ex. 100% discounts)
-     * 3. Payment method is not Paymongo credit card
+     * 3. Payment method does not belong to methods that needs payment intents
      */
     if (
-        ($ccSettings['enabled'] !== 'yes' && $paymayaSettings['enabled'] !== 'yes') ||
+        $paymentMethodSettings['enabled'] !== 'yes' ||
         !$hasPaymentMethod ||
         (!in_array($paymentMethod, PAYMENT_METHODS_WITH_INTENT))
     ) return;
@@ -57,7 +55,7 @@ function cynder_paymongo_create_intent($orderId) {
             'data' => array(
                 'attributes' =>array(
                     'amount' => floatval($amount * 100),
-                    'payment_method_allowed' => ['card', 'paymaya', 'atome'],
+                    'payment_method_allowed' => ['card', 'paymaya', 'atome', 'dob'],
                     'currency' => 'PHP', // hard-coded for now
                     'description' => get_bloginfo('name') . ' - ' . $orderId,
                     'metadata' => array(
@@ -120,6 +118,9 @@ function cynder_paymongo_catch_redirect() {
     $debugMode = get_option('woocommerce_cynder_paymongo_debug_mode');
     $debugMode = (!empty($debugMode) && $debugMode === 'yes') ? true : false;
 
+    $sendInvoice = get_option('woocommerce_cynder_paymongo_send_invoice_after_payment');
+    $sendInvoice = (!empty($sendInvoice) && $sendInvoice === 'yes') ? true : false;
+
     if ($debugMode) {
         wc_get_logger()->log('info', '[Catch Redirect][Payload] ' . wc_print_r($_GET, true));
     }
@@ -175,8 +176,10 @@ function cynder_paymongo_catch_redirect() {
             $orderId = $order->get_id();
             wc_reduce_stock_levels($orderId);
 
-            // Sending invoice after successful payment
-            $woocommerce->mailer()->emails['WC_Email_Customer_Invoice']->trigger($orderId);
+            // Sending invoice after successful payment if setting is enabled
+            if ($sendInvoice) {
+                $woocommerce->mailer()->emails['WC_Email_Customer_Invoice']->trigger($orderId);
+            }
         }
 
         // Empty cart
@@ -216,7 +219,7 @@ add_action(
 );
 
 function add_webhook_settings($settings, $current_section) {
-    if ($current_section === 'paymongo_gcash' || $current_section === 'paymongo_grab_pay' || $current_section === 'paymongo' || $current_section === 'paymongo_paymaya') {
+    if (in_array($current_section, PAYMONGO_PAYMENT_METHODS)) {
         $webhookUrl = add_query_arg(
             'wc-api',
             'cynder_paymongo',
@@ -309,6 +312,14 @@ function add_webhook_settings($settings, $current_section) {
                 'desc_tip' => 'This enables additional logs in WC logger for developer analysis',
                 'desc' => 'Enable additional logs',
                 'default'     => 'no',
+            ),
+            array(
+                'id' => 'woocommerce_cynder_paymongo_send_invoice_after_payment',
+                'title' => 'Send Invoice',
+                'desc' => 'Enables automatic invoice sending after payment',
+                'desc_tip' => 'This enables automatic sending of an invoice to the customer via e-mail after payment is resolved',
+                'type' => 'checkbox',
+                'default' => 'yes',
             ),
             array(
                 'type' => 'sectionend',
