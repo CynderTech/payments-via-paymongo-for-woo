@@ -2,7 +2,7 @@
 /**
  * PHP version 7
  * 
- * PayMongo - Credit Card Payment Method
+ * PayMongo - Bpi Payment Method
  * 
  * @category Plugin
  * @package  PayMongo
@@ -16,7 +16,7 @@ if (!defined('ABSPATH')) {
 }
 
 /**
- * PayMongo - Credit Card Payment Method Class
+ * PayMongo - Bpi Payment Method Class
  * 
  * @category Class
  * @package  PayMongo
@@ -24,7 +24,7 @@ if (!defined('ABSPATH')) {
  * @license  n/a (http://127.0.0.0)
  * @link     n/a
  */
-class Cynder_PayMongo_PayMaya extends Cynder_PayMongo_Payment_Intent_Gateway
+class Cynder_PayMongo_Bpi extends Cynder_PayMongo_Payment_Intent_Gateway
 {
     /**
      * Singleton instance
@@ -54,10 +54,11 @@ class Cynder_PayMongo_PayMaya extends Cynder_PayMongo_Payment_Intent_Gateway
      */
     public function __construct()
     {
-        $this->id = PAYMONGO_PAYMAYA;
-        $this->method_title = 'Maya Payments via PayMongo';
+        $this->id = PAYMONGO_BPI;
+        $this->method_title = 'BPI Payments via PayMongo';
         $this->method_description = 'Simple and easy payments '
-            . 'with Maya';
+            . 'with BPI Direct Online Banking';
+        $this->hasDetailsPayload = true;
 
         parent::__construct();
     }
@@ -74,7 +75,7 @@ class Cynder_PayMongo_PayMaya extends Cynder_PayMongo_Payment_Intent_Gateway
         $this->form_fields = array(
             'enabled' => array(
                 'title'       => 'Enable/Disable',
-                'label'       => 'Enable Maya Gateway via PayMongo',
+                'label'       => 'Enable BPI Gateway via PayMongo',
                 'type'        => 'checkbox',
                 'description' => '',
                 'default'     => 'no'
@@ -84,7 +85,7 @@ class Cynder_PayMongo_PayMaya extends Cynder_PayMongo_Payment_Intent_Gateway
                 'title'       => 'Title',
                 'description' => 'This controls the title that ' .
                                  'the user sees during checkout.',
-                'default'     => 'Maya via PayMongo',
+                'default'     => 'BPI DOB via PayMongo',
                 'desc_tip'    => true,
             ),
             'description' => array(
@@ -95,5 +96,22 @@ class Cynder_PayMongo_PayMaya extends Cynder_PayMongo_Payment_Intent_Gateway
                 'default'     => 'Simple and easy payments.',
             ),
         );
+    }
+
+    public function generatePaymentMethodDetailsPayload($order)
+    {
+        return array(
+            'bank_code' => 'bpi'
+        );
+    }
+    
+    /**
+     * Get Icon for checkout page
+     * 
+     * @return string
+     */
+    public function get_icon() // phpcs:ignore
+    {
+        
     }
 }
