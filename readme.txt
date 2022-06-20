@@ -2,9 +2,9 @@
 Contributors: pickmeshop
 Tags: payments, credit card, gcash, grabpay
 Requires at least: 5.0
-Tested up to: 5.9
+Tested up to: 6.0
 Requires PHP: 5.6
-Stable tag: 1.8.1
+Stable tag: 1.9.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -12,7 +12,7 @@ Take payments on your store using PayMongo.
 
 == Description ==
 
-Accept Visa, MasterCard, GCash, GrabPay, Maya, and Atome directly on your store with the PayMongo Payment Gateway for WooCommerce
+Accept Visa, MasterCard, GCash, GrabPay, Maya, Atome, and BPI directly on your store with the PayMongo Payment Gateway for WooCommerce
 
 ** 1.6.x UPDATE INSTRUCTIONS **
 
@@ -95,6 +95,13 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 3. Payment methods as displayed in checkout page.
 
 == Changelog ==
+
+= 1.9.0 =
+*Release Date - June 21, 2022*
+[FEATURE] Added BPI DOB payment method
+[FEATURE] Added option to disable automatic invoice sending after payment resolution
+[CHORE] Compatibility tests for WP 6.0
+[CHORE] Compatibility tests for WC 6.6.0
 
 = 1.8.1 =
 *Release Date - May 16, 2022*
