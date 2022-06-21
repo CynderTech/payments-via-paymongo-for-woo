@@ -112,6 +112,10 @@ class Cynder_PayMongo_Bpi extends Cynder_PayMongo_Payment_Intent_Gateway
      */
     public function get_icon() // phpcs:ignore
     {
-        
+        $icons_str = '<img class="paymongo-method-logo paymongo-bpi-icon" src="https://assets-global.website-files.com/60411749e60be86afb89d2f0/62417131ea248c5ad3ca5c9b_BPI.png" alt="'
+            . $this->title
+            .'" />';
+
+        return apply_filters('woocommerce_gateway_icon', $icons_str, $this->id);
     }
 }
