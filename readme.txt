@@ -4,7 +4,7 @@ Tags: payments, credit card, gcash, grabpay
 Requires at least: 5.0
 Tested up to: 6.0
 Requires PHP: 5.6
-Stable tag: 1.9.0
+Stable tag: 1.9.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -96,7 +96,7 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 == Changelog ==
 
-= 1.9.0 =
+= 1.9.1 =
 *Release Date - June 21, 2022*
 [FEATURE] Added BPI DOB payment method
 [FEATURE] Added option to disable automatic invoice sending after payment resolution
