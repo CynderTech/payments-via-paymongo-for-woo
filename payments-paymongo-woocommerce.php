@@ -155,6 +155,7 @@ function Paymongo_Init_Gateway_class()
                 include_once $fileDir.'/classes/cynder-paymongo-webhook-handler.php';
                 include_once $fileDir.'/classes/cynder-paymongo-atome.php';
                 include_once $fileDir.'/classes/cynder-paymongo-bpi.php';
+                include_once $fileDir.'/classes/cynder-paymongo-billease.php';
                 include_once 'paymongo-top-level-hooks.php';
 
                 add_filter(
@@ -187,6 +188,7 @@ function Paymongo_Init_Gateway_class()
                 $methods[] = 'Cynder_PayMongo_PayMaya';
                 $methods[] = 'Cynder_PayMongo_Atome';
                 $methods[] = 'Cynder_PayMongo_Bpi';
+                $methods[] = 'Cynder_PayMongo_BillEase';
                 
                 return $methods;
             }
