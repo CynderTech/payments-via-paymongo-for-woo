@@ -18,7 +18,10 @@ if (!defined('ABSPATH')) {
 function cynder_paymongo_create_intent($orderId) {
     $testMode = get_option('woocommerce_cynder_paymongo_test_mode');
     $testMode = (!empty($testMode) && $testMode === 'yes') ? true : false;
-
+    
+    $debugMode = get_option('woocommerce_cynder_paymongo_debug_mode');
+    $debugMode = (!empty($debugMode) && $debugMode === 'yes') ? true : false;
+    
     $order = wc_get_order($orderId);
 
     $paymentMethod = $order->get_payment_method();
@@ -55,7 +58,7 @@ function cynder_paymongo_create_intent($orderId) {
             'data' => array(
                 'attributes' =>array(
                     'amount' => floatval($amount * 100),
-                    'payment_method_allowed' => ['card', 'paymaya', 'atome', 'dob'],
+                    'payment_method_allowed' => ['card', 'paymaya', 'atome', 'dob', 'billease'],
                     'currency' => 'PHP', // hard-coded for now
                     'description' => get_bloginfo('name') . ' - ' . $orderId,
                     'metadata' => array(
@@ -66,6 +69,10 @@ function cynder_paymongo_create_intent($orderId) {
             ),
         )
     );
+
+    if ($debugMode) {
+        wc_get_logger()->log('info', '[Create Payment Intent] Payload ' . wc_print_r($payload, true));
+    }
 
     $args = array(
         'body' => $payload,
@@ -82,8 +89,9 @@ function cynder_paymongo_create_intent($orderId) {
         $args
     );
 
-    /** Enable for debugging purposes */
-    // wc_get_logger()->log('info', json_encode($response));
+    if ($debugMode) {
+        wc_get_logger()->log('info', '[Create Payment Intent] Response ' . wc_print_r($response['body'], true));
+    }
 
     $genericErrorMessage = 'Something went wrong with the payment. Please try another payment method. If issue persist, contact support.';
 
