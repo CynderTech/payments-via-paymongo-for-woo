@@ -10,6 +10,9 @@
  * @license  n/a (http://127.0.0.0)
  * @link     n/a
  */
+
+namespace Cynder\PayMongo;
+
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }

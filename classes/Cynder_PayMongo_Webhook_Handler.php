@@ -11,6 +11,10 @@
  * @link     n/a
  */
 
+namespace Cynder\PayMongo;
+
+use WC_Payment_Gateway;
+
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }

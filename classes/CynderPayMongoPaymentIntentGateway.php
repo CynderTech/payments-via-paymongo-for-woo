@@ -11,6 +11,10 @@
  * @link     n/a
  */
 
+namespace Cynder\PayMongo;
+
+use WC_Payment_Gateway;
+
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
@@ -24,7 +28,7 @@ if (!defined('ABSPATH')) {
  * @license  n/a (http://127.0.0.0)
  * @link     n/a
  */
-class Cynder_PayMongo_Payment_Intent_Gateway extends WC_Payment_Gateway
+class CynderPayMongoPaymentIntentGateway extends WC_Payment_Gateway
 {
     /**
      * Singleton instance
