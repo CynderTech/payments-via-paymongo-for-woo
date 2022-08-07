@@ -13,6 +13,7 @@
 
 namespace Cynder\PayMongo;
 
+use PostHog\PostHog;
 use WC_Payment_Gateway;
 
 if (!defined('ABSPATH')) {
@@ -241,6 +242,18 @@ class CynderPayMongoPaymentIntentGateway extends WC_Payment_Gateway
 
         $order = wc_get_order($orderId);
         $paymentIntentId = $order->get_meta('paymongo_payment_intent_id');
+
+        if ($this->debugMode) {
+            wc_get_logger()->log('info', 'Customer ID ' . $order->get_customer_id());
+        }
+
+        PostHog::capture(array(
+            'distinctId' => $order->get_customer_id() . '-' . $orderId,
+            'event' => 'process payment',
+            'properties' => array(
+                'payment_method' => $order->get_payment_method(),
+            ),
+        ));
 
         $payload = json_encode(
             array(

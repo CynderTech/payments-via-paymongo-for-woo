@@ -13,6 +13,7 @@
 
 namespace Cynder\PayMongo;
 
+use PostHog\PostHog;
 use WC_Payment_Gateway;
 
 if (!defined('ABSPATH')) {
@@ -107,6 +108,14 @@ class Cynder_PayMongo_Ewallet_Gateway extends WC_Payment_Gateway
     public function process_payment($orderId) // phpcs:ignore
     {
         $order = wc_get_order($orderId);
+
+        PostHog::capture(array(
+            'distinctId' => $order->get_customer_id() . '-' . $orderId,
+            'event' => 'process payment',
+            'properties' => array(
+                'payment_method' => $order->get_payment_method(),
+            ),
+        ));
 
         $billing = array();
 

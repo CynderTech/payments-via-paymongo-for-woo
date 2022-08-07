@@ -19,6 +19,12 @@
  * @link     n/a
  */
 
+include_once 'paymongo-constants.php';
+include_once 'classes/address.php';
+require_once plugin_dir_path(__FILE__) . '/vendor/autoload.php';
+
+use PostHog\PostHog;
+
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -65,6 +71,8 @@ function Paymongo_Init_Gateway_class()
             )
         )
     );
+
+    PostHog::init('phc_zC7px2IrSCO7SlSVEb250VISscWfwvBPafWJOYJsUhv', array('host' => 'https://app.posthog.com'));
     
 
     if (!class_exists('Cynder_PayMongo')) :
@@ -142,8 +150,6 @@ function Paymongo_Init_Gateway_class()
              */
             public function init()
             {
-                include_once 'paymongo-constants.php';
-                require_once plugin_dir_path(__FILE__) . '/vendor/autoload.php';
                 include_once 'paymongo-top-level-hooks.php';
 
                 add_filter(
