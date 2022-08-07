@@ -13,5 +13,7 @@
             "email": "plugins@cynder.io"
         }
     ],
-    "require": {}
+    "require": {
+        "posthog/posthog-php": "2.1.*"
+    }
 }
