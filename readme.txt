@@ -4,7 +4,7 @@ Tags: payments, credit card, gcash, grabpay
 Requires at least: 5.0
 Tested up to: 6.0
 Requires PHP: 5.6
-Stable tag: 1.9.1
+Stable tag: 1.10.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -95,6 +95,11 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 3. Payment methods as displayed in checkout page.
 
 == Changelog ==
+
+= 1.10.0 =
+*Release Date - September 6, 2022*
+[FEATURE] Added BillEase payment method
+[CHORE] Compatibility tests for WC 6.8.2
 
 = 1.9.1 =
 *Release Date - June 21, 2022*
