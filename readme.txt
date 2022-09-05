@@ -12,7 +12,7 @@ Take payments on your store using PayMongo.
 
 == Description ==
 
-Accept Visa, MasterCard, GCash, GrabPay, Maya, Atome, and BPI directly on your store with the PayMongo Payment Gateway for WooCommerce
+Accept Visa, MasterCard, GCash, GrabPay, Maya, Atome, BPI, and BillEase directly on your store with the PayMongo Payment Gateway for WooCommerce
 
 ** 1.6.x UPDATE INSTRUCTIONS **
 
@@ -55,8 +55,8 @@ The manual installation method involves downloading our plugin and uploading it 
 
 1. Activate the plugin.
 2. From the left sidebar, navigate to **WooCommerce** > **Settings** > **Payments**.
-3. Look for the **Card Payments via PayMongo** option and click the **Set Up** button.
-    * **Note:** The main API key settings of the whole plugin is inside the card payment option subsection. **You need to configure the plugin in this section even though you're not gonna accept credit/debit card payments through PayMongo**.
+3. Choose a payment option and click the **Set Up** button associated to it.
+    * **Note:** The plugin settings starting from API settings is shared. **You need to configure the plugin once with any payment option and just enable any number of payment options**.
 
 **Test Configuration** *(Optional but highly recommended)*
 
@@ -72,17 +72,15 @@ Before accepting actual payments for transactions, it is ideal to test payment w
 2. Click the **Save Changes** button.
 3. Done.
 
-**E-wallets Configuration**
+**Webhooks Configuration**
 
-For e-wallet transactions, you need to specify a webhook secret key in the e-wallet settings. You can generate one using Cynder's [Webhook Secret Key Generator](https://paymongo-webhook-tool.meeco.dev). A convenience link is provided just below the field. After generating a webhook secret key using the key generator, paste it on the webhook secret key field.
+For the plugin to work, you need to specify a webhook secret key in the corresponding settings fields. You can generate one using Cynder's [Webhook Secret Key Generator](https://paymongo-webhook-tool.meeco.dev). A convenience link is provided just below the field. After generating a webhook secret key using the key generator, paste it on the webhook secret key fields.
 
-* **Note:** The webhook secret key field is **ONLY REQUIRED** if you would be enabling GCash and/or GrabPay as payment method/s for your platform. This allows PayMongo to notify WooCommerce about payment processing using these methods after payment has been authorized by the customer.
+* **Note:** Webhook secret keys can be created using the PayMongo secret keys. You need to generate 2 separate webhook secret keys using production and sandbox secret keys if you want to test the plugin first and later put it to production mode.
 
-* **Note:** The key generator requires a specific URL provided to you by the plugin under the webhook secret key field (ex. ***https://example.com/?wc-api=cynder_paymongo***), as well as your test secret key.
+* **Note:** The key generator requires a specific URL provided to you by the plugin under the webhook secret key field (ex. ***https://example.com/?wc-api=cynder_paymongo***), as well as your PayMongo secret key.
 
 * **Note:** If you've generated a key for the same domain prior to the current update, you can retrieve it using the Retrieve section of the key generator.
-
-* **Note:** Setting the webhook secret key for either GCash or GrabPay configures both options. You can just enable or disable each payment option depending on your needs.
 
 = Updating =
 
