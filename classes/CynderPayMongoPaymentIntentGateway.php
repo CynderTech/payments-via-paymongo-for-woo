@@ -247,10 +247,13 @@ class CynderPayMongoPaymentIntentGateway extends WC_Payment_Gateway
             wc_get_logger()->log('info', 'Customer ID ' . $order->get_customer_id());
         }
 
+        $amount = floatval($order->get_total());
+
         PostHog::capture(array(
-            'distinctId' => $order->get_customer_id() . '-' . $orderId,
+            'distinctId' => base64_encode(get_bloginfo('wpurl')),
             'event' => 'process payment',
             'properties' => array(
+                'amount' => $amount,
                 'payment_method' => $order->get_payment_method(),
             ),
         ));
