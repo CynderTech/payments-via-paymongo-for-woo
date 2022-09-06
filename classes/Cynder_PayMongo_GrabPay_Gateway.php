@@ -11,6 +11,8 @@
  * @link     n/a
  */
 
+namespace Cynder\PayMongo;
+
 if (! defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }

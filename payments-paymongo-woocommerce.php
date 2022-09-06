@@ -19,6 +19,12 @@
  * @link     n/a
  */
 
+include_once 'paymongo-constants.php';
+include_once 'classes/address.php';
+require_once plugin_dir_path(__FILE__) . '/vendor/autoload.php';
+
+use PostHog\PostHog;
+
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -65,6 +71,8 @@ function Paymongo_Init_Gateway_class()
             )
         )
     );
+
+    PostHog::init('phc_zC7px2IrSCO7SlSVEb250VISscWfwvBPafWJOYJsUhv', array('host' => 'https://app.posthog.com'));
     
 
     if (!class_exists('Cynder_PayMongo')) :
@@ -142,20 +150,6 @@ function Paymongo_Init_Gateway_class()
              */
             public function init()
             {
-                include_once 'paymongo-constants.php';
-
-                $fileDir = dirname(__FILE__);
-                include_once $fileDir.'/classes/address.php';
-                include_once $fileDir.'/classes/cynder-paymongo-payment-intent-base.php';
-                include_once $fileDir.'/classes/cynder-paymongo-gateway.php';
-                include_once $fileDir.'/classes/cynder-paymongo-paymaya.php';
-                include_once $fileDir.'/classes/cynder-paymongo-ewallet-base.php';
-                include_once $fileDir.'/classes/cynder-paymongo-gcash-gateway.php';
-                include_once $fileDir.'/classes/cynder-paymongo-grabpay-gateway.php';
-                include_once $fileDir.'/classes/cynder-paymongo-webhook-handler.php';
-                include_once $fileDir.'/classes/cynder-paymongo-atome.php';
-                include_once $fileDir.'/classes/cynder-paymongo-bpi.php';
-                include_once $fileDir.'/classes/cynder-paymongo-billease.php';
                 include_once 'paymongo-top-level-hooks.php';
 
                 add_filter(
@@ -182,13 +176,13 @@ function Paymongo_Init_Gateway_class()
              */
             public function addGateways($methods)
             {
-                $methods[] = 'Cynder_PayMongo_Gateway';
-                $methods[] = 'Cynder_PayMongo_Gcash_Gateway';
-                $methods[] = 'Cynder_PayMongo_GrabPay_Gateway';
-                $methods[] = 'Cynder_PayMongo_PayMaya';
-                $methods[] = 'Cynder_PayMongo_Atome';
-                $methods[] = 'Cynder_PayMongo_Bpi';
-                $methods[] = 'Cynder_PayMongo_BillEase';
+                $methods[] = 'Cynder\\PayMongo\\CynderPayMongoGateway';
+                $methods[] = 'Cynder\\PayMongo\\Cynder_PayMongo_Gcash_Gateway';
+                $methods[] = 'Cynder\\PayMongo\\Cynder_PayMongo_GrabPay_Gateway';
+                $methods[] = 'Cynder\\PayMongo\\Cynder_PayMongo_PayMaya';
+                $methods[] = 'Cynder\\PayMongo\\Cynder_PayMongo_Atome';
+                $methods[] = 'Cynder\\PayMongo\\Cynder_PayMongo_Bpi';
+                $methods[] = 'Cynder\\PayMongo\\Cynder_PayMongo_BillEase';
                 
                 return $methods;
             }
