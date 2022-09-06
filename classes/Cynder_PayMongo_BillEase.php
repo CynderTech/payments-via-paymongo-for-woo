@@ -99,17 +99,17 @@ class Cynder_PayMongo_BillEase extends CynderPayMongoPaymentIntentGateway
         );
     }
     
-    // /**
-    //  * Get Icon for checkout page
-    //  * 
-    //  * @return string
-    //  */
-    // public function get_icon() // phpcs:ignore
-    // {
-    //     $icons_str = '<img class="paymongo-method-logo paymongo-cards-icon" src="https://www.atome.ph/logo.svg" alt="'
-    //         . $this->title
-    //         .'" />';
+    /**
+     * Get Icon for checkout page
+     * 
+     * @return string
+     */
+    public function get_icon() // phpcs:ignore
+    {
+        $icon_path = CYNDER_PAYMONGO_PLUGIN_URL . '/assets/images/paymongo_billease.svg';
 
-    //     return apply_filters('woocommerce_gateway_icon', $icons_str, $this->id);
-    // }
+        $icons_str = '<img src="' . $icon_path . '" class="paymongo-method-logo" alt="' . $this->title . '" />';
+
+        return apply_filters('woocommerce_gateway_icon', $icons_str, $this->id);
+    }
 }
