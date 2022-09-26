@@ -13,6 +13,7 @@
 
 namespace Cynder\PayMongo;
 
+use PostHog\PostHog;
 use WC_Payment_Gateway;
 
 if (!defined('ABSPATH')) {
@@ -167,6 +168,7 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
             }
 
             $sourceType = $resourceData['attributes']['source']['type'];
+            $amount = $resourceData['attributes']['amount'];
 
             if ($eventData['type'] === 'payment.paid' && $sourceType !== 'gcash' && $sourceType !== 'grab_pay') {
                 $paymentIntentId = $resourceData['attributes']['payment_intent_id'];
@@ -197,6 +199,16 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
                     if ($this->sendInvoice) {
                         $woocommerce->mailer()->emails['WC_Email_Customer_Invoice']->trigger($orderId);
                     }
+
+                    PostHog::capture(array(
+                        'distinctId' => base64_encode(get_bloginfo('wpurl')),
+                        'event' => 'successful payment',
+                        'properties' => array(
+                            'payment_id' => $resourceData['id'],
+                            'amount' => floatval($amount) / 100,
+                            'payment_method' => $order->get_payment_method(),
+                        ),
+                    ));
                 }
                 return;
             }
@@ -208,6 +220,17 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
                 wc_get_logger()->log('info', '[processWebhook] event: payment.failed with payment intent ID ' . $paymentIntentId);
 
                 $order->update_status('failed', 'Payment failed', true);
+
+                PostHog::capture(array(
+                    'distinctId' => base64_encode(get_bloginfo('wpurl')),
+                    'event' => 'failed payment',
+                    'properties' => array(
+                        'payment_id' => $resourceData['id'],
+                        'amount' => floatval($amount) / 100,
+                        'payment_method' => $order->get_payment_method(),
+                    ),
+                ));
+
                 return;
             }
 
@@ -272,7 +295,9 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
                 die();
             }
 
-            $status = $body['data']['attributes']['status'];
+            $attributes = $body['data']['attributes'];
+            $status = $attributes['status'];
+            $amount = $attributes['amount'];
 
             if ($status == 'paid') {
                 $order->payment_complete($body['data']['id']);
@@ -282,6 +307,16 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
                     $woocommerce->mailer()->emails['WC_Email_Customer_Invoice']->trigger($order->get_order_number());
                 }
 
+                PostHog::capture(array(
+                    'distinctId' => base64_encode(get_bloginfo('wpurl')),
+                    'event' => 'successful payment',
+                    'properties' => array(
+                        'payment_id' => $body['data']['id'],
+                        'amount' => floatval($amount) / 100,
+                        'payment_method' => $order->get_payment_method(),
+                    ),
+                ));
+
                 status_header(200);
                 die();
             }
@@ -289,6 +324,17 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
             if ($status == 'failed') {
                 wc_get_logger()->log('info', 'Payment failed: ' . wc_print_r($response['body'], true));
                 $order->update_status($status);
+
+                PostHog::capture(array(
+                    'distinctId' => base64_encode(get_bloginfo('wpurl')),
+                    'event' => 'failed payment',
+                    'properties' => array(
+                        'payment_id' => $body['data']['id'],
+                        'amount' => floatval($amount) / 100,
+                        'payment_method' => $order->get_payment_method(),
+                    ),
+                ));
+
                 status_header(400);
                 die();
             }

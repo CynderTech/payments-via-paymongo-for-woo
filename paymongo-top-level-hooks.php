@@ -11,6 +11,8 @@
  * @link     n/a
  */
 
+use PostHog\PostHog;
+
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
@@ -172,6 +174,7 @@ function cynder_paymongo_catch_redirect() {
 
     $responseAttr = $body['data']['attributes'];
     $status = $responseAttr['status'];
+    $intentAmount = $responseAttr['amount'];
 
     $orderId = $_GET['order'];
     $order = wc_get_order($orderId);
@@ -188,6 +191,16 @@ function cynder_paymongo_catch_redirect() {
             if ($sendInvoice) {
                 $woocommerce->mailer()->emails['WC_Email_Customer_Invoice']->trigger($orderId);
             }
+
+            PostHog::capture(array(
+                'distinctId' => base64_encode(get_bloginfo('wpurl')),
+                'event' => 'successful payment',
+                'properties' => array(
+                    'payment_id' => $payment['id'],
+                    'amount' => floatval($intentAmount) / 100,
+                    'payment_method' => $order->get_payment_method(),
+                ),
+            ));
         }
 
         // Empty cart

@@ -307,6 +307,7 @@ class CynderPayMongoPaymentIntentGateway extends WC_Payment_Gateway
             if ($status == 'succeeded') {
                 // we received the payment
                 $payments = $responseAttr['payments'];
+                $intentAmount = $responseAttr['amount'];
                 $order->payment_complete($payments[0]['id']);
                 wc_reduce_stock_levels($orderId);
 
@@ -317,6 +318,16 @@ class CynderPayMongoPaymentIntentGateway extends WC_Payment_Gateway
 
                 // Empty cart
                 $woocommerce->cart->empty_cart();
+
+                PostHog::capture(array(
+                    'distinctId' => base64_encode(get_bloginfo('wpurl')),
+                    'event' => 'successful payment',
+                    'properties' => array(
+                        'payment_id' => $payments[0]['id'],
+                        'amount' => floatval($intentAmount) / 100,
+                        'payment_method' => $order->get_payment_method(),
+                    ),
+                ));
 
                 // Redirect to the thank you page
                 return array(
