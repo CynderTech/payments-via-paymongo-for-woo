@@ -11,6 +11,11 @@
  * @link     n/a
  */
 
+namespace Cynder\PayMongo;
+
+use PostHog\PostHog;
+use WC_Payment_Gateway;
+
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
@@ -24,7 +29,7 @@ if (!defined('ABSPATH')) {
  * @license  n/a (http://127.0.0.0)
  * @link     n/a
  */
-class Cynder_PayMongo_Payment_Intent_Gateway extends WC_Payment_Gateway
+class CynderPayMongoPaymentIntentGateway extends WC_Payment_Gateway
 {
     /**
      * Singleton instance
@@ -238,6 +243,21 @@ class Cynder_PayMongo_Payment_Intent_Gateway extends WC_Payment_Gateway
         $order = wc_get_order($orderId);
         $paymentIntentId = $order->get_meta('paymongo_payment_intent_id');
 
+        if ($this->debugMode) {
+            wc_get_logger()->log('info', 'Customer ID ' . $order->get_customer_id());
+        }
+
+        $amount = floatval($order->get_total());
+
+        PostHog::capture(array(
+            'distinctId' => base64_encode(get_bloginfo('wpurl')),
+            'event' => 'process payment',
+            'properties' => array(
+                'amount' => $amount,
+                'payment_method' => $order->get_payment_method(),
+            ),
+        ));
+
         $payload = json_encode(
             array(
                 'data' => array(
@@ -287,6 +307,7 @@ class Cynder_PayMongo_Payment_Intent_Gateway extends WC_Payment_Gateway
             if ($status == 'succeeded') {
                 // we received the payment
                 $payments = $responseAttr['payments'];
+                $intentAmount = $responseAttr['amount'];
                 $order->payment_complete($payments[0]['id']);
                 wc_reduce_stock_levels($orderId);
 
@@ -297,6 +318,18 @@ class Cynder_PayMongo_Payment_Intent_Gateway extends WC_Payment_Gateway
 
                 // Empty cart
                 $woocommerce->cart->empty_cart();
+
+                PostHog::capture(array(
+                    'distinctId' => base64_encode(get_bloginfo('wpurl')),
+                    'event' => 'successful payment',
+                    'properties' => array(
+                        'payment_id' => $payments[0]['id'],
+                        'amount' => floatval($intentAmount) / 100,
+                        'payment_method' => $order->get_payment_method(),
+                    ),
+                ));
+
+                do_action('cynder_paymongo_successful_payment', $payments[0]);
 
                 // Redirect to the thank you page
                 return array(

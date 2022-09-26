@@ -1,0 +1,19 @@
+{
+    "name": "cynderpaymongo/wc-paymongo-payment-gateway",
+    "description": "PayMongo WooCommerce plugin",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Cynder\\PayMongo\\": "classes/"
+        }
+    },
+    "authors": [
+        {
+            "name": "cynder",
+            "email": "plugins@cynder.io"
+        }
+    ],
+    "require": {
+        "posthog/posthog-php": "2.1.*"
+    }
+}

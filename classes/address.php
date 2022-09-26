@@ -1,5 +1,7 @@
 <?php
 
+namespace Cynder\PayMongo;
+
 function is_billing_value_set($value) {
     return isset($value) && $value !== '';
 }
