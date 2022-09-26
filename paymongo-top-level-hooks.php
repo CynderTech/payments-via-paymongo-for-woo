@@ -201,6 +201,8 @@ function cynder_paymongo_catch_redirect() {
                     'payment_method' => $order->get_payment_method(),
                 ),
             ));
+
+            do_action('cynder_paymongo_successful_payment', $payment);
         }
 
         // Empty cart

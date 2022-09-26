@@ -209,6 +209,8 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
                             'payment_method' => $order->get_payment_method(),
                         ),
                     ));
+
+                    do_action('cynder_paymongo_successful_payment', $resourceData);
                 }
                 return;
             }
@@ -230,6 +232,8 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
                         'payment_method' => $order->get_payment_method(),
                     ),
                 ));
+
+                do_action('cynder_paymongo_failed_payment', $resourceData);
 
                 return;
             }
@@ -316,6 +320,8 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
                         'payment_method' => $order->get_payment_method(),
                     ),
                 ));
+
+                do_action('cynder_paymongo_successful_payment', $body['data']);
 
                 status_header(200);
                 die();

@@ -329,6 +329,8 @@ class CynderPayMongoPaymentIntentGateway extends WC_Payment_Gateway
                     ),
                 ));
 
+                do_action('cynder_paymongo_successful_payment', $payments[0]);
+
                 // Redirect to the thank you page
                 return array(
                     'result' => 'success',
