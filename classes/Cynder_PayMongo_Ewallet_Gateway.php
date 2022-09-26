@@ -109,10 +109,13 @@ class Cynder_PayMongo_Ewallet_Gateway extends WC_Payment_Gateway
     {
         $order = wc_get_order($orderId);
 
+        $amount = floatval($order->get_total());
+
         PostHog::capture(array(
-            'distinctId' => $order->get_customer_id() . '-' . $orderId,
+            'distinctId' => base64_encode(get_bloginfo('wpurl')),
             'event' => 'process payment',
             'properties' => array(
+                'amount' => $amount,
                 'payment_method' => $order->get_payment_method(),
             ),
         ));
