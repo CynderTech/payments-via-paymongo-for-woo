@@ -207,6 +207,7 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
                             'payment_id' => $resourceData['id'],
                             'amount' => floatval($amount) / 100,
                             'payment_method' => $order->get_payment_method(),
+                            'sandbox' => $this->testmode ? 'true' : 'false',
                         ),
                     ));
 
@@ -230,6 +231,7 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
                         'payment_id' => $resourceData['id'],
                         'amount' => floatval($amount) / 100,
                         'payment_method' => $order->get_payment_method(),
+                        'sandbox' => $this->testmode ? 'true' : 'false',
                     ),
                 ));
 
@@ -318,6 +320,7 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
                         'payment_id' => $body['data']['id'],
                         'amount' => floatval($amount) / 100,
                         'payment_method' => $order->get_payment_method(),
+                        'sandbox' => $this->testmode ? 'true' : 'false',
                     ),
                 ));
 
@@ -338,6 +341,7 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
                         'payment_id' => $body['data']['id'],
                         'amount' => floatval($amount) / 100,
                         'payment_method' => $order->get_payment_method(),
+                        'sandbox' => $this->testmode ? 'true' : 'false',
                     ),
                 ));
 

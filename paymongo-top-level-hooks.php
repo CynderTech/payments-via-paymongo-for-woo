@@ -199,6 +199,7 @@ function cynder_paymongo_catch_redirect() {
                     'payment_id' => $payment['id'],
                     'amount' => floatval($intentAmount) / 100,
                     'payment_method' => $order->get_payment_method(),
+                    'sandbox' => $testMode ? 'true' : 'false',
                 ),
             ));
 
