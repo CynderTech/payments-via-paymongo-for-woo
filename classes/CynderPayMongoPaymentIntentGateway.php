@@ -255,6 +255,7 @@ class CynderPayMongoPaymentIntentGateway extends WC_Payment_Gateway
             'properties' => array(
                 'amount' => $amount,
                 'payment_method' => $order->get_payment_method(),
+                'sandbox' => $this->testmode ? 'true' : 'false',
             ),
         ));
 
@@ -326,6 +327,7 @@ class CynderPayMongoPaymentIntentGateway extends WC_Payment_Gateway
                         'payment_id' => $payments[0]['id'],
                         'amount' => floatval($intentAmount) / 100,
                         'payment_method' => $order->get_payment_method(),
+                        'sandbox' => $this->testmode ? 'true' : 'false',
                     ),
                 ));
 
