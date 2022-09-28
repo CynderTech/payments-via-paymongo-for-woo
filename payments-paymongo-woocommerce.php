@@ -151,6 +151,7 @@ function Paymongo_Init_Gateway_class()
             public function init()
             {
                 include_once 'paymongo-top-level-hooks.php';
+                include_once dirname(__FILE__) . '/classes/Cynder_PayMongo_Webhook_Handler.php';
 
                 add_filter(
                     'woocommerce_payment_gateways',
