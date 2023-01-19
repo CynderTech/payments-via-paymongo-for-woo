@@ -20,7 +20,6 @@
  */
 
 include_once 'paymongo-constants.php';
-include_once 'classes/address.php';
 require_once plugin_dir_path(__FILE__) . '/vendor/autoload.php';
 
 use PostHog\PostHog;
@@ -61,7 +60,6 @@ function Paymongo_Init_Gateway_class()
 
     define('CYNDER_PAYMONGO_MAIN_FILE', __FILE__);
     define('CYNDER_PAYMONGO_VERSION', '1.11.2');
-    define('CYNDER_PAYMONGO_BASE_URL',  'https://api.paymongo.com/v1');
     define(
         'CYNDER_PAYMONGO_PLUGIN_URL',
         untrailingslashit(

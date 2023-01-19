@@ -13,8 +13,11 @@
 
 namespace Cynder\PayMongo;
 
+use GuzzleHttp\Exception\ClientException;
 use PostHog\PostHog;
 use WC_Payment_Gateway;
+use Paymongo\Phaymongo\Phaymongo;
+use Paymongo\Phaymongo\PaymongoUtils;
 
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
@@ -37,6 +40,17 @@ class Cynder_PayMongo_Ewallet_Gateway extends WC_Payment_Gateway
      * @var Singleton The reference the *Singleton* instance of this class
      */
     private static $_instance;
+
+    private $client;
+
+    protected $testmode;
+    protected $secret_key;
+    protected $public_key;
+    protected $debugMode;
+
+    private $ewallet_type;
+
+    protected $icon_name;
 
     /**
      * Returns the *Singleton* instance of this class.
@@ -84,16 +98,14 @@ class Cynder_PayMongo_Ewallet_Gateway extends WC_Payment_Gateway
             'woocommerce_update_options_payment_gateways_' . $this->id,
             array($this, 'process_admin_options')
         );
+
+        $this->client = new Phaymongo($this->public_key, $this->secret_key);
     }
 
     /** Override this function on certain wallets */
     public function initFormFields() {
 
     }
-
-    public function is_billing_value_set($value) {
-        return isset($value) && $value !== '';
-    } 
 
     /**
      * Creates E-Wallet source
@@ -121,104 +133,30 @@ class Cynder_PayMongo_Ewallet_Gateway extends WC_Payment_Gateway
             ),
         ));
 
-        $billing = array();
+        $billing = PaymongoUtils::generateBillingObject($order, 'woocommerce');
+        $successUrl = get_home_url() . '/?wc-api=cynder_paymongo_catch_source_redirect&order=' . $orderId . '&status=success&agent=cynder_woocommerce&version=' . CYNDER_PAYMONGO_VERSION;
+        $failedUrl = get_home_url() . '/?wc-api=cynder_paymongo_catch_source_redirect&order=' . $orderId . '&status=failed&agent=cynder_woocommerce&version=' . CYNDER_PAYMONGO_VERSION;
+        
+        try {
+            $source = $this->client->source()->create($amount, $this->ewallet_type, $successUrl, $failedUrl, $billing, array('agent' => 'cynder_woocommerce', 'version' => CYNDER_PAYMONGO_VERSION));
 
-        $billing_first_name = $order->get_billing_first_name();
-        $billing_last_name = $order->get_billing_last_name();
-        $has_billing_first_name = $this->is_billing_value_set($billing_first_name);
-        $has_billing_last_name = $this->is_billing_value_set($billing_last_name);
-
-        if ($has_billing_first_name && $has_billing_last_name) {
-            $billing['name'] = $billing_first_name . ' ' . $billing_last_name;
-        }
-
-        $billing_email = $order->get_billing_email();
-        $has_billing_email = $this->is_billing_value_set($billing_email);
-
-        if ($has_billing_email) {
-            $billing['email'] = $billing_email;
-        }
-
-        $billing_phone = $order->get_billing_phone();
-        $has_billing_phone = $this->is_billing_value_set($billing_phone);
-
-        if ($has_billing_phone) {
-            $billing['phone'] = $billing_phone;
-        }
-
-        $billing_address = generate_billing_address($order);
-
-        if (count($billing_address) > 0) {
-            $billing['address'] = $billing_address;
-        }
-
-        $attributes = array(
-            'type' => $this->ewallet_type,
-            'amount' => intval($order->get_total() * 100, 32),
-            'currency' => $order->get_currency(),
-            'description' => get_bloginfo('name') . ' - ' . $orderId,
-            'redirect' => array(
-                'success' => get_home_url() . '/?wc-api=cynder_paymongo_catch_source_redirect&order=' . $orderId . '&status=success&agent=cynder_woocommerce&version=' . CYNDER_PAYMONGO_VERSION,
-                'failed' => get_home_url() . '/?wc-api=cynder_paymongo_catch_source_redirect&order=' . $orderId . '&status=failed&agent=cynder_woocommerce&version=' . CYNDER_PAYMONGO_VERSION,
-            ),
-        );
-
-        if (count($billing) > 0) {
-            $attributes['billing'] = $billing;
-        }
-
-        if ($this->debugMode) {
-            wc_get_logger()->log('info', '[Process Payment][E-wallet] Attributes ' . wc_print_r($attributes, true));
-        }
-
-        $payload = json_encode(
-            array(
-                'data' => array(
-                    'attributes' => $attributes,
-                ),
-            )
-        );
-
-        $args = array(
-            'body' => $payload,
-            'method' => "POST",
-            'headers' => array(
-                'Authorization' => 'Basic ' . base64_encode($this->secret_key),
-                'accept' => 'application/json',
-                'content-type' => 'application/json'
-            ),
-            'timeout' => 60,
-        );
-
-        if ($this->debugMode) {
-            wc_get_logger()->log('info', '[Process Payment][E-wallet] Request Payload ' . wc_print_r($args, true));
-        }
-
-        $response = wp_remote_post(CYNDER_PAYMONGO_BASE_URL . '/sources', $args);
-
-        if (!is_wp_error($response)) {
-            $body = json_decode($response['body'], true);
-
-            if ($body
-                && array_key_exists('data', $body)
-                && array_key_exists('attributes', $body['data'])
-                && array_key_exists('status', $body['data']['attributes'])
-                && $body['data']['attributes']['status'] == 'pending'
+            if ($source
+                && array_key_exists('attributes', $source)
+                && array_key_exists('status', $source['attributes'])
+                && $source['attributes']['status'] == 'pending'
             ) {
-                $order->add_meta_data('source_id', $body['data']['id']);
+                $order->add_meta_data('source_id', $source['id']);
                 $order->update_status('pending');
                 
-                // cynder_reduce_stock_levels($orderId);
-                // $woocommerce->cart->empty_cart();
-                $attributes = $body['data']['attributes'];
+                $attributes = $source['attributes'];
 
                 return array(
                     'result' => 'success',
                     'redirect' => $attributes['redirect']['checkout_url'],
                 );
             } else {
-                for ($i = 0; $i < count($body['errors']); $i++) {
-                    $error = $body['errors'][$i];
+                for ($i = 0; $i < count($source['errors']); $i++) {
+                    $error = $source['errors'][$i];
                     $code = $error['code'];
                     $message = $error['detail'];
 
@@ -231,8 +169,9 @@ class Cynder_PayMongo_Ewallet_Gateway extends WC_Payment_Gateway
 
                 return;
             }
-        } else {
-            wc_get_logger()->log('error', '[Processing Payment] Response error ' . json_encode($response));
+        } catch (ClientException $e) {
+            $response = $e->getResponse();
+            wc_get_logger()->log('error', '[Processing Payment] Response error ' . wc_print_r(json_decode($response->getBody()->getContents(), true), true));
             return wc_add_notice('Connection error. Check logs.', 'error');
         }
     }
