@@ -11,8 +11,9 @@
  * @link     n/a
  */
 
+use Cynder\PayMongo\Utils;
 use GuzzleHttp\Exception\ClientException;
-use PostHog\PostHog;
+use Paymongo\Phaymongo\PaymongoException;
 use Paymongo\Phaymongo\Phaymongo;
 
 if (!defined('ABSPATH')) {
@@ -94,7 +95,7 @@ function cynder_paymongo_create_intent($orderId) {
 add_action('woocommerce_checkout_order_processed', 'cynder_paymongo_create_intent');
 
 function cynder_paymongo_catch_redirect() {
-    global $woocommerce;
+    $utils = new Utils();
 
     $debugMode = get_option('woocommerce_cynder_paymongo_debug_mode');
     $debugMode = (!empty($debugMode) && $debugMode === 'yes') ? true : false;
@@ -139,31 +140,14 @@ function cynder_paymongo_catch_redirect() {
         if ($status === 'succeeded' || $status === 'processing') {
             if ($status === 'succeeded') {
                 $payment = $responseAttr['payments'][0];
-                $order->payment_complete($payment['id']);
-                $orderId = $order->get_id();
-                wc_reduce_stock_levels($orderId);
 
-                // Sending invoice after successful payment if setting is enabled
-                if ($sendInvoice) {
-                    $woocommerce->mailer()->emails['WC_Email_Customer_Invoice']->trigger($orderId);
-                }
-
-                PostHog::capture(array(
-                    'distinctId' => base64_encode(get_bloginfo('wpurl')),
-                    'event' => 'successful payment',
-                    'properties' => array(
-                        'payment_id' => $payment['id'],
-                        'amount' => floatval($intentAmount) / 100,
-                        'payment_method' => $order->get_payment_method(),
-                        'sandbox' => $testMode ? 'true' : 'false',
-                    ),
-                ));
-
-                do_action('cynder_paymongo_successful_payment', $payment);
+                $utils->completeOrder($order, $payment['id'], $sendInvoice);
+                $utils->trackPaymentResolution('successful', $payment['id'], floatval($intentAmount) / 100, $order->get_payment_method(), $testMode);
+                $utils->callAction('cynder_paymongo_successful_payment', $payment);
             }
 
             // Empty cart
-            $woocommerce->cart->empty_cart();
+            $utils->emptyCart();
 
             // Redirect to the thank you page
             wp_redirect($order->get_checkout_order_received_url());
@@ -171,13 +155,13 @@ function cynder_paymongo_catch_redirect() {
             wc_add_notice('Something went wrong with the payment. Please try another payment method. If issue persist, contact support.', 'error');
             wp_redirect($order->get_checkout_payment_url());
         }
-    } catch (ClientException $e) {
+    } catch (PaymongoException $e) {
         /** 
          * Log the error but confirm the order placement. This will fallback
          * to the webhooks for proper resolution.
          */
-        $response = $e->getResponse();
-        wc_get_logger()->log('error', '[Catch Redirect][Source] ' . wc_print_r(json_decode($response->getBody()->__toString(), true), true));
+        $formatted_messages = $e->format_errors();
+        $utils->log('error', '[Catch Redirect for Payment Intent] Order ID: ' . $order->get_id() . ' - Response: ' . join(',', $formatted_messages));
         wp_redirect($order->get_checkout_order_received_url());
     }
 }

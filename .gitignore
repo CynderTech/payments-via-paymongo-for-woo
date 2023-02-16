@@ -2,3 +2,4 @@
 .svn
 .vscode
 /vendor/
+.phpunit.result.cache

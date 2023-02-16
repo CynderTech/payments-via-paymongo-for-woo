@@ -37,6 +37,7 @@ class Cynder_PayMongo_Gcash_Gateway extends Cynder_PayMongo_Ewallet_Gateway
     {
         $this->ewallet_type = 'gcash';
         $this->id = 'paymongo_' . $this->ewallet_type;
+        $this->icon_name = 'gcash';
         $this->has_fields = true;
         $this->method_title = 'GCash Gateway via PayMongo';
         $this->method_description = 'Simple and easy payments with GCash.';

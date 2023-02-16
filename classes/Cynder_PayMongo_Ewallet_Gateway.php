@@ -13,11 +13,9 @@
 
 namespace Cynder\PayMongo;
 
-use GuzzleHttp\Exception\ClientException;
-use PostHog\PostHog;
 use WC_Payment_Gateway;
 use Paymongo\Phaymongo\Phaymongo;
-use Paymongo\Phaymongo\PaymongoUtils;
+use Cynder\PayMongo\Source;
 
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
@@ -47,9 +45,9 @@ class Cynder_PayMongo_Ewallet_Gateway extends WC_Payment_Gateway
     protected $secret_key;
     protected $public_key;
     protected $debugMode;
-
-    private $ewallet_type;
-
+    protected $source;
+    protected $utils;
+    protected $ewallet_type;
     protected $icon_name;
 
     /**
@@ -99,7 +97,11 @@ class Cynder_PayMongo_Ewallet_Gateway extends WC_Payment_Gateway
             array($this, 'process_admin_options')
         );
 
-        $this->client = new Phaymongo($this->public_key, $this->secret_key);
+        wc_get_logger()->log('info', 'WALLET TYPE ' . $this->ewallet_type);
+
+        $this->client = new Phaymongo($this->public_key, $this->secret_key, []);
+        $this->utils = new Utils();
+        $this->source = new Source($this->ewallet_type, $this->utils, $debugMode, $testMode, $this->client, CYNDER_PAYMONGO_VERSION);
     }
 
     /** Override this function on certain wallets */
@@ -121,59 +123,7 @@ class Cynder_PayMongo_Ewallet_Gateway extends WC_Payment_Gateway
     {
         $order = wc_get_order($orderId);
 
-        $amount = floatval($order->get_total());
-
-        PostHog::capture(array(
-            'distinctId' => base64_encode(get_bloginfo('wpurl')),
-            'event' => 'process payment',
-            'properties' => array(
-                'amount' => $amount,
-                'payment_method' => $order->get_payment_method(),
-                'sandbox' => $this->testmode ? 'true' : 'false',
-            ),
-        ));
-
-        $billing = PaymongoUtils::generateBillingObject($order, 'woocommerce');
-        $successUrl = get_home_url() . '/?wc-api=cynder_paymongo_catch_source_redirect&order=' . $orderId . '&status=success&agent=cynder_woocommerce&version=' . CYNDER_PAYMONGO_VERSION;
-        $failedUrl = get_home_url() . '/?wc-api=cynder_paymongo_catch_source_redirect&order=' . $orderId . '&status=failed&agent=cynder_woocommerce&version=' . CYNDER_PAYMONGO_VERSION;
-        
-        try {
-            $source = $this->client->source()->create($amount, $this->ewallet_type, $successUrl, $failedUrl, $billing, array('agent' => 'cynder_woocommerce', 'version' => CYNDER_PAYMONGO_VERSION));
-
-            if ($source
-                && array_key_exists('attributes', $source)
-                && array_key_exists('status', $source['attributes'])
-                && $source['attributes']['status'] == 'pending'
-            ) {
-                $order->add_meta_data('source_id', $source['id']);
-                $order->update_status('pending');
-                
-                $attributes = $source['attributes'];
-
-                return array(
-                    'result' => 'success',
-                    'redirect' => $attributes['redirect']['checkout_url'],
-                );
-            } else {
-                for ($i = 0; $i < count($source['errors']); $i++) {
-                    $error = $source['errors'][$i];
-                    $code = $error['code'];
-                    $message = $error['detail'];
-
-                    if ($code == 'parameter_below_minimum') {
-                        $message = 'Amount cannot be less than P100.00';
-                    }
-
-                    wc_add_notice($message, 'error');
-                }
-
-                return;
-            }
-        } catch (ClientException $e) {
-            $response = $e->getResponse();
-            wc_get_logger()->log('error', '[Processing Payment] Response error ' . wc_print_r(json_decode($response->getBody()->getContents(), true), true));
-            return wc_add_notice('Connection error. Check logs.', 'error');
-        }
+        return $this->source->processPayment($order);
     }
 
     /**
@@ -183,11 +133,9 @@ class Cynder_PayMongo_Ewallet_Gateway extends WC_Payment_Gateway
      */
     public function get_icon() // phpcs:ignore
     {
-        $icon_name = isset($this->icon_name) ? $this->icon_name : $this->ewallet_type;
-
         $icons_str = '<img src="' 
             . CYNDER_PAYMONGO_PLUGIN_URL
-            . '/assets/images/' . $icon_name . '.png" class="paymongo-method-logo paymongo-cards-icon" alt="'
+            . '/assets/images/' . $this->icon_name . '.png" class="paymongo-method-logo paymongo-cards-icon" alt="'
             . $this->title .'" />';
 
         return apply_filters('woocommerce_gateway_icon', $icons_str, $this->id);
