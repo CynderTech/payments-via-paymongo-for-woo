@@ -76,8 +76,20 @@ function cynder_paymongo_create_intent($orderId) {
             && $paymentIntent['attributes']['status'] == 'awaiting_payment_method'
         ) {
             $clientKey = $paymentIntent['attributes']['client_key'];
-            $order->add_meta_data('paymongo_payment_intent_id', $paymentIntent['id']);
-            $order->add_meta_data('paymongo_client_key', $clientKey);
+
+            $existingIntentId = $order->get_meta(PAYMONGO_PAYMENT_INTENT_META_KEY);
+            $existingClientKey = $order->get_meta(PAYMONGO_CLIENT_KEY_META_KEY);
+
+            if (isset($existingIntentId) && $existingIntentId !== '') {
+                $order->add_meta_data(PAYMONGO_PAYMENT_INTENT_META_KEY . '_old', $existingIntentId);
+            }
+
+            if (isset($existingClientKey) && $existingClientKey !== '') {
+                $order->add_meta_data(PAYMONGO_CLIENT_KEY_META_KEY . '_old', $existingClientKey);
+            }
+
+            $order->update_meta_data(PAYMONGO_PAYMENT_INTENT_META_KEY, $paymentIntent['id']);
+            $order->update_meta_data(PAYMONGO_CLIENT_KEY_META_KEY, $clientKey);
             $order->save_meta_data();
         } else {
             wc_get_logger()->log('error', '[Create Payment Intent] ' . json_encode($paymentIntent['errors']));
@@ -151,7 +163,7 @@ function cynder_paymongo_catch_redirect() {
 
             // Redirect to the thank you page
             wp_redirect($order->get_checkout_order_received_url());
-        } else if ($status === 'awaiting_payment_method') {
+        } else if ($status === 'awaiting_payment_method' || $status === 'awaiting_next_action') {
             wc_add_notice('Something went wrong with the payment. Please try another payment method. If issue persist, contact support.', 'error');
             wp_redirect($order->get_checkout_payment_url());
         }

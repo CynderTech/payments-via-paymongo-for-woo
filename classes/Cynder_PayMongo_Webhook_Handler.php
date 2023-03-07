@@ -18,6 +18,7 @@ use Paymongo\Phaymongo\PaymongoException;
 use Paymongo\Phaymongo\Phaymongo;
 use PostHog\PostHog;
 use WC_Payment_Gateway;
+use WC_Order;
 
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
@@ -206,11 +207,16 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
 
                 wc_get_logger()->log('info', '[processWebhook] event: payment.failed with payment intent ID ' . $paymentIntentId);
 
-                $order->update_status('failed', 'Payment failed', true);
-
-                $this->utils->trackPaymentResolution('failed', $resourceData['id'], floatval($amount) / 100, $order->get_payment_method(), $this->testmode);
-
-                $this->utils->callAction('cynder_paymongo_failed_payment', $resourceData);
+                /**
+                 * Only unpaid orders should be processed for failed payments
+                 */
+                if (!$order->is_paid()) {
+                    $order->update_status('failed', 'Payment failed', true);
+    
+                    $this->utils->trackPaymentResolution('failed', $resourceData['id'], floatval($amount) / 100, $order->get_payment_method(), $this->testmode);
+    
+                    $this->utils->callAction('cynder_paymongo_failed_payment', $resourceData);
+                }
 
                 return;
             }
@@ -356,7 +362,7 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
      * @param string $metaKey Metadata key
      * @param string $metaValue Metadata value
      *
-     * @return object,bool
+     * @return WC_Order
      *
      * @since 1.5.0
      */

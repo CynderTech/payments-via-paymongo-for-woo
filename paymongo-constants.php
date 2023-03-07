@@ -27,3 +27,6 @@ const PAYMONGO_PAYMENT_METHOD_LABELS = array(
     PAYMONGO_BPI => 'BPI Direct Onling Banking via PayMongo',
     PAYMONGO_BILLEASE => 'BillEase via PayMongo',
 );
+
+const PAYMONGO_PAYMENT_INTENT_META_KEY = 'paymongo_payment_intent_id';
+const PAYMONGO_CLIENT_KEY_META_KEY = 'paymongo_client_key';
