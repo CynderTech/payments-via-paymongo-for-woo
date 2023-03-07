@@ -26,7 +26,7 @@ if (!defined('ABSPATH')) {
  * @license  n/a (http://127.0.0.0)
  * @link     n/a
  */
-class Cynder_PayMongo_Gcash_Gateway extends Cynder_PayMongo_Ewallet_Gateway
+class Cynder_PayMongo_Gcash_Gateway extends CynderPayMongoPaymentIntentGateway
 {
     /**
      * Starting point of the payment gateway
@@ -35,10 +35,7 @@ class Cynder_PayMongo_Gcash_Gateway extends Cynder_PayMongo_Ewallet_Gateway
      */
     public function __construct()
     {
-        $this->ewallet_type = 'gcash';
-        $this->id = 'paymongo_' . $this->ewallet_type;
-        $this->icon_name = 'gcash';
-        $this->has_fields = true;
+        $this->id = PAYMONGO_GCASH;
         $this->method_title = 'GCash Gateway via PayMongo';
         $this->method_description = 'Simple and easy payments with GCash.';
 

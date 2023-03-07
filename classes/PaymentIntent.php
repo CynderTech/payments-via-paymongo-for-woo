@@ -20,6 +20,8 @@ class PaymentIntent {
         'paymongo_atome' => 'atome',
         'paymongo_bpi' => 'dob',
         'paymongo_billease' => 'billease',
+        'paymongo_gcash' => 'gcash',
+        'paymongo_grab_pay' => 'grab_pay',
     ];
 
     public function __construct($type, $utils, $debug_mode, $test_mode, $client)

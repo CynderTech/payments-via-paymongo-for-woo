@@ -165,30 +165,15 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
         }
 
         $validEventTypes = [
-            'source.chargeable',
             'payment.paid',
             'payment.failed',
         ];
 
         if (in_array($eventData['type'], $validEventTypes)) {
-            if ($eventData['type'] === 'source.chargeable') {
-                $sourceId = $resourceData['id'];
-                $order = $this->getOrderByMeta('source_id', $sourceId);
-
-                if (!$order) {
-                    wc_get_logger()->log('error', '[processWebhook] No order found with source ID ' . $sourceId);
-                    return;
-                }
-
-                wc_get_logger()->log('info', '[processWebhook] event: source.chargeable with source ID ' . $sourceId);
-
-                return $this->createPaymentRecord($resourceData, $order);
-            }
-
             $sourceType = $resourceData['attributes']['source']['type'];
             $amount = $resourceData['attributes']['amount'];
 
-            if ($eventData['type'] === 'payment.paid' && $sourceType !== 'gcash' && $sourceType !== 'grab_pay') {
+            if ($eventData['type'] === 'payment.paid') {
                 $paymentIntentId = $resourceData['attributes']['payment_intent_id'];
                 $order = $this->getOrderByMeta('paymongo_payment_intent_id', $paymentIntentId);
 
@@ -215,7 +200,7 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
                 return;
             }
 
-            if ($eventData['type'] === 'payment.failed' && $sourceType !== 'gcash' && $sourceType !== 'grab_pay') {
+            if ($eventData['type'] === 'payment.failed') {
                 $paymentIntentId = $resourceData['attributes']['payment_intent_id'];
                 $order = $this->getOrderByMeta('paymongo_payment_intent_id', $paymentIntentId);
 
@@ -236,66 +221,6 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
 
         wc_get_logger()->log('error', '[processWebhook] Invalid event type = ' . $eventData['type']);
         status_header(422);
-        die();
-    }
-
-    /**
-     * Creates PayMongo Payment Record
-     * 
-     * @param array $source Source data from event data sent by paymongo
-     * @param object $order  Order data from woocommerce database
-     * 
-     * @return void
-     * 
-     * @link  https://developers.paymongo.com/reference#payment-source
-     * @since 1.0.0
-     */
-    public function createPaymentRecord($source, $order)
-    {
-        $amount = floatval($order->get_total());
-        $payment_method = $order->get_payment_method();
-
-        if ($this->debugMode) {
-            wc_get_logger()->log('info', '[Create Payment] Creating payment for ' . $source['id'] . ' to the amount of ' . $amount);
-        }
-
-        try {
-            $payment = $this->client->payment()->create($amount, $source['id'], 'source', get_bloginfo('name') . ' - ' . $order->get_id(), null, array('agent' => 'cynder_woocommerce', 'version' => CYNDER_PAYMONGO_VERSION));
-
-            $attributes = $payment['attributes'];
-            $status = $attributes['status'];
-            $amount = $attributes['amount'];
-
-            if ($status == 'paid') {
-                $this->utils->completeOrder($order, $payment['id'], $this->sendInvoice);
-
-                $this->utils->trackPaymentResolution('successful', $payment['id'], $amount, $payment_method, $this->testmode);
-
-                $this->utils->callAction('cynder_paymongo_successful_payment', $payment);
-
-                status_header(200);
-                die();
-            }
-
-            if ($status == 'failed') {
-                wc_get_logger()->log('info', 'Payment failed: ' . wc_print_r($payment, true));
-                $order->update_status($status);
-
-                $this->utils->trackPaymentResolution('failed', $payment['id'], $amount, $payment_method, $this->testmode);
-
-                $this->utils->callAction('cynder_paymongo_failed_payment', $payment);
-
-                status_header(400);
-                die();
-            }
-        } catch (PaymongoException $e) {
-            $formatted_messages = $e->format_errors();
-
-            $this->utils->log('error', '[Creating Payment] Order ID: ' . $order->get_id() . ' - Response: ' . join(',', $formatted_messages));
-            status_header(422);
-            die();
-        }
-
         die();
     }
 

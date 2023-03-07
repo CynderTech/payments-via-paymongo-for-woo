@@ -13,10 +13,7 @@
 
 namespace Cynder\PayMongo;
 
-use GuzzleHttp\Exception\ClientException;
-use Paymongo\Phaymongo\PaymongoUtils;
 use Paymongo\Phaymongo\Phaymongo;
-use PostHog\PostHog;
 use WC_Payment_Gateway;
 
 if (!defined('ABSPATH')) {

@@ -32,7 +32,7 @@ class Utils {
 
     public function emptyCart() {
         global $woocommerce;
-        $woocommerce->cart->empty_carty();
+        $woocommerce->cart->empty_cart();
     }
 
     public function completeOrder($order, $payment_id, $send_invoice) {
@@ -70,9 +70,5 @@ class Utils {
                 'sandbox' => $test_mode ? 'true' : 'false',
             ),
         ));
-    }
-
-    public function getSourceReturnUrl($status, $order_id, $plugin_version) {
-        return get_home_url() . '/?wc-api=cynder_paymongo_catch_source_redirect&order=' . $order_id . '&status=' . $status . '&agent=cynder_woocommerce&version=' . $plugin_version;
     }
 }

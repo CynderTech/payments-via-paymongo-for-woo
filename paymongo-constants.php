@@ -18,21 +18,6 @@ const PAYMONGO_PAYMENT_METHODS = array(
     PAYMONGO_BILLEASE,
 );
 
-const PAYMENT_METHODS_WITH_INTENT = array(
-    PAYMONGO_CARD,
-    PAYMONGO_PAYMAYA,
-    PAYMONGO_ATOME,
-    PAYMONGO_BPI,
-    PAYMONGO_BILLEASE,
-);
-
-const SERVER_PAYMENT_METHOD_TYPES = array(
-    PAYMONGO_PAYMAYA => 'paymaya',
-    PAYMONGO_ATOME => 'atome',
-    PAYMONGO_BPI => 'dob',
-    PAYMONGO_BILLEASE => 'billease',
-);
-
 const PAYMONGO_PAYMENT_METHOD_LABELS = array(
     PAYMONGO_CARD => 'Credit/Debit Card via PayMongo',
     PAYMONGO_GCASH => 'GCash via PayMongo',

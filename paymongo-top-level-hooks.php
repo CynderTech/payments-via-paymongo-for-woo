@@ -44,7 +44,7 @@ function cynder_paymongo_create_intent($orderId) {
     if (
         $paymentMethodSettings['enabled'] !== 'yes' ||
         !$hasPaymentMethod ||
-        (!in_array($paymentMethod, PAYMENT_METHODS_WITH_INTENT))
+        (!in_array($paymentMethod, PAYMONGO_PAYMENT_METHODS))
     ) return;
 
     $amount = floatval($order->get_total());
@@ -64,7 +64,7 @@ function cynder_paymongo_create_intent($orderId) {
     $genericErrorMessage = 'Something went wrong with the payment. Please try another payment method. If issue persist, contact support.';
 
     try {
-        $paymentIntent = $client->paymentIntent()->create(floatval($amount), ['card', 'paymaya', 'atome', 'dob', 'billease'], get_bloginfo('name') . ' - ' . $orderId, array('agent' => 'cynder_woocommerce', 'version' => CYNDER_PAYMONGO_VERSION));
+        $paymentIntent = $client->paymentIntent()->create(floatval($amount), ['card', 'paymaya', 'atome', 'dob', 'billease', 'gcash', 'grab_pay'], get_bloginfo('name') . ' - ' . $orderId, array('agent' => 'cynder_woocommerce', 'version' => CYNDER_PAYMONGO_VERSION));
 
         if ($debugMode) {
             wc_get_logger()->log('info', '[Create Payment Intent] Response ' . wc_print_r($paymentIntent, true));
