@@ -207,6 +207,11 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
 
                 wc_get_logger()->log('info', '[processWebhook] event: payment.failed with payment intent ID ' . $paymentIntentId);
 
+                if (!$order) {
+                    wc_get_logger()->log('error', '[processWebhook] No order found with payment intent ID ' . $paymentIntentId);
+                    return;
+                }
+
                 /**
                  * Only unpaid orders should be processed for failed payments
                  */
