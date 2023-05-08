@@ -2,9 +2,9 @@
 Contributors: pickmeshop
 Tags: payments, credit card, gcash, grabpay
 Requires at least: 5.0
-Tested up to: 6.0
+Tested up to: 6.2
 Requires PHP: 5.6
-Stable tag: 1.11.2
+Stable tag: 1.12.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -93,6 +93,13 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 3. Payment methods as displayed in checkout page.
 
 == Changelog ==
+
+= 1.12.0 =
+*Release Date - May 8, 2023*
+[FEATURE] GCash and GrabPay is now using Payment Intent workflow
+[FIX] Fix fatal errors
+[CHORE] House cleaning and code maintenance
+[CHORE] Compatibility tests with WC 7.6.1 & WP 6.2
 
 = 1.11.2 =
 *Release Date - September 28, 2022*
