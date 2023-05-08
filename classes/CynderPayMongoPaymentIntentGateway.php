@@ -13,7 +13,7 @@
 
 namespace Cynder\PayMongo;
 
-use PostHog\PostHog;
+use Paymongo\Phaymongo\Phaymongo;
 use WC_Payment_Gateway;
 
 if (!defined('ABSPATH')) {
@@ -38,7 +38,17 @@ class CynderPayMongoPaymentIntentGateway extends WC_Payment_Gateway
      */
     private static $_instance;
 
+    private $client;
+
     public $hasDetailsPayload = false;
+
+    protected $testmode;
+    protected $secret_key;
+    protected $public_key;
+    protected $sendInvoice;
+    protected $debugMode;
+    protected $paymentIntent;
+    protected $utils;
 
     /**
      * Returns the *Singleton* instance of this class.
@@ -100,6 +110,10 @@ class CynderPayMongoPaymentIntentGateway extends WC_Payment_Gateway
                 2
             );
         }
+
+        $this->utils = new Utils();
+        $this->client = new Phaymongo($this->public_key, $this->secret_key);
+        $this->paymentIntent = new PaymentIntent($this->id, $this->utils, $debugMode, $testMode, $this->client);
     }
 
     /**
@@ -114,107 +128,20 @@ class CynderPayMongoPaymentIntentGateway extends WC_Payment_Gateway
      */
     public function getPaymentMethodId($orderId) {
         $order = wc_get_order($orderId);
+        $paymentMethod = $this->paymentIntent->getPaymentMethod($order, $this->hasDetailsPayload ? 'generatePaymentMethodDetailsPayload' : null);
 
-        $attributes = array(
-            'type' => SERVER_PAYMENT_METHOD_TYPES[$this->id],
-            'billing' => $this->generateBillingPayload($order),
-        );
-
-        if ($this->hasDetailsPayload) {
-            $attributes['details'] = $this->generatePaymentMethodDetailsPayload($order);
+        if (isset($paymentMethod)) {
+            $paymentMethodId = $paymentMethod['id'];
+            return $paymentMethodId;
+        } else {
+            $this->utils->addNotice('error', 'Payment processing error. Please contact side administrator for further details.');
+            return null;
         }
-
-        $paymentMethodPayload = json_encode(
-            array(
-                'data' => array(
-                    'attributes' => $attributes,
-                ),
-            )
-        );
-
-        $paymentMethodArgs = array(
-            'body' => $paymentMethodPayload,
-            'method' => 'POST',
-            'headers' => array(
-                'Authorization' => 'Basic ' . base64_encode($this->secret_key),
-                'accept' => 'application/json',
-                'content-type' => 'application/json'
-            ),
-        );
-
-        $paymentMethodResponse = wp_remote_post(
-            CYNDER_PAYMONGO_BASE_URL . '/payment_methods',
-            $paymentMethodArgs
-        );
-
-        if (is_wp_error($paymentMethodResponse)) {
-            wc_get_logger()->log('error', '[Processing Payment] Order ID: ' . $orderId . ' - Response error ' . wc_print_r(json_decode($paymentMethodResponse['body'], true), true));
-            return wc_add_notice('Payment processing error. Please contact side administrator for further details.', 'error');
-        }
-
-        $paymentMethodResponsePayload =  json_decode($paymentMethodResponse['body'], true);
-
-        if ($this->debugMode) {
-            wc_get_logger()->log('info', '[process_payment] Payment method response ' . wc_print_r($paymentMethodResponsePayload, true));
-        }
-
-        if (isset($paymentMethodResponsePayload['errors'])) {
-            for ($i = 0; $i < count($paymentMethodResponsePayload['errors']); $i++) {
-                wc_add_notice($paymentMethodResponsePayload['errors'][$i]['detail'], 'error');
-            }
-
-            return;
-        }
-
-        $paymentMethodId = $paymentMethodResponsePayload['data']['id'];
-
-        return $paymentMethodId;
-    }
-
-    public function generateBillingPayload($order) {
-        $billing_first_name = $order->get_billing_first_name();
-        $billing_last_name = $order->get_billing_last_name();
-        $has_billing_first_name = $this->is_billing_value_set($billing_first_name);
-        $has_billing_last_name = $this->is_billing_value_set($billing_last_name);
-
-        if ($has_billing_first_name && $has_billing_last_name) {
-            $billing['name'] = $billing_first_name . ' ' . $billing_last_name;
-        }
-
-        $billing_email = $order->get_billing_email();
-        $has_billing_email = $this->is_billing_value_set($billing_email);
-
-        if ($has_billing_email) {
-            $billing['email'] = $billing_email;
-        }
-
-        $billing_phone = $order->get_billing_phone();
-        $has_billing_phone = $this->is_billing_value_set($billing_phone);
-
-        if ($has_billing_phone) {
-            $billing['phone'] = $billing_phone;
-        }
-
-        $billing_address = generate_billing_address($order);
-
-        if ($this->debugMode) {
-            wc_get_logger()->log('info', 'Billing address ' . wc_print_r($billing_address, true));
-        }
-
-        if (count($billing_address) > 0) {
-            $billing['address'] = $billing_address;
-        }
-
-        return $billing;
     }
 
     /** Override on certain payment methods */
     public function generatePaymentMethodDetailsPayload($order) {
         return array();
-    }
-
-    public function is_billing_value_set($value) {
-        return isset($value) && $value !== '';
     }
 
     /**
@@ -229,126 +156,14 @@ class CynderPayMongoPaymentIntentGateway extends WC_Payment_Gateway
      */
     public function process_payment($orderId) // phpcs:ignore
     {
-        global $woocommerce;
-    
         $paymentMethodId = $this->getPaymentMethodId($orderId);
-
-        if (!isset($paymentMethodId)) {
-            $errorMessage = '[Processing Payment] No payment method ID found.';
-            $userMessage = 'Your payment did not proceed due to an error. Rest assured that no payment was made. You may refresh this page and try again.';
-            wc_get_logger()->log('error', $errorMessage);
-            return wc_add_notice($userMessage, 'error');
-        }
-
         $order = wc_get_order($orderId);
         $paymentIntentId = $order->get_meta('paymongo_payment_intent_id');
+        $returnUrl = get_home_url() . '/?wc-api=cynder_paymongo_catch_redirect&order=' . $orderId . '&intent=' . $paymentIntentId . '&agent=cynder_woocommerce&version=' . CYNDER_PAYMONGO_VERSION;
 
-        if ($this->debugMode) {
-            wc_get_logger()->log('info', 'Customer ID ' . $order->get_customer_id());
-        }
+        $returnObj = $this->paymentIntent->processPayment($order, $paymentMethodId, $returnUrl, $this->get_return_url($order), $this->sendInvoice);
 
-        $amount = floatval($order->get_total());
-
-        PostHog::capture(array(
-            'distinctId' => base64_encode(get_bloginfo('wpurl')),
-            'event' => 'process payment',
-            'properties' => array(
-                'amount' => $amount,
-                'payment_method' => $order->get_payment_method(),
-                'sandbox' => $this->testmode ? 'true' : 'false',
-            ),
-        ));
-
-        $payload = json_encode(
-            array(
-                'data' => array(
-                    'attributes' =>array(
-                        'payment_method' => $paymentMethodId,
-                        'return_url' => get_home_url() . '/?wc-api=cynder_paymongo_catch_redirect&order=' . $orderId . '&intent=' . $paymentIntentId . '&agent=cynder_woocommerce&version=' . CYNDER_PAYMONGO_VERSION
-                    ),
-                ),
-            )
-        );
-        
-        $args = array(
-            'body' => $payload,
-            'method' => "POST",
-            'headers' => array(
-                'Authorization' => 'Basic ' . base64_encode($this->secret_key),
-                'accept' => 'application/json',
-                'content-type' => 'application/json'
-            ),
-            'timeout' => 60,
-        );
-
-        $response = wp_remote_post(
-            CYNDER_PAYMONGO_BASE_URL . '/payment_intents/' . $paymentIntentId . '/attach',
-            $args
-        );
-
-        if (!is_wp_error($response)) {
-            if ($this->debugMode) {
-                wc_get_logger()->log('info', '[process_payment] Response ' . wc_print_r($response, true));
-            }
-
-            $body = json_decode($response['body'], true);
-
-            if (isset($body['errors'])) {
-                for ($i = 0; $i < count($body['errors']); $i++) {
-                    wc_add_notice($body['errors'][$i]['detail'], 'error');
-                }
-
-                return;
-            }
-
-            $responseAttr = $body['data']['attributes'];
-            $status = $responseAttr['status'];
-
-            /** For regular payments, process as is */
-            if ($status == 'succeeded') {
-                // we received the payment
-                $payments = $responseAttr['payments'];
-                $intentAmount = $responseAttr['amount'];
-                $order->payment_complete($payments[0]['id']);
-                wc_reduce_stock_levels($orderId);
-
-                // Sending invoice after successful payment if setting is enabled
-                if ($this->sendInvoice) {
-                    $woocommerce->mailer()->emails['WC_Email_Customer_Invoice']->trigger($orderId);
-                }
-
-                // Empty cart
-                $woocommerce->cart->empty_cart();
-
-                PostHog::capture(array(
-                    'distinctId' => base64_encode(get_bloginfo('wpurl')),
-                    'event' => 'successful payment',
-                    'properties' => array(
-                        'payment_id' => $payments[0]['id'],
-                        'amount' => floatval($intentAmount) / 100,
-                        'payment_method' => $order->get_payment_method(),
-                        'sandbox' => $this->testmode ? 'true' : 'false',
-                    ),
-                ));
-
-                do_action('cynder_paymongo_successful_payment', $payments[0]);
-
-                // Redirect to the thank you page
-                return array(
-                    'result' => 'success',
-                    'redirect' => $this->get_return_url($order)
-                );
-            } else if ($status === 'awaiting_next_action') {
-                /** For 3DS-enabled cards, redirect to authorization page */
-                return array(
-                    'result' => 'success',
-                    'redirect' => $responseAttr['next_action']['redirect']['url']
-                );
-            }
-        } else {
-            wc_get_logger()->log('error', '[Processing Payment] ID: ' . $paymentIntentId . ' - Response error ' . json_encode($response));
-            return wc_add_notice('Connection error. Check logs.', 'error');
-        }
+        return $returnObj;
     }
 
     /**

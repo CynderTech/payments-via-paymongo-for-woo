@@ -26,7 +26,7 @@ if (! defined('ABSPATH')) {
  * @license  n/a (http://127.0.0.0)
  * @link     n/a
  */
-class Cynder_PayMongo_GrabPay_Gateway extends Cynder_PayMongo_Ewallet_Gateway
+class Cynder_PayMongo_GrabPay_Gateway extends CynderPayMongoPaymentIntentGateway
 {
     /**
      * Starting point of the payment gateway
@@ -35,9 +35,7 @@ class Cynder_PayMongo_GrabPay_Gateway extends Cynder_PayMongo_Ewallet_Gateway
      */
     public function __construct()
     {
-        $this->ewallet_type = 'grab_pay';
-        $this->icon_name = 'grabpay';
-        $this->id = 'paymongo_' . $this->ewallet_type;
+        $this->id = PAYMONGO_GRABPAY;
         $this->has_fields = true;
         $this->method_title = 'GrabPay Gateway via PayMongo';
         $this->method_description = 'Simple and easy payments with GrabPay.';

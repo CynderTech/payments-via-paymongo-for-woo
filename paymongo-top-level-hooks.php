@@ -11,7 +11,10 @@
  * @link     n/a
  */
 
-use PostHog\PostHog;
+use Cynder\PayMongo\Utils;
+use GuzzleHttp\Exception\ClientException;
+use Paymongo\Phaymongo\PaymongoException;
+use Paymongo\Phaymongo\Phaymongo;
 
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
@@ -41,7 +44,7 @@ function cynder_paymongo_create_intent($orderId) {
     if (
         $paymentMethodSettings['enabled'] !== 'yes' ||
         !$hasPaymentMethod ||
-        (!in_array($paymentMethod, PAYMENT_METHODS_WITH_INTENT))
+        (!in_array($paymentMethod, PAYMONGO_PAYMENT_METHODS))
     ) return;
 
     $amount = floatval($order->get_total());
@@ -52,70 +55,51 @@ function cynder_paymongo_create_intent($orderId) {
         throw new Exception(__($errorMessage, 'woocommerce'));
     }
 
+    $pkKey = $testMode ? 'woocommerce_cynder_paymongo_test_public_key' : 'woocommerce_cynder_paymongo_public_key';
     $skKey = $testMode ? 'woocommerce_cynder_paymongo_test_secret_key' : 'woocommerce_cynder_paymongo_secret_key';
+    $publicKey = get_option($pkKey);
     $secretKey = get_option($skKey);
-
-    $payload = json_encode(
-        array(
-            'data' => array(
-                'attributes' =>array(
-                    'amount' => floatval($amount * 100),
-                    'payment_method_allowed' => ['card', 'paymaya', 'atome', 'dob', 'billease'],
-                    'currency' => 'PHP', // hard-coded for now
-                    'description' => get_bloginfo('name') . ' - ' . $orderId,
-                    'metadata' => array(
-                        'agent' => 'cynder_woocommerce',
-                        'version' => CYNDER_PAYMONGO_VERSION,
-                    )
-                ),
-            ),
-        )
-    );
-
-    if ($debugMode) {
-        wc_get_logger()->log('info', '[Create Payment Intent] Payload ' . wc_print_r($payload, true));
-    }
-
-    $args = array(
-        'body' => $payload,
-        'method' => "POST",
-        'headers' => array(
-            'Authorization' => 'Basic ' . base64_encode($secretKey),
-            'accept' => 'application/json',
-            'content-type' => 'application/json'
-        ),
-    );
-
-    $response = wp_remote_post(
-        CYNDER_PAYMONGO_BASE_URL . '/payment_intents',
-        $args
-    );
-
-    if ($debugMode) {
-        wc_get_logger()->log('info', '[Create Payment Intent] Response ' . wc_print_r($response['body'], true));
-    }
+    $client = new Phaymongo($publicKey, $secretKey);
 
     $genericErrorMessage = 'Something went wrong with the payment. Please try another payment method. If issue persist, contact support.';
 
-    if (!is_wp_error($response)) {
-        $body = json_decode($response['body'], true);
+    try {
+        $paymentIntent = $client->paymentIntent()->create(floatval($amount), ['card', 'paymaya', 'atome', 'dob', 'billease', 'gcash', 'grab_pay'], get_bloginfo('name') . ' - ' . $orderId, array('agent' => 'cynder_woocommerce', 'version' => CYNDER_PAYMONGO_VERSION));
 
-        if ($body
-            && array_key_exists('data', $body)
-            && array_key_exists('attributes', $body['data'])
-            && array_key_exists('status', $body['data']['attributes'])
-            && $body['data']['attributes']['status'] == 'awaiting_payment_method'
+        if ($debugMode) {
+            wc_get_logger()->log('info', '[Create Payment Intent] Response ' . wc_print_r($paymentIntent, true));
+        }
+    
+        if ($paymentIntent
+            && array_key_exists('attributes', $paymentIntent)
+            && array_key_exists('status', $paymentIntent['attributes'])
+            && $paymentIntent['attributes']['status'] == 'awaiting_payment_method'
         ) {
-            $clientKey = $body['data']['attributes']['client_key'];
-            $order->add_meta_data('paymongo_payment_intent_id', $body['data']['id']);
-            $order->add_meta_data('paymongo_client_key', $clientKey);
+            $clientKey = $paymentIntent['attributes']['client_key'];
+
+            $existingIntentId = $order->get_meta(PAYMONGO_PAYMENT_INTENT_META_KEY);
+            $existingClientKey = $order->get_meta(PAYMONGO_CLIENT_KEY_META_KEY);
+
+            if (isset($existingIntentId) && $existingIntentId !== '') {
+                $order->add_meta_data(PAYMONGO_PAYMENT_INTENT_META_KEY . '_old', $existingIntentId);
+            }
+
+            if (isset($existingClientKey) && $existingClientKey !== '') {
+                $order->add_meta_data(PAYMONGO_CLIENT_KEY_META_KEY . '_old', $existingClientKey);
+            }
+
+            $order->update_meta_data(PAYMONGO_PAYMENT_INTENT_META_KEY, $paymentIntent['id']);
+            $order->update_meta_data(PAYMONGO_CLIENT_KEY_META_KEY, $clientKey);
             $order->save_meta_data();
         } else {
-            wc_get_logger()->log('error', '[Create Payment Intent] ' . json_encode($body['errors']));
+            wc_get_logger()->log('error', '[Create Payment Intent] ' . json_encode($paymentIntent['errors']));
             throw new Exception(__($genericErrorMessage, 'woocommerce'));
         }
-    } else {
-        wc_get_logger()->log('error', '[Create Payment Intent] ' . json_encode($response->get_error_messages()));
+
+        wc_get_logger()->log('info', 'SHOO!');
+    } catch (ClientException $e) {
+        $response = $e->getResponse();
+        wc_get_logger()->log('error', '[Create Payment Intent] ' . wc_print_r(json_decode($response->getBody()->__toString(), true), true));
         throw new Exception(__($genericErrorMessage, 'woocommerce'));
     }
 }
@@ -123,7 +107,7 @@ function cynder_paymongo_create_intent($orderId) {
 add_action('woocommerce_checkout_order_processed', 'cynder_paymongo_create_intent');
 
 function cynder_paymongo_catch_redirect() {
-    global $woocommerce;
+    $utils = new Utils();
 
     $debugMode = get_option('woocommerce_cynder_paymongo_debug_mode');
     $debugMode = (!empty($debugMode) && $debugMode === 'yes') ? true : false;
@@ -144,76 +128,53 @@ function cynder_paymongo_catch_redirect() {
     $testMode = get_option('woocommerce_cynder_paymongo_test_mode');
     $testMode = (!empty($testMode) && $testMode === 'yes') ? true : false;
 
+    $pkKey = $testMode ? 'woocommerce_cynder_paymongo_test_public_key' : 'woocommerce_cynder_paymongo_public_key';
     $skKey = $testMode ? 'woocommerce_cynder_paymongo_test_secret_key' : 'woocommerce_cynder_paymongo_secret_key';
+    $publicKey = get_option($pkKey);
     $secretKey = get_option($skKey);
-
-    $args = array(
-        'method' => 'GET',
-        'headers' => array(
-            'Authorization' => 'Basic ' . base64_encode($secretKey),
-            'accept' => 'application/json',
-            'content-type' => 'application/json'
-        ),
-    );
-
-    $response = wp_remote_get(
-        CYNDER_PAYMONGO_BASE_URL . '/payment_intents/' . $paymentIntentId,
-        $args
-    );
-
-    if ($debugMode) {
-        wc_get_logger()->log('info', '[Catch Redirect][Response] ' . json_encode($response));
-    }
-
-    if (is_wp_error($response)) {
-        /** Handle errors */
-        return;
-    }
-
-    $body = json_decode($response['body'], true);
-
-    $responseAttr = $body['data']['attributes'];
-    $status = $responseAttr['status'];
-    $intentAmount = $responseAttr['amount'];
+    $client = new Phaymongo($publicKey, $secretKey);
 
     $orderId = $_GET['order'];
     $order = wc_get_order($orderId);
 
-    /** If payment intent status is succeeded or processing, just empty cart and redirect to confirmation page */
-    if ($status === 'succeeded' || $status === 'processing') {
-        if ($status === 'succeeded') {
-            $payment = $responseAttr['payments'][0];
-            $order->payment_complete($payment['id']);
-            $orderId = $order->get_id();
-            wc_reduce_stock_levels($orderId);
+    try {
+        $paymentIntent = $client->paymentIntent()->retrieveById($paymentIntentId);
 
-            // Sending invoice after successful payment if setting is enabled
-            if ($sendInvoice) {
-                $woocommerce->mailer()->emails['WC_Email_Customer_Invoice']->trigger($orderId);
-            }
-
-            PostHog::capture(array(
-                'distinctId' => base64_encode(get_bloginfo('wpurl')),
-                'event' => 'successful payment',
-                'properties' => array(
-                    'payment_id' => $payment['id'],
-                    'amount' => floatval($intentAmount) / 100,
-                    'payment_method' => $order->get_payment_method(),
-                    'sandbox' => $testMode ? 'true' : 'false',
-                ),
-            ));
-
-            do_action('cynder_paymongo_successful_payment', $payment);
+        if ($debugMode) {
+            wc_get_logger()->log('info', '[Catch Redirect][Response] ' . wc_print_r($paymentIntent, true));
         }
 
-        // Empty cart
-        $woocommerce->cart->empty_cart();
+        $responseAttr = $paymentIntent['attributes'];
+        $status = $responseAttr['status'];
+        $intentAmount = $responseAttr['amount'];
 
-        // Redirect to the thank you page
+        /** If payment intent status is succeeded or processing, just empty cart and redirect to confirmation page */
+        if ($status === 'succeeded' || $status === 'processing') {
+            if ($status === 'succeeded') {
+                $payment = $responseAttr['payments'][0];
+
+                $utils->completeOrder($order, $payment['id'], $sendInvoice);
+                $utils->trackPaymentResolution('successful', $payment['id'], floatval($intentAmount) / 100, $order->get_payment_method(), $testMode);
+                $utils->callAction('cynder_paymongo_successful_payment', $payment);
+            }
+
+            // Empty cart
+            $utils->emptyCart();
+
+            // Redirect to the thank you page
+            wp_redirect($order->get_checkout_order_received_url());
+        } else if ($status === 'awaiting_payment_method' || $status === 'awaiting_next_action') {
+            wc_add_notice('Something went wrong with the payment. Please try another payment method. If issue persist, contact support.', 'error');
+            wp_redirect($order->get_checkout_payment_url());
+        }
+    } catch (PaymongoException $e) {
+        /** 
+         * Log the error but confirm the order placement. This will fallback
+         * to the webhooks for proper resolution.
+         */
+        $formatted_messages = $e->format_errors();
+        $utils->log('error', '[Catch Redirect for Payment Intent] Order ID: ' . $order->get_id() . ' - Response: ' . join(',', $formatted_messages));
         wp_redirect($order->get_checkout_order_received_url());
-    } else if ($status === 'awaiting_payment_method') {
-        wc_add_notice('Something went wrong with the payment. Please try another payment method. If issue persist, contact support.', 'error');
-        wp_redirect($order->get_checkout_payment_url());
     }
 }
 

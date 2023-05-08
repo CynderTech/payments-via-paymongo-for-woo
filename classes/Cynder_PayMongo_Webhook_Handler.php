@@ -13,8 +13,12 @@
 
 namespace Cynder\PayMongo;
 
+use GuzzleHttp\Exception\ClientException;
+use Paymongo\Phaymongo\PaymongoException;
+use Paymongo\Phaymongo\Phaymongo;
 use PostHog\PostHog;
 use WC_Payment_Gateway;
+use WC_Order;
 
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
@@ -37,6 +41,16 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
      * @var Singleton The reference the *Singleton* instance of this class
      */
     private static $_instance;
+
+    private $client;
+
+    protected $testmode;
+    protected $public_key;
+    protected $secret_key;
+    protected $webhook_secret;
+    protected $sendInvoice;
+    protected $debugMode;
+    protected $utils;
 
     /**
      * Returns the *Singleton* instance of this class.
@@ -62,7 +76,9 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
         $testMode = get_option('woocommerce_cynder_paymongo_test_mode');
         $this->testmode = (!empty($testMode) && $testMode === 'yes') ? true : false;
 
+        $pkKey = $this->testmode ? 'woocommerce_cynder_paymongo_test_public_key' : 'woocommerce_cynder_paymongo_public_key';
         $skKey = $this->testmode ? 'woocommerce_cynder_paymongo_test_secret_key' : 'woocommerce_cynder_paymongo_secret_key';
+        $this->public_key = get_option($pkKey);
         $this->secret_key = get_option($skKey);
 
         $wsKey = $this->testmode ? 'paymongo_test_webhook_secret_key' : 'paymongo_webhook_secret_key';
@@ -86,6 +102,9 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
             10,
             2
         );
+
+        $this->client = new Phaymongo($this->public_key, $this->secret_key);
+        $this->utils = new Utils();
     }
 
     /**
@@ -147,30 +166,15 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
         }
 
         $validEventTypes = [
-            'source.chargeable',
             'payment.paid',
             'payment.failed',
         ];
 
         if (in_array($eventData['type'], $validEventTypes)) {
-            if ($eventData['type'] === 'source.chargeable') {
-                $sourceId = $resourceData['id'];
-                $order = $this->getOrderByMeta('source_id', $sourceId);
-
-                if (!$order) {
-                    wc_get_logger()->log('error', '[processWebhook] No order found with source ID ' . $sourceId);
-                    return;
-                }
-
-                wc_get_logger()->log('info', '[processWebhook] event: source.chargeable with source ID ' . $sourceId);
-
-                return $this->createPaymentRecord($resourceData, $order);
-            }
-
             $sourceType = $resourceData['attributes']['source']['type'];
             $amount = $resourceData['attributes']['amount'];
 
-            if ($eventData['type'] === 'payment.paid' && $sourceType !== 'gcash' && $sourceType !== 'grab_pay') {
+            if ($eventData['type'] === 'payment.paid') {
                 $paymentIntentId = $resourceData['attributes']['payment_intent_id'];
                 $order = $this->getOrderByMeta('paymongo_payment_intent_id', $paymentIntentId);
 
@@ -188,54 +192,36 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
                  * Any paid orders should be ignored
                  */
                 if (!$order->is_paid()) {
-                    $orderId = $order->get_id();
+                    $this->utils->completeOrder($order, $resourceData['id'], $this->sendInvoice);
 
-                    wc_get_logger()->log('info', 'Paying order ID ' . $orderId . ' from payment webhook.');
+                    $this->utils->trackPaymentResolution('successful', $resourceData['id'], floatval($amount) / 100, $order->get_payment_method(), $this->testmode);
 
-                    $order->payment_complete($resourceData['id']);
-                    wc_reduce_stock_levels($orderId);
-
-                    // Sending invoice after successful payment if setting is enabled
-                    if ($this->sendInvoice) {
-                        $woocommerce->mailer()->emails['WC_Email_Customer_Invoice']->trigger($orderId);
-                    }
-
-                    PostHog::capture(array(
-                        'distinctId' => base64_encode(get_bloginfo('wpurl')),
-                        'event' => 'successful payment',
-                        'properties' => array(
-                            'payment_id' => $resourceData['id'],
-                            'amount' => floatval($amount) / 100,
-                            'payment_method' => $order->get_payment_method(),
-                            'sandbox' => $this->testmode ? 'true' : 'false',
-                        ),
-                    ));
-
-                    do_action('cynder_paymongo_successful_payment', $resourceData);
+                    $this->utils->callAction('cynder_paymongo_successful_payment', $resourceData);
                 }
                 return;
             }
 
-            if ($eventData['type'] === 'payment.failed' && $sourceType !== 'gcash' && $sourceType !== 'grab_pay') {
+            if ($eventData['type'] === 'payment.failed') {
                 $paymentIntentId = $resourceData['attributes']['payment_intent_id'];
                 $order = $this->getOrderByMeta('paymongo_payment_intent_id', $paymentIntentId);
 
                 wc_get_logger()->log('info', '[processWebhook] event: payment.failed with payment intent ID ' . $paymentIntentId);
 
-                $order->update_status('failed', 'Payment failed', true);
+                if (!$order) {
+                    wc_get_logger()->log('error', '[processWebhook] No order found with payment intent ID ' . $paymentIntentId);
+                    return;
+                }
 
-                PostHog::capture(array(
-                    'distinctId' => base64_encode(get_bloginfo('wpurl')),
-                    'event' => 'failed payment',
-                    'properties' => array(
-                        'payment_id' => $resourceData['id'],
-                        'amount' => floatval($amount) / 100,
-                        'payment_method' => $order->get_payment_method(),
-                        'sandbox' => $this->testmode ? 'true' : 'false',
-                    ),
-                ));
-
-                do_action('cynder_paymongo_failed_payment', $resourceData);
+                /**
+                 * Only unpaid orders should be processed for failed payments
+                 */
+                if (!$order->is_paid()) {
+                    $order->update_status('failed', 'Payment failed', true);
+    
+                    $this->utils->trackPaymentResolution('failed', $resourceData['id'], floatval($amount) / 100, $order->get_payment_method(), $this->testmode);
+    
+                    $this->utils->callAction('cynder_paymongo_failed_payment', $resourceData);
+                }
 
                 return;
             }
@@ -246,118 +232,6 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
 
         wc_get_logger()->log('error', '[processWebhook] Invalid event type = ' . $eventData['type']);
         status_header(422);
-        die();
-    }
-
-    /**
-     * Creates PayMongo Payment Record
-     * 
-     * @param array $source Source data from event data sent by paymongo
-     * @param object $order  Order data from woocommerce database
-     * 
-     * @return void
-     * 
-     * @link  https://developers.paymongo.com/reference#payment-source
-     * @since 1.0.0
-     */
-    public function createPaymentRecord($source, $order)
-    {
-        global $woocommerce;
-
-        $createPaymentPayload = array(
-            'data' => array(
-                'attributes' => array(
-                    'amount' => intval($order->get_total() * 100, 32),
-                    'currency' => $order->get_currency(),
-                    'description' => get_bloginfo('name') . ' - ' . $order->get_id(),
-                    'source' => array(
-                        'id' => $source['id'],
-                        'type' => 'source'
-                    ),
-                ),
-            ),
-        );
-
-        // wc_get_logger()->log('info', 'Payment payload ' . wc_print_r($createPaymentPayload, true));
-
-        $args = array(
-            'body' => json_encode($createPaymentPayload),
-            'method' => "POST",
-            'headers' => array(
-                'Authorization' => 'Basic ' . base64_encode($this->secret_key),
-                'accept' => 'application/json',
-                'content-type' => 'application/json'
-            ),
-        );
-
-        $response = wp_remote_post(CYNDER_PAYMONGO_BASE_URL . '/payments', $args);
-
-        if (!is_wp_error($response)) {
-            $body = json_decode($response['body'], true);
-            
-            if (array_key_exists('errors', $body) && $body['errors'][0]) {
-                status_header($response['response']['code']);
-                wc_get_logger()->log('info', 'Payment failed: ' . wc_print_r($body, true));
-                die();
-            }
-
-            $attributes = $body['data']['attributes'];
-            $status = $attributes['status'];
-            $amount = $attributes['amount'];
-
-            if ($status == 'paid') {
-                $order->payment_complete($body['data']['id']);
-
-                // Sending invoice after successful payment if setting is enabled
-                if ($this->sendInvoice) {
-                    $woocommerce->mailer()->emails['WC_Email_Customer_Invoice']->trigger($order->get_order_number());
-                }
-
-                PostHog::capture(array(
-                    'distinctId' => base64_encode(get_bloginfo('wpurl')),
-                    'event' => 'successful payment',
-                    'properties' => array(
-                        'payment_id' => $body['data']['id'],
-                        'amount' => floatval($amount) / 100,
-                        'payment_method' => $order->get_payment_method(),
-                        'sandbox' => $this->testmode ? 'true' : 'false',
-                    ),
-                ));
-
-                do_action('cynder_paymongo_successful_payment', $body['data']);
-
-                status_header(200);
-                die();
-            }
-
-            if ($status == 'failed') {
-                wc_get_logger()->log('info', 'Payment failed: ' . wc_print_r($response['body'], true));
-                $order->update_status($status);
-
-                PostHog::capture(array(
-                    'distinctId' => base64_encode(get_bloginfo('wpurl')),
-                    'event' => 'failed payment',
-                    'properties' => array(
-                        'payment_id' => $body['data']['id'],
-                        'amount' => floatval($amount) / 100,
-                        'payment_method' => $order->get_payment_method(),
-                        'sandbox' => $this->testmode ? 'true' : 'false',
-                    ),
-                ));
-
-                status_header(400);
-                die();
-            }
-        } else {
-            /** Mark order as failed */
-            $order->update_status('failed', 'PayMongo payment creation failed. See logs for details.', true);
-            $sourceId = $source['id'];
-
-            wc_get_logger()->log('error', "Payment creation failed for: ${sourceId} " . wc_print_r($response->get_error_message(), true));
-            status_header(422);
-            die();
-        }
-
         die();
     }
 
@@ -493,7 +367,7 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
      * @param string $metaKey Metadata key
      * @param string $metaValue Metadata value
      *
-     * @return object,bool
+     * @return WC_Order
      *
      * @since 1.5.0
      */
