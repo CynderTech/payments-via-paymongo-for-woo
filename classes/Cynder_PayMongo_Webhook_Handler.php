@@ -162,8 +162,9 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
         $resourceData = $eventData['data'];
         $resourceAttributes = $resourceData['attributes'];
         $paymentIntentId = $resourceAttributes['payment_intent_id'];
+        $resourceMetadata = $resourceAttributes['metadata'];
 
-        if (!isset($paymentIntentId) || empty($paymentIntentId)) {
+        if ($resourceMetadata['agent'] !== 'cynder_woocommerce' || !isset($paymentIntentId) || empty($paymentIntentId)) {
             $this->utils->log('error', 'No payment intent ID found for payment ID ' . $resourceData['id']);
             return;
         }
