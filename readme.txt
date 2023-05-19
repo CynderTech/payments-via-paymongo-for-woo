@@ -4,7 +4,7 @@ Tags: payments, credit card, gcash, grabpay
 Requires at least: 5.0
 Tested up to: 6.2
 Requires PHP: 5.6
-Stable tag: 1.12.0
+Stable tag: 1.12.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -93,6 +93,13 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 3. Payment methods as displayed in checkout page.
 
 == Changelog ==
+
+= 1.12.1 =
+*Release Date - May 19, 2023*
+[FIX] Fix crashes after checkout due to illegal offset type on action hooks
+[FIX] Fix irrelevant payment webhooks processing from PayMongo Pages and Links
+[FIX] Fix BPI payment method detail generation
+[CHORE] Compatibility tests with WC 7.7.0
 
 = 1.12.0 =
 *Release Date - May 8, 2023*
