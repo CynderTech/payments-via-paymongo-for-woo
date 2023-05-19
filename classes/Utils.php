@@ -18,7 +18,7 @@ class Utils {
     }
 
     public function callAction($action, ...$args) {
-        call_user_func('do_action', array_merge([$action], $args));
+        call_user_func_array('do_action', array_merge([$action], $args));
     }
 
     public function sendInvoice($order_id) {
