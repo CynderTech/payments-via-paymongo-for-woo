@@ -160,6 +160,13 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
         $decoded = json_decode($payload, true);
         $eventData = $decoded['data']['attributes'];
         $resourceData = $eventData['data'];
+        $resourceAttributes = $resourceData['attributes'];
+        $paymentIntentId = $resourceAttributes['payment_intent_id'];
+
+        if (!isset($paymentIntentId) || empty($paymentIntentId)) {
+            $this->utils->log('error', 'No payment intent ID found for payment ID ' . $resourceData['id']);
+            return;
+        }
 
         if ($this->debugMode) {
             wc_get_logger()->log('info', '[processWebhook] Webhook payload ' . wc_print_r($decoded, true));
@@ -171,16 +178,19 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
         ];
 
         if (in_array($eventData['type'], $validEventTypes)) {
-            $sourceType = $resourceData['attributes']['source']['type'];
-            $amount = $resourceData['attributes']['amount'];
+            $sourceType = $resourceAttributes['source']['type'];
+            $amount = $resourceAttributes['amount'];
 
             if ($eventData['type'] === 'payment.paid') {
-                $paymentIntentId = $resourceData['attributes']['payment_intent_id'];
                 $order = $this->getOrderByMeta('paymongo_payment_intent_id', $paymentIntentId);
 
                 if (!$order) {
                     wc_get_logger()->log('error', '[processWebhook] No order found with payment intent ID ' . $paymentIntentId);
                     return;
+                }
+
+                if ($this->debugMode) {
+                    $this->utils->log('info', '[processWebhook] Found Order ID! ' . $order->get_id());
                 }
 
                 wc_get_logger()->log('info', '[processWebhook] event: payment.paid with payment intent ID ' . $paymentIntentId);
@@ -202,7 +212,6 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
             }
 
             if ($eventData['type'] === 'payment.failed') {
-                $paymentIntentId = $resourceData['attributes']['payment_intent_id'];
                 $order = $this->getOrderByMeta('paymongo_payment_intent_id', $paymentIntentId);
 
                 wc_get_logger()->log('info', '[processWebhook] event: payment.failed with payment intent ID ' . $paymentIntentId);
