@@ -128,7 +128,7 @@ class CynderPayMongoPaymentIntentGateway extends WC_Payment_Gateway
      */
     public function getPaymentMethodId($orderId) {
         $order = wc_get_order($orderId);
-        $paymentMethod = $this->paymentIntent->getPaymentMethod($order, $this->hasDetailsPayload ? 'generatePaymentMethodDetailsPayload' : null);
+        $paymentMethod = $this->paymentIntent->getPaymentMethod($order, $this->hasDetailsPayload ? array($this, 'generatePaymentMethodDetailsPayload') : null);
 
         if (isset($paymentMethod)) {
             $paymentMethodId = $paymentMethod['id'];
@@ -156,7 +156,16 @@ class CynderPayMongoPaymentIntentGateway extends WC_Payment_Gateway
      */
     public function process_payment($orderId) // phpcs:ignore
     {
+        if ($this->debugMode) {
+            $this->utils->log('info', '[Processing Payment] Processing payment for order ID ' . $orderId);
+        }
+
         $paymentMethodId = $this->getPaymentMethodId($orderId);
+
+        if ($this->debugMode) {
+            $this->utils->log('info', '[Processing Payment] Payment method ID ' . $paymentMethodId  . ' successfully created for order ID ' . $orderId);
+        }
+
         $order = wc_get_order($orderId);
         $paymentIntentId = $order->get_meta('paymongo_payment_intent_id');
         $returnUrl = get_home_url() . '/?wc-api=cynder_paymongo_catch_redirect&order=' . $orderId . '&intent=' . $paymentIntentId . '&agent=cynder_woocommerce&version=' . CYNDER_PAYMONGO_VERSION;
