@@ -102,7 +102,7 @@ class Cynder_PayMongo_Bpi extends CynderPayMongoPaymentIntentGateway
 
     public function generatePaymentMethodDetailsPayload($order)
     {
-        $bankCode = $this->debugMode ? 'test_bank_one' : 'bpi';
+        $bankCode = $this->testmode ? 'test_bank_one' : 'bpi';
 
         return array(
             'bank_code' => $bankCode,
