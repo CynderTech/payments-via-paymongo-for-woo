@@ -4,7 +4,7 @@ Tags: payments, credit card, gcash, grabpay
 Requires at least: 5.0
 Tested up to: 6.2
 Requires PHP: 5.6
-Stable tag: 1.12.1
+Stable tag: 1.12.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -93,6 +93,10 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 3. Payment methods as displayed in checkout page.
 
 == Changelog ==
+
+= 1.12.2 =
+*Release Date - May 22, 2023*
+[FIX] Fix BPI DOB issue on production mode
 
 = 1.12.1 =
 *Release Date - May 19, 2023*
