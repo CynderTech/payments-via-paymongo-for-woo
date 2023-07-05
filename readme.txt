@@ -4,7 +4,7 @@ Tags: payments, credit card, gcash, grabpay
 Requires at least: 5.0
 Tested up to: 6.2
 Requires PHP: 5.6
-Stable tag: 1.12.3
+Stable tag: 1.12.4
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -94,7 +94,12 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 == Changelog ==
 
-= 1.12.2 =
+= 1.12.4 =
+*Release Date - July 5, 2023*
+[FIX] Fix dependency issue
+[CHORE] Compatibility tests with WC 7.8.2
+
+= 1.12.3 =
 *Release Date - June 30, 2023*
 [FIX] Fix multi-shop API key usage
 [FIX] Create payment intent error handling
