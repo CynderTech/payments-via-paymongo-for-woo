@@ -19,6 +19,7 @@ class PaymentIntent {
         'paymongo_paymaya' => 'paymaya',
         'paymongo_atome' => 'atome',
         'paymongo_bpi' => 'dob',
+        'paymongo_unionbank' => 'dob',
         'paymongo_billease' => 'billease',
         'paymongo_gcash' => 'gcash',
         'paymongo_grab_pay' => 'grab_pay',
