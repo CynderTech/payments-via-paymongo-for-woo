@@ -168,8 +168,6 @@ jQuery(document).ready(function ($) {
 										</li>`);
 			});
 
-			console.log("list", list);
-
 			const hasList =
 				$("#installment_list li").length === selectedBank.length;
 
@@ -410,7 +408,7 @@ jQuery(document).ready(function ($) {
 			}
         }
 
-        if (errors) {
+        if (errors.length > 0) {
 			return this.showClientErrors(errors);
         }
 
