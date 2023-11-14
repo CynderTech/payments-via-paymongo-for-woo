@@ -224,6 +224,8 @@ class CynderPayMongoGateway extends CynderPayMongoPaymentIntentGateway
      */
     public function payment_fields() // phpcs:ignore
     {
+        $total = $this->get_order_total() * 100;
+
         $request_args = array(
             'method' => 'GET',
             'headers' => array(
@@ -231,12 +233,12 @@ class CynderPayMongoGateway extends CynderPayMongoPaymentIntentGateway
                 'Content-Type' => 'application/json'
             )
         );
-        $test = wp_remote_get('https://api.paymongo.com/v1/card_installment_plans?amount=350050', $request_args);
+        $test = wp_remote_get("https://api.paymongo.com/v1/card_installment_plans?amount=$total", $request_args);
         wc_get_logger()->log('info', wc_print_r($test, true));
-        $item = json_decode($test['body'], true);
+        $body = json_decode($test['body'], true);
 
         $selected_cc_bank = 'security_bank';
-        $installment_plans = $item['data'] ?? null;
+        $installment_plans = $body['data'] ?? null;
 
         if ($this->description) {
             if ($this->testmode) {
