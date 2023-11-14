@@ -181,8 +181,7 @@ class CynderPayMongoGateway extends CynderPayMongoPaymentIntentGateway
             'paymongo',
             plugins_url('assets/css/paymongo-styles.css', CYNDER_PAYMONGO_MAIN_FILE),
             array(),
-            // CYNDER_PAYMONGO_VERSION
-            1
+            CYNDER_PAYMONGO_VERSION
         );
         wp_enqueue_script(
             'cleave',
