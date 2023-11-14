@@ -21,13 +21,13 @@ if ($installment_plans) {
         return array(
             ...$data,
             'image_url' => $image_id ? CYNDER_PAYMONGO_PLUGIN_URL . "/assets/images/" . $image_id . ".png" : "",
-            'auth_amount' => wc_price($data['auth_amount']),
+            'auth_amount' => wc_price($data['auth_amount'] / 100),
             'bank_interest_rate' => $percentage_formatter->format($data['bank_interest_rate'] / 100),
-            'interest_amount_charged' => wc_price($data['interest_amount_charged']),
-            'loan_amount' => wc_price($data['loan_amount']),
+            'interest_amount_charged' => wc_price($data['interest_amount_charged'] / 100),
+            'loan_amount' => wc_price($data['loan_amount'] / 100),
             'processing_fee_percent' => $percentage_formatter->format($data['processing_fee_percent'] / 100),
-            'processing_fee_value' => wc_price($data['processing_fee_value']),
-            'monthly_installment' => wc_price($data['monthly_installment']),
+            'processing_fee_value' => wc_price($data['processing_fee_value'] / 100),
+            'monthly_installment' => wc_price($data['monthly_installment'] / 100),
         );
     }
 
