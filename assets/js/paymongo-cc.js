@@ -235,6 +235,11 @@ jQuery(document).ready(function ($) {
 		});
 
 		$("#paymongo_cc_issuer").change(function () {
+			if ($("input[name='paymongo_cc_installment_tc']:checked").val() == "yes") {
+				$("input[name='paymongo_cc_installment_tc']").trigger("click");
+      		}
+			$("#installment_list li:first input[type='radio']").trigger("click");
+
 			const cc_installment_tenure = $(
 				"input[name='paymongo_cc_installment_tenure']:checked"
 			).val();
