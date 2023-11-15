@@ -5,7 +5,6 @@ $list_of_banks = array();
 if ($installment_plans) {
     function cc_bank_availables($data)
     {
-
         if (preg_match("/land\s*bank/i", $data["issuer_name"])) {
             $image_id = "landbank";
         } elseif (preg_match("/security\s*bank/i", $data["issuer_name"])) {
@@ -36,7 +35,6 @@ if ($installment_plans) {
 
 $installment_plan_json = json_encode($list_of_banks);
 
-
 ?>
 
 <?php $percentage_formatter = new NumberFormatter(get_locale(), NumberFormatter::PERCENT); ?>
@@ -57,11 +55,9 @@ $installment_plan_json = json_encode($list_of_banks);
                 <div id="installment-container" class="woocommerce-PaymentBox woocommerce-PaymentBox--paymongo payment_box payment_method_paymongo hidden">
                     <div class="my-1">
                         <h3>Payment Information</h3>
-
                         <div class="d-block my-1">
                             <label for="paymongo_cc_issuer" class="bank-label">Select a bank <span class="required">*</span></label>
                             <select name="paymongo_cc_issuer" id="paymongo_cc_issuer" class="d-block">
-
                             </select>
                         </div>
 
@@ -78,9 +74,7 @@ $installment_plan_json = json_encode($list_of_banks);
 
                     <div class="my-1">
                         <h3>Choose your Installment Plan <span class="required">*</span></h3>
-
                         <ul id="installment_list" class="woocommerce-PaymentMethods payment_methods methods wc_payment_methods">
-
                         </ul>
                     </div>
 
