@@ -141,3 +141,64 @@
         transform: rotate(360deg);
     }
 }
+
+.my-1 {
+    /* background-color: red !important; */
+    margin-block: 1rem !important;
+}
+
+.d-block {
+    display: block !important;
+}
+
+.d-inline-flex {
+    display: inline-flex !important;
+}
+
+.mr-1 {
+    margin-right: 1rem !important;
+}
+
+.s-7 {
+    width: 7rem !important;
+    min-height: 7rem !important;
+}
+
+.tenure-label {
+    float: right !important;
+    margin-left: 1rem !important;
+    margin-inline-start: auto !important;
+    padding-left: 1rem !important;
+}
+
+.installment-logo {
+    font-size: smaller !important;
+    margin-inline-start: auto !important;
+    float: right !important;
+    padding-left: 1rem !important;
+}
+
+.mw-10 {
+    min-width: 10rem !important;
+}
+
+.required {
+    color: red !important;
+}
+
+.bank-label {
+    margin-bottom: 0.7rem !important;
+    line-height: 2 !important;
+}
+
+.mb-1 {
+    margin-bottom: 1rem !important;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.ml {
+    margin-left: 0.5rem !important;
+}
