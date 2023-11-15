@@ -58,6 +58,12 @@ function Paymongo_Init_Gateway_class()
         return;
     }
 
+    add_action( 'before_woocommerce_init', function() {
+        if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+            \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+        }
+    } );
+
     define('CYNDER_PAYMONGO_MAIN_FILE', __FILE__);
     define('CYNDER_PAYMONGO_VERSION', '1.12.4');
     define(
