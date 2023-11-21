@@ -176,6 +176,9 @@
     margin-inline-start: auto !important;
     float: right !important;
     padding-left: 1rem !important;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 0.5rem;
 }
 
 .mw-10 {
@@ -201,4 +204,9 @@
 
 .ml {
     margin-left: 0.5rem !important;
+}
+
+.disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
 }
