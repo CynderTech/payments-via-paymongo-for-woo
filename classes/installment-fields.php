@@ -62,8 +62,8 @@ $installment_plan_json = json_encode($list_of_banks);
                         </div>
 
                         <div class="my-1 d-inline-flex">
-                            <div class="mr-1">
-                                <img id="cc_bank_logo" src="" class="s-7" />
+                            <div id="cc_bank_logo_div">
+                                <img id="cc_bank_logo" src="" />
                             </div>
                             <div>
                                 <h5 id="cc_bank_name"></h5>

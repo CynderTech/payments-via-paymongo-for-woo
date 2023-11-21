@@ -91,6 +91,14 @@ jQuery(document).ready(function ($) {
 
         const installment_data = $("input[name='installment-data']").val();
 
+        if (!installment_data) {
+            $("#paymongo_cc_installment_yes").attr("disabled", true);
+            $("#cc_payment_installment").addClass("disabled");
+        } else {
+            $("#paymongo_cc_installment_yes").attr("disabled", false);
+            $("#cc_payment_installment").removeClass("disabled");
+        }
+
         const formattedInstallmentData = JSON.parse(installment_data);
 
         const selectedBank = formattedInstallmentData.filter(
@@ -136,10 +144,19 @@ jQuery(document).ready(function ($) {
                 );
 
                 $("#cc_bank_name").html(bank.issuer_name);
-                $("#cc_bank_logo").attr("src", bank.image_url);
                 $("#cc_bank_interest_rate").html(
                 `${bank.bank_interest_rate} Interest Rate`
                 );
+
+                if (bank.image_url) {
+                    $("#cc_bank_logo").attr("src", bank.image_url);
+                    $("#cc_bank_logo_div").addClass("mr-1");
+                    $("#cc_bank_logo").addClass("s-7");
+                } else {
+                    $("#cc_bank_logo").removeAttr("src");
+                    $("#cc_bank_logo_div").removeClass("mr-1");
+                    $("#cc_bank_logo").removeClass("s-7");
+                }
             }
         }
 
