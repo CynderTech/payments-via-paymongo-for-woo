@@ -84,22 +84,22 @@ jQuery(document).ready(function ($) {
         const cc_installment_tenure = $(
         "input[name='paymongo_cc_installment_tenure']:checked"
         ).val();
-        const cc_installment_issuer = $("#paymongo_cc_issuer").val();
+        const cc_installment_issuer = $("#paymongo_cc_installment_issuer").val();
         const cc_installment = $(
         "input[name=paymongo_cc_installment]:checked"
         ).val();
 
         const installment_data = $("input[name='installment-data']").val();
 
-        if (!installment_data) {
+        const formattedInstallmentData = JSON.parse(installment_data);
+
+        if (!formattedInstallmentData || !formattedInstallmentData.length) {
             $("#paymongo_cc_installment_yes").attr("disabled", true);
             $("#cc_payment_installment").addClass("disabled");
         } else {
             $("#paymongo_cc_installment_yes").attr("disabled", false);
             $("#cc_payment_installment").removeClass("disabled");
         }
-
-        const formattedInstallmentData = JSON.parse(installment_data);
 
         const selectedBank = formattedInstallmentData.filter(
             (item) => item.issuer_id == cc_installment_issuer
@@ -131,10 +131,11 @@ jQuery(document).ready(function ($) {
                     `);
                 });
 
-                const hasOptions = $("#paymongo_cc_issuer option").length > 0;
+                const hasOptions =
+                  $("#paymongo_cc_installment_issuer option").length > 0;
 
                 if (!hasOptions) {
-                    $("#paymongo_cc_issuer").append(bank_list);
+                    $("#paymongo_cc_installment_issuer").append(bank_list);
                 }
             }
 
@@ -222,7 +223,9 @@ jQuery(document).ready(function ($) {
                 const cc_installment_tenure = $(
                     "input[name='paymongo_cc_installment_tenure']:checked"
                 ).val();
-                const cc_installment_issuer = $("#paymongo_cc_issuer").val();
+                const cc_installment_issuer = $(
+                  "#paymongo_cc_installment_issuer"
+                ).val();
                 const selectedPlan = formattedInstallmentData.find(
                     (item) =>
                     item.issuer_id == cc_installment_issuer &&
@@ -239,7 +242,9 @@ jQuery(document).ready(function ($) {
                 const cc_installment_tenure = $(
                 "input[name='paymongo_cc_installment_tenure']:checked"
                 ).val();
-                const cc_installment_issuer = $("#paymongo_cc_issuer").val();
+                const cc_installment_issuer = $(
+                  "#paymongo_cc_installment_issuer"
+                ).val();
 
                 var selectedPlan = formattedInstallmentData.find(
                 (item) =>
@@ -251,24 +256,28 @@ jQuery(document).ready(function ($) {
             }
         });
 
-        $("#paymongo_cc_issuer").change(function () {
-            if ($("input[name='paymongo_cc_installment_tc']:checked").val() == "yes") {
-                $("input[name='paymongo_cc_installment_tc']").trigger("click");
-              }
-            $("#installment_list li:first input[type='radio']").trigger("click");
+        $("#paymongo_cc_installment_issuer").change(function () {
+          if (
+            $("input[name='paymongo_cc_installment_tc']:checked").val() == "yes"
+          ) {
+            $("input[name='paymongo_cc_installment_tc']").trigger("click");
+          }
+          $("#installment_list li:first input[type='radio']").trigger("click");
 
-            const cc_installment_tenure = $(
-                "input[name='paymongo_cc_installment_tenure']:checked"
-            ).val();
-            const cc_installment_issuer = $("#paymongo_cc_issuer").val();
+          const cc_installment_tenure = $(
+            "input[name='paymongo_cc_installment_tenure']:checked"
+          ).val();
+          const cc_installment_issuer = $(
+            "#paymongo_cc_installment_issuer"
+          ).val();
 
-            var selectedPlan = formattedInstallmentData.find(
-                (item) =>
-                item.issuer_id == cc_installment_issuer &&
-                item.tenure == cc_installment_tenure
-            );
+          var selectedPlan = formattedInstallmentData.find(
+            (item) =>
+              item.issuer_id == cc_installment_issuer &&
+              item.tenure == cc_installment_tenure
+          );
 
-            updateInstallmentDetails(selectedPlan);
+          updateInstallmentDetails(selectedPlan);
         });
     };
 
@@ -328,8 +337,8 @@ jQuery(document).ready(function ($) {
         cynder_paymongo_cc_params.paymongo_cc_installment_tenure ||
         $("input[name='paymongo_cc_installment_tenure']:checked").val();
         const cc_installment_issuer =
-        cynder_paymongo_cc_params.paymongo_cc_issuer ||
-        $("#paymongo_cc_issuer").val();
+          cynder_paymongo_cc_params.paymongo_cc_installment_issuer ||
+          $("#paymongo_cc_installment_issuer").val();
         const cc_installment_tc =
         cynder_paymongo_cc_params.paymongo_cc_installment_tc ||
         $("input[name='paymongo_cc_installment_tc']:checked").val();
