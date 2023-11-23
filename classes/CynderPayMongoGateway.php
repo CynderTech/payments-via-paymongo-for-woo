@@ -234,10 +234,8 @@ class CynderPayMongoGateway extends CynderPayMongoPaymentIntentGateway
             )
         );
         $test = wp_remote_get("https://api.paymongo.com/v1/card_installment_plans?amount=$total", $request_args);
-        wc_get_logger()->log('info', wc_print_r($test, true));
         $body = json_decode($test['body'], true);
 
-        $selected_cc_bank = 'security_bank';
         $installment_plans = $body['data'] ?? null;
 
         if ($this->description) {

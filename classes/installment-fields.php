@@ -56,8 +56,8 @@ $installment_plan_json = json_encode($list_of_banks);
                     <div class="my-1">
                         <h3>Payment Information</h3>
                         <div class="d-block my-1">
-                            <label for="paymongo_cc_issuer" class="bank-label">Select a bank <span class="required">*</span></label>
-                            <select name="paymongo_cc_issuer" id="paymongo_cc_issuer" class="d-block">
+                            <label for="paymongo_cc_installment_issuer" class="bank-label">Select a bank <span class="required">*</span></label>
+                            <select name="paymongo_cc_installment_issuer" id="paymongo_cc_installment_issuer" class="d-block">
                             </select>
                         </div>
 
