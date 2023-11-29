@@ -65,7 +65,7 @@ function Paymongo_Init_Gateway_class()
     } );
 
     define('CYNDER_PAYMONGO_MAIN_FILE', __FILE__);
-    define('CYNDER_PAYMONGO_VERSION', '1.12.4');
+    define('CYNDER_PAYMONGO_VERSION', '1.13.0');
     define(
         'CYNDER_PAYMONGO_PLUGIN_URL',
         untrailingslashit(
