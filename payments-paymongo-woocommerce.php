@@ -6,7 +6,7 @@
  * Description: Take credit card, GCash, GrabPay and PayMaya payments via PayMongo.
  * Author: CynderTech
  * Author URI: http://cynder.io
- * Version: 1.13.0
+ * Version: 1.13.1
  * Requires at least: 5.3.2
  * Tested up to: 6.3.2
  * WC requires at least: 3.9.3
@@ -182,13 +182,12 @@ function Paymongo_Init_Gateway_class()
             public function addGateways($methods)
             {
                 $methods[] = 'Cynder\\PayMongo\\CynderPayMongoGateway';
-                $methods[] = 'Cynder\\PayMongo\\Cynder_PayMongo_CardInstallment';
                 $methods[] = 'Cynder\\PayMongo\\Cynder_PayMongo_Gcash_Gateway';
                 $methods[] = 'Cynder\\PayMongo\\Cynder_PayMongo_GrabPay_Gateway';
                 $methods[] = 'Cynder\\PayMongo\\Cynder_PayMongo_PayMaya';
                 $methods[] = 'Cynder\\PayMongo\\Cynder_PayMongo_Atome';
                 $methods[] = 'Cynder\\PayMongo\\Cynder_PayMongo_Bpi';
-                $methods[] = 'Cynder\\PayMongo\\Cynder_PayMongo_UnionBank';
+                // $methods[] = 'Cynder\\PayMongo\\Cynder_PayMongo_UnionBank';
                 $methods[] = 'Cynder\\PayMongo\\Cynder_PayMongo_BillEase';
                 
                 return $methods;
