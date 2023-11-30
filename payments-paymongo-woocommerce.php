@@ -182,13 +182,12 @@ function Paymongo_Init_Gateway_class()
             public function addGateways($methods)
             {
                 $methods[] = 'Cynder\\PayMongo\\CynderPayMongoGateway';
-                $methods[] = 'Cynder\\PayMongo\\Cynder_PayMongo_CardInstallment';
                 $methods[] = 'Cynder\\PayMongo\\Cynder_PayMongo_Gcash_Gateway';
                 $methods[] = 'Cynder\\PayMongo\\Cynder_PayMongo_GrabPay_Gateway';
                 $methods[] = 'Cynder\\PayMongo\\Cynder_PayMongo_PayMaya';
                 $methods[] = 'Cynder\\PayMongo\\Cynder_PayMongo_Atome';
                 $methods[] = 'Cynder\\PayMongo\\Cynder_PayMongo_Bpi';
-                $methods[] = 'Cynder\\PayMongo\\Cynder_PayMongo_UnionBank';
+                // $methods[] = 'Cynder\\PayMongo\\Cynder_PayMongo_UnionBank';
                 $methods[] = 'Cynder\\PayMongo\\Cynder_PayMongo_BillEase';
                 
                 return $methods;

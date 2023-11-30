@@ -226,15 +226,19 @@ class CynderPayMongoGateway extends CynderPayMongoPaymentIntentGateway
     {
         $total = $this->get_order_total() * 100;
 
-        $request_args = array(
-            'method' => 'GET',
-            'headers' => array(
-                'Authorization' => 'Basic ' . base64_encode($this->secret_key . ':'),
-                'Content-Type' => 'application/json'
-            )
-        );
-        $test = wp_remote_get("https://api.paymongo.com/v1/card_installment_plans?amount=$total", $request_args);
-        $body = json_decode($test['body'], true);
+        /**
+         * Temporarily disable codeblock below
+         */
+
+        // $request_args = array(
+        //     'method' => 'GET',
+        //     'headers' => array(
+        //         'Authorization' => 'Basic ' . base64_encode($this->secret_key . ':'),
+        //         'Content-Type' => 'application/json'
+        //     )
+        // );
+        // $test = wp_remote_get("https://api.paymongo.com/v1/card_installment_plans?amount=$total", $request_args);
+        // $body = json_decode($test['body'], true);
 
         $installment_plans = $body['data'] ?? null;
 
@@ -261,7 +265,7 @@ class CynderPayMongoGateway extends CynderPayMongoPaymentIntentGateway
 
         include $pluginDir . '/classes/cc-fields.php';
 
-        include $pluginDir . '/classes/installment-fields.php';
+        // include $pluginDir . '/classes/installment-fields.php';
 
         do_action('woocommerce_credit_card_form_end', $this->id);
 
