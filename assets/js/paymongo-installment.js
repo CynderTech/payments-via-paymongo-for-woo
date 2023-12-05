@@ -101,8 +101,6 @@ jQuery(document).ready(function ($) {
             $("#cc_payment_installment").removeClass("disabled");
         }
 
-        console.log(cc_installment, installment_data);
-
         const selectedBank = formattedInstallmentData.filter(
             (item) => item.issuer_id == cc_installment_issuer
         );
