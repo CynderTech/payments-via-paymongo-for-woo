@@ -105,7 +105,6 @@ class CynderPayMongoGateway extends CynderPayMongoPaymentIntentGateway
     public function getPaymentMethodId($orderId)
     {
         $paymentMethodId = $_POST['cynder_paymongo_method_id'];
-        error_log($paymentMethodId);
         return $paymentMethodId;
     }
 

@@ -2,12 +2,9 @@
 
 $list_of_banks = array();
 
-error_log("Test");
 if ($installment_plans) {
-    error_log("Inside");
     function cc_bank_availables($data)
     {
-        error_log("in inside");
         if (preg_match("/land\s*bank/i", $data["issuer_name"])) {
             $image_id = "landbank";
         } elseif (preg_match("/security\s*bank/i", $data["issuer_name"])) {
@@ -18,15 +15,9 @@ if ($installment_plans) {
             $image_id = null;
         }
 
-        error_log("2nd inside");
-
         $percentage_formatter = new NumberFormatter(get_locale(), NumberFormatter::PERCENT);
-
-        error_log("3rd inside");
         
         $test = array(...$data);
-        error_log(print_r($data, true));
-        error_log("4th inside");
 
         return array(
             ...$data,
@@ -41,14 +32,11 @@ if ($installment_plans) {
         );
     }
 
-    error_log(print_r($list_of_banks, true));
     $list_of_banks = array_map("cc_bank_availables", $installment_plans);
-    error_log(print_r($list_of_banks, true));
 }
 
 
 $installment_plan_json = json_encode($list_of_banks);
-error_log($installment_plan_json);
 
 ?>
 
