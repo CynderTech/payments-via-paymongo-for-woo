@@ -66,29 +66,32 @@ function cynder_paymongo_create_intent($orderId) {
     $genericErrorMessage = 'Something went wrong with the payment. Please try another payment method. If issue persist, contact support.';
 
     try {
-        $cc_installment_tenure = $_POST['paymongo_cc_installment_tenure'];
-        $cc_installment_issuer = $_POST['paymongo_cc_installment_issuer'];
-        $cc_installment = $_POST['paymongo_cc_installment'];
+        /**
+         * Used by Card Installments. Configure
+         * when card installments is working.
+         */
+        // $cc_installment_tenure = $_POST['paymongo_cc_installment_tenure'];
+        // $cc_installment_issuer = $_POST['paymongo_cc_installment_issuer'];
+        // $cc_installment = $_POST['paymongo_cc_installment'];
 
-        $payment_method_options = null;
+        // $payment_method_options = null;
 
-        if ($cc_installment == "yes" && isset($cc_installment_issuer) && isset($cc_installment_tenure)) {
-            $payment_method_options =
-                array(
-                    "card" => array(
-                        "request_three_d_secure" => "any",
-                        "installments" => array(
-                            "enabled" => true,
-                        )
-                    )
-                );
-        }
-
+        // if ($cc_installment == "yes" && isset($cc_installment_issuer) && isset($cc_installment_tenure)) {
+        //     $payment_method_options =
+        //         array(
+        //             "card" => array(
+        //                 "request_three_d_secure" => "any",
+        //                 "installments" => array(
+        //                     "enabled" => true,
+        //                 )
+        //             )
+        //         );
+        // }
         $shopName = get_bloginfo('name');
         $paymentIntent = $client->paymentIntent()->create(
             floatval($amount),
             ['card', 'paymaya', 'atome', 'dob', 'billease', 'gcash', 'grab_pay'],
-            $payment_method_options,
+            // $payment_method_options,
             $shopName . ' - ' . $orderId,
             array(
                 'agent' => 'cynder_woocommerce',
