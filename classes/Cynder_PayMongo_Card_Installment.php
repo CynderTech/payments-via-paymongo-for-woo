@@ -80,7 +80,7 @@ class Cynder_PayMongo_Card_Installment extends CynderPayMongoPaymentIntentGatewa
         $this->form_fields = array(
             'enabled' => array(
                 'title'       => 'Enable/Disable',
-                'label'       => 'Enable PayMongo Gateway',
+                'label'       => 'Enable Card Installment via PayMongo Gateway',
                 'type'        => 'checkbox',
                 'description' => '',
                 'default'     => 'no'
@@ -195,11 +195,12 @@ class Cynder_PayMongo_Card_Installment extends CynderPayMongoPaymentIntentGatewa
         );
 
         wp_register_script(
-            'woocommerce_paymongo_cc_installment',
+            'woocommerce_paymongo_card_installment',
             plugins_url('assets/js/paymongo-installment.js', CYNDER_PAYMONGO_MAIN_FILE),
             array('jquery', 'cleave'),
         );
-        wp_localize_script('woocommerce_paymongo_cc', 'cynder_paymongo_cc_params', $paymongoCc);
+
+        wp_localize_script('woocommerce_paymongo_card_installment', 'cynder_paymongo_cc_params', $paymongoCc);
 
         wp_register_script(
             'woocommerce_paymongo_client',
@@ -211,7 +212,7 @@ class Cynder_PayMongo_Card_Installment extends CynderPayMongoPaymentIntentGatewa
         wp_enqueue_style('paymongo');
         wp_enqueue_script('woocommerce_paymongo_checkout');
         wp_enqueue_script('woocommerce_paymongo_client');
-        wp_enqueue_script('woocommerce_paymongo_cc_installment');
+        wp_enqueue_script('woocommerce_paymongo_card_installment');
     }
 
 
@@ -252,16 +253,16 @@ class Cynder_PayMongo_Card_Installment extends CynderPayMongoPaymentIntentGatewa
         }
 
         echo '<fieldset id="cynder-' . esc_attr($this->id) . '-form"' .
-            ' class="cynder-credit-card-form cynder-payment-form" ' .
+            ' class="cynder-payment-form" ' .
             'style="background:transparent;">';
 
-        do_action('woocommerce_credit_card_form_start', $this->id);
+        do_action('woocommerce_installment_card_form_start', $this->id);
 
         $pluginDir = plugin_dir_path(CYNDER_PAYMONGO_MAIN_FILE);
 
         include $pluginDir . '/classes/installment-fields.php';
 
-        do_action('woocommerce_credit_card_form_end', $this->id);
+        do_action('woocommerce_installment_card_form_end', $this->id);
 
         echo '<div class="clear"></div></fieldset>';
     }
@@ -269,5 +270,19 @@ class Cynder_PayMongo_Card_Installment extends CynderPayMongoPaymentIntentGatewa
     public function validate_fields() // phpcs:ignore
     {
         return true;
+    }
+
+    /**
+     * Get Icon for checkout page
+     * 
+     * @return string
+     */
+    public function get_icon() // phpcs:ignore
+    {
+        $icon_path = CYNDER_PAYMONGO_PLUGIN_URL . '/assets/images/paylater.png';
+
+        $icons_str = '<img src="' . $icon_path . '" class="paymongo-method-logo paymongo-unionbank-icon" alt="' . $this->title . '" />';
+
+        return apply_filters('woocommerce_gateway_icon', $icons_str, $this->id);
     }
 }
