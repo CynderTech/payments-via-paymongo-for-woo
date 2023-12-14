@@ -22,8 +22,6 @@ jQuery(document).ready(function ($) {
         
         if(cynder_paymongo_cc_params.isCheckout) {
             form = $('form.woocommerce-checkout');
-            // form.on('checkout_place_order_paymongo', this.onSubmit.bind(this));
-            // form.on("change", this.onChange.bind(this));
             form.on(
                 'checkout_place_order_paymongo',
                 this.onSubmit.bind(this)
@@ -33,7 +31,6 @@ jQuery(document).ready(function ($) {
         } else if (cynder_paymongo_cc_params.isOrderPay) {
             form = $('#order_review');
             form.on('submit', this.onSubmit.bind(this));
-            // form.on('change', this.onChange.bind(this));
             this.form = form;
             $(document.body).trigger('cynder_paymongo_init_checkout_form', [form]);
         } else {
@@ -76,214 +73,6 @@ jQuery(document).ready(function ($) {
 
         this.removeLoader();
     };
-
-    // CCForm.prototype.onChange = function (e) {
-    //     const userLocale =
-    //     navigator.languages && navigator.languages.length
-    //         ? navigator.languages[0]
-    //         : navigator.language;
-
-    //     const formatNumber = new Intl.NumberFormat(userLocale);
-
-    //     const cc_installment_tenure = $(
-    //     "input[name='paymongo_cc_installment_tenure']:checked"
-    //     ).val();
-    //     const cc_installment_issuer = $("#paymongo_cc_installment_issuer").val();
-    //     const cc_installment = $(
-    //     "input[name=paymongo_cc_installment]:checked"
-    //     ).val();
-
-    //     const installment_data = $("input[name='installment-data']").val();
-
-    //     const formattedInstallmentData = JSON.parse(installment_data);
-
-    //     if (!formattedInstallmentData || !formattedInstallmentData.length) {
-    //         $("#paymongo_cc_installment_yes").attr("disabled", true);
-    //         $("#cc_payment_installment").addClass("disabled");
-    //     } else {
-    //         $("#paymongo_cc_installment_yes").attr("disabled", false);
-    //         $("#cc_payment_installment").removeClass("disabled");
-    //     }
-
-    //     const selectedBank = formattedInstallmentData.filter(
-    //         (item) => item.issuer_id == cc_installment_issuer
-    //     );
-
-    //     if (cc_installment) {
-    //         let bank_list = "";
-
-    //         const uniqueIds = [];
-
-    //         const filteredBankData = formattedInstallmentData.filter((element) => {
-    //             const isDuplicate = uniqueIds.includes(element.issuer_id);
-
-    //             if (!isDuplicate) {
-    //                 uniqueIds.push(element.issuer_id);
-
-    //                 return true;
-    //             }
-
-    //             return false;
-    //         });
-
-    //         if (filteredBankData) {
-    //             filteredBankData.forEach((cc_banks, i) => {
-    //                 bank_list = bank_list.concat(`
-    //                 <option key=${i} id=${i} value=${cc_banks.issuer_id} ${
-    //                     i == 0 && "checked"
-    //                 }>${cc_banks.issuer_name}</option>
-    //                 `);
-    //             });
-
-    //             const hasOptions =
-    //               $("#paymongo_cc_installment_issuer option").length > 0;
-
-    //             if (!hasOptions) {
-    //                 $("#paymongo_cc_installment_issuer").append(bank_list);
-    //             }
-    //         }
-
-    //         if (cc_installment_issuer) {
-    //             const bank = formattedInstallmentData.find(
-    //             (data) => data.issuer_id == cc_installment_issuer
-    //             );
-
-    //             $("#cc_bank_name").html(bank.issuer_name);
-    //             $("#cc_bank_interest_rate").html(
-    //             `${bank.bank_interest_rate} Interest Rate`
-    //             );
-
-    //             if (bank.image_url) {
-    //                 $("#cc_bank_logo").attr("src", bank.image_url);
-    //                 $("#cc_bank_logo_div").addClass("mr-1");
-    //                 $("#cc_bank_logo").addClass("s-7");
-    //             } else {
-    //                 $("#cc_bank_logo").removeAttr("src");
-    //                 $("#cc_bank_logo_div").removeClass("mr-1");
-    //                 $("#cc_bank_logo").removeClass("s-7");
-    //             }
-    //         }
-    //     }
-
-    //     if (selectedBank) {
-    //         let list = "";
-
-    //         selectedBank.forEach((selected_installment_period, i) => {
-    //             list =
-    //             list.concat(`<li key=${i} class="woocommerce-PaymentMethod woocommerce-PaymentMethod--paymongo wc_payment_method payment_method_paymongo_paymongo">
-    //                                         <input id="paymongo_cc_installment_tenure_${
-    //                                         selected_installment_period.tenure
-    //                                         }" type="radio" class="input-radio" name="paymongo_cc_installment_tenure" value=${
-    //                 selected_installment_period.tenure
-    //             } ${i == 0 && "checked"} />
-    //                                         <label id="paymongo_cc_installment_tenure_${
-    //                                         selected_installment_period.tenure
-    //                                         }" class="" for="paymongo_cc_installment_tenure_${
-    //                 selected_installment_period.tenure
-    //             }">${formatNumber.format(
-    //                 selected_installment_period.tenure
-    //             )} Months (${
-    //                 selected_installment_period.processing_fee_percent
-    //             } Processing Fee) <span class="tenure-label">${
-    //                 selected_installment_period.monthly_installment
-    //             } / monthly</span></label>
-    //                                     </li>`);
-    //         });
-
-    //         const hasList =
-    //             $("#installment_list li").length === selectedBank.length;
-
-    //         if (!hasList) {
-    //             $("#installment_list li").remove();
-    //             $("#installment_list").append(list);
-    //         }
-    //     }
-
-    //     const updateInstallmentDetails = (detail) => {
-    //         $("#auth_amount").html(detail.auth_amount);
-    //         $("#interest_amount_charged").html(detail.interest_amount_charged);
-    //         $("#bank_interest_rate").html(detail.bank_interest_rate);
-    //         $("#processing_fee_value").html(detail.processing_fee_value);
-    //         $("#processing_fee_percent").html(detail.processing_fee_percent);
-    //         $("#loan_amount").html(detail.loan_amount);
-    //         $("#monthly_installment").html(detail.monthly_installment);
-    //         $("#cc_terms_and_conditions").html(detail.terms_and_conditions);
-    //         $("#cc_tenure").html(`${formatNumber.format(detail.tenure)} months`);
-    //     };
-
-    //     $("input[name=paymongo_cc_installment]").change(function () {
-    //         const cc_installment = $(
-    //             "input[name=paymongo_cc_installment]:checked"
-    //         ).val();
-
-    //         const isInstallment = cc_installment === "yes" ? true : false;
-
-    //         if (!isInstallment) {
-    //             $("#installment-container").addClass("hidden");
-    //         } else {
-    //             $("#installment-container").removeClass("hidden");
-
-    //             if (cc_installment_tenure && cc_installment_issuer) {
-    //             const cc_installment_tenure = $(
-    //                 "input[name='paymongo_cc_installment_tenure']:checked"
-    //             ).val();
-    //             const cc_installment_issuer = $(
-    //               "#paymongo_cc_installment_issuer"
-    //             ).val();
-    //             const selectedPlan = formattedInstallmentData.find(
-    //                 (item) =>
-    //                 item.issuer_id == cc_installment_issuer &&
-    //                 item.tenure == cc_installment_tenure
-    //             );
-
-    //             updateInstallmentDetails(selectedPlan);
-    //             }
-    //         }
-    //     });
-
-    //     $("input[name=paymongo_cc_installment_tenure]").change(function () {
-    //         if (cc_installment_tenure && cc_installment_issuer) {
-    //             const cc_installment_tenure = $(
-    //             "input[name='paymongo_cc_installment_tenure']:checked"
-    //             ).val();
-    //             const cc_installment_issuer = $(
-    //               "#paymongo_cc_installment_issuer"
-    //             ).val();
-
-    //             var selectedPlan = formattedInstallmentData.find(
-    //             (item) =>
-    //                 item.issuer_id == cc_installment_issuer &&
-    //                 item.tenure == cc_installment_tenure
-    //             );
-
-    //             updateInstallmentDetails(selectedPlan);
-    //         }
-    //     });
-
-    //     $("#paymongo_cc_installment_issuer").change(function () {
-    //       if (
-    //         $("input[name='paymongo_cc_installment_tc']:checked").val() == "yes"
-    //       ) {
-    //         $("input[name='paymongo_cc_installment_tc']").trigger("click");
-    //       }
-    //       $("#installment_list li:first input[type='radio']").trigger("click");
-
-    //       const cc_installment_tenure = $(
-    //         "input[name='paymongo_cc_installment_tenure']:checked"
-    //       ).val();
-    //       const cc_installment_issuer = $(
-    //         "#paymongo_cc_installment_issuer"
-    //       ).val();
-
-    //       var selectedPlan = formattedInstallmentData.find(
-    //         (item) =>
-    //           item.issuer_id == cc_installment_issuer &&
-    //           item.tenure == cc_installment_tenure
-    //       );
-
-    //       updateInstallmentDetails(selectedPlan);
-    //     });
-    // };
 
     CCForm.prototype.onSubmit = function (e) {
         const form = this.form;
@@ -334,21 +123,6 @@ jQuery(document).ready(function ($) {
         const phone =
             cynder_paymongo_cc_params.billing_phone || $("#billing_phone").val();
 
-        // const cc_installment =
-        // cynder_paymongo_cc_params.paymongo_cc_installment ||
-        // $("input[name='paymongo_cc_installment']:checked").val();
-        // const cc_installment_tenure =
-        // cynder_paymongo_cc_params.paymongo_cc_installment_tenure ||
-        // $("input[name='paymongo_cc_installment_tenure']:checked").val();
-        // const cc_installment_issuer =
-        //   cynder_paymongo_cc_params.paymongo_cc_installment_issuer ||
-        //   $("#paymongo_cc_installment_issuer").val();
-        // const cc_installment_tc =
-        // cynder_paymongo_cc_params.paymongo_cc_installment_tc ||
-        // $("input[name='paymongo_cc_installment_tc']:checked").val();
-
-        // const isInstallment = cc_installment === "yes" ? true : false;
-
         const payload = {
             type: "card",
             details: {
@@ -370,18 +144,6 @@ jQuery(document).ready(function ($) {
                 email: email,
                 phone: phone,
             },
-        //     ...(isInstallment === true && {
-        //     payment_method_options: {
-        //     card: {
-        //       installments: {
-        //       plan: {
-        //         issuer_id: cc_installment_issuer,
-        //         tenure: cc_installment_tenure,
-        //       },
-        //       },
-        //     },
-        //     },
-        //   }),
         };
 
         var args = [
@@ -418,34 +180,8 @@ jQuery(document).ready(function ($) {
     CCForm.prototype.onPaymentMethodCreationResponse = function (err, data) {
         this.removeLoader();
 
-        // let errors = [];
-
-        // const cc_installment = $("input[name='paymongo_cc_installment']:checked").val();
-        // const cc_installment_tc = $("input[name='paymongo_cc_installment_tc']:checked").val();
-
-        // const isInstallment = cc_installment === "yes" ? true : false;
-        // const acceptTC = cc_installment_tc === "yes" ? true : false;
-
         if (err) {
             return this.showClientErrors(err.errors);
-        //     errors = errors.concat(err.errors);
-        // }
-
-        // if (isInstallment) {
-        //     if (!acceptTC) {
-        //         errors = [
-        //             ...errors,
-        //             {
-        //                 code: "parameter_required",
-        //                 detail:
-        //                 "Please accept the terms and conditions before to proceed.",
-        //             },
-        //         ];
-        //     }
-        // }
-
-        // if (errors.length > 0) {
-        //     return this.showClientErrors(errors);
         }
 
         var form = this.form;
