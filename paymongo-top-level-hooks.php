@@ -70,28 +70,30 @@ function cynder_paymongo_create_intent($orderId) {
          * Used by Card Installments. Configure
          * when card installments is working.
          */
-        // $cc_installment_tenure = $_POST['paymongo_cc_installment_tenure'];
-        // $cc_installment_issuer = $_POST['paymongo_cc_installment_issuer'];
-        // $cc_installment = $_POST['paymongo_cc_installment'];
+        $payment_method_options = null;
 
-        // $payment_method_options = null;
+        if ($paymentMethod == 'paymongo_card_installment') {
+            $cc_installment_tenure = $_POST['paymongo_cc_installment_tenure'];
+            $cc_installment_issuer = $_POST['paymongo_cc_installment_issuer'];
 
-        // if ($cc_installment == "yes" && isset($cc_installment_issuer) && isset($cc_installment_tenure)) {
-        //     $payment_method_options =
-        //         array(
-        //             "card" => array(
-        //                 "request_three_d_secure" => "any",
-        //                 "installments" => array(
-        //                     "enabled" => true,
-        //                 )
-        //             )
-        //         );
-        // }
+            if (isset($cc_installment_issuer) && isset($cc_installment_tenure)) {
+                $payment_method_options =
+                    array(
+                        "card" => array(
+                            "request_three_d_secure" => "any",
+                            "installments" => array(
+                                "enabled" => true,
+                            )
+                        )
+                    );
+            }
+        }
+
         $shopName = get_bloginfo('name');
         $paymentIntent = $client->paymentIntent()->create(
             floatval($amount),
             ['card', 'paymaya', 'atome', 'dob', 'billease', 'gcash', 'grab_pay'],
-            // $payment_method_options,
+            $payment_method_options,
             $shopName . ' - ' . $orderId,
             array(
                 'agent' => 'cynder_woocommerce',
