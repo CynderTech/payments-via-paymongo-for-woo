@@ -68,8 +68,8 @@ jQuery(document).ready(function($) {
             });
         }
 
-        if ($("#ppaymongo_cc_installment_expdate").length) {
-            var expDate = new Cleave("#ppaymongo_cc_installment_expdate", {
+        if ($("#paymongo_cc_installment_expdate").length) {
+            var expDate = new Cleave("#paymongo_cc_installment_expdate", {
                 date: true,
                 datePattern: ["m", "y"],
             });
@@ -220,6 +220,7 @@ jQuery(document).ready(function($) {
 
             updateInstallmentDetails(selectedPlan);
         }
+        
         $("#paymongo_cc_installment_issuer").change(function() {
             if (
                 $("input[name='paymongo_cc_installment_tc']:checked").val() == "yes"
