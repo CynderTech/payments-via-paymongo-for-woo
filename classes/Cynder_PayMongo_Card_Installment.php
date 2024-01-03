@@ -239,32 +239,36 @@ class Cynder_PayMongo_Card_Installment extends CynderPayMongoPaymentIntentGatewa
 
         $installment_plans = $body['data'] ?? null;
 
-        if ($this->description) {
-            if ($this->testmode) {
-                $this->description .= ' TEST MODE ENABLED. In test mode,' .
-                    ' you can use the card numbers listed in the ' .
-                    '<a href="' .
-                    'https://developers.paymongo.com/docs/testing' .
-                    '" target="_blank" rel="noopener noreferrer">documentation</a>.';
-                $this->description  = trim($this->description);
+        if ($total < PAYMONGO_CARD_INSTALLMENT_MINIMUM_AMOUNT * 100) {
+            echo 'Available for amount ' . wc_price(PAYMONGO_CARD_INSTALLMENT_MINIMUM_AMOUNT) .  ' and above. Please choose another payment method.';
+        } else {
+            if ($this->description) {
+                if ($this->testmode) {
+                    $this->description .= ' TEST MODE ENABLED. In test mode,' .
+                        ' you can use the card numbers listed in the ' .
+                        '<a href="' .
+                        'https://developers.paymongo.com/docs/testing' .
+                        '" target="_blank" rel="noopener noreferrer">documentation</a>.';
+                    $this->description  = trim($this->description);
+                }
+                // display the description with <p> tags etc.
+                echo wpautop(wp_kses_post($this->description));
             }
-            // display the description with <p> tags etc.
-            echo wpautop(wp_kses_post($this->description));
+
+            echo '<fieldset id="cynder-' . esc_attr($this->id) . '-form"' .
+                ' class="cynder-payment-form" ' .
+                'style="background:transparent;">';
+
+            do_action('woocommerce_installment_card_form_start', $this->id);
+
+            $pluginDir = plugin_dir_path(CYNDER_PAYMONGO_MAIN_FILE);
+
+            include $pluginDir . '/classes/installment-fields.php';
+
+            do_action('woocommerce_installment_card_form_end', $this->id);
+
+            echo '<div class="clear"></div></fieldset>';
         }
-
-        echo '<fieldset id="cynder-' . esc_attr($this->id) . '-form"' .
-            ' class="cynder-payment-form" ' .
-            'style="background:transparent;">';
-
-        do_action('woocommerce_installment_card_form_start', $this->id);
-
-        $pluginDir = plugin_dir_path(CYNDER_PAYMONGO_MAIN_FILE);
-
-        include $pluginDir . '/classes/installment-fields.php';
-
-        do_action('woocommerce_installment_card_form_end', $this->id);
-
-        echo '<div class="clear"></div></fieldset>';
     }
 
     public function validate_fields() // phpcs:ignore
