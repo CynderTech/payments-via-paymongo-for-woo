@@ -239,7 +239,7 @@ class Cynder_PayMongo_Card_Installment extends CynderPayMongoPaymentIntentGatewa
 
         $installment_plans = $body['data'] ?? null;
 
-        if($total < PAYMONGO_CARD_INSTALLMENT_MINIMUM_AMOUNT * 100) {
+        if ($total < PAYMONGO_CARD_INSTALLMENT_MINIMUM_AMOUNT * 100) {
             echo 'Available for amount ' . wc_price(PAYMONGO_CARD_INSTALLMENT_MINIMUM_AMOUNT) .  ' and above. Please choose another payment method.';
         } else {
             if ($this->description) {
