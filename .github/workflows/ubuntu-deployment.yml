@@ -42,7 +42,7 @@ jobs:
 
   notify-workflow-finished:
     name: Notify (Workflow Finished)
-    needs: build
+    needs: update
     runs-on: ubuntu-latest
     steps:
       - if: ${{ env.DISCORD_WEBHOOK != null && env.DISCORD_WEBHOOK != ' ' && env.DISCORD_WEBHOOK != 0 && env.DEPLOYMENT_URL != null && env.DEPLOYMENT_URL != ' ' && env.DEPLOYMENT_URL != 0 }}
