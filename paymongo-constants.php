@@ -36,3 +36,5 @@ const PAYMONGO_PAYMENT_METHOD_LABELS = array(
 
 const PAYMONGO_PAYMENT_INTENT_META_KEY = 'paymongo_payment_intent_id';
 const PAYMONGO_CLIENT_KEY_META_KEY = 'paymongo_client_key';
+
+const PAYMONGO_CARD_INSTALLMENT_MINIMUM_AMOUNT = 3000;

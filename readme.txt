@@ -4,7 +4,7 @@ Tags: payments, credit card, gcash, grabpay
 Requires at least: 5.0
 Tested up to: 6.3.2
 Requires PHP: 5.6
-Stable tag: 1.13.0
+Stable tag: 1.13.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -93,6 +93,19 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 3. Payment methods as displayed in checkout page.
 
 == Changelog ==
+
+= 1.13.3 =
+*Release Date - January 4, 2024*
+[FIX] Re-enabled UnionBank and Card Installment payment options
+
+= 1.13.2 =
+*Release Date - December 5, 2023*
+[FIX] Fix dependency issue
+[CHORE] Compatibility tests with WC 8.3.1
+
+= 1.13.1 =
+*Release Date - November 30, 2023*
+[CHANGE] Temporarily disabled new payment options
 
 = 1.13.0 =
 *Release Date - November 29, 2023*

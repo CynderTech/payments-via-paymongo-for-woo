@@ -91,24 +91,25 @@ class PaymentIntent {
         $this->utils->trackProcessPayment($amount, $payment_method, $this->test_mode);
 
         try {
-            $cc_installment_tenure = $_POST['paymongo_cc_installment_tenure'];
-            $cc_installment_issuer = $_POST['paymongo_cc_installment_issuer'];
-            $cc_installment = $_POST['paymongo_cc_installment'];
-
             $payment_method_options = null;
 
-            if ($cc_installment == "yes" && isset($cc_installment_issuer) && isset($cc_installment_tenure)) {
-                $payment_method_options =
-                    array(
-                        "card" => array(
-                            "installments" => array(
-                                "plan" => array(
-                                    "issuer_id" => $cc_installment_issuer,
-                                    "tenure" => intval($cc_installment_tenure),
+            if ($payment_method == 'paymongo_card_installment') {
+                $cc_installment_tenure = $_POST['paymongo_cc_installment_tenure'];
+                $cc_installment_issuer = $_POST['paymongo_cc_installment_issuer'];
+
+                if (isset($cc_installment_issuer) && isset($cc_installment_tenure)) {
+                    $payment_method_options =
+                        array(
+                            "card" => array(
+                                "installments" => array(
+                                    "plan" => array(
+                                        "issuer_id" => $cc_installment_issuer,
+                                        "tenure" => intval($cc_installment_tenure),
+                                    )
                                 )
                             )
-                        )
-                    );
+                        );
+                }
             }
 
             $payment_intent = $this->client->paymentIntent()->attachPaymentMethod($payment_intent_id, $payment_method_id, $payment_method_options, $return_url_for_gateway);

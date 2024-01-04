@@ -1,0 +1,54 @@
+name: Ubuntu Deployment
+
+on:
+  push:
+    branches:
+      - develop
+
+env: 
+  NODE_ENV: development
+  DEPLOYMENT_URL: ${{ secrets.DEVELOPMENT_DEPLOYMENT_URL }}
+
+jobs:
+  notify-workflow-started:
+    name: Notify (Workflow Started)
+    runs-on: ubuntu-latest
+    steps:
+      - if: ${{ env.DISCORD_WEBHOOK != null && env.DISCORD_WEBHOOK != ' ' && env.DISCORD_WEBHOOK != 0 && env.DEPLOYMENT_URL != null && env.DEPLOYMENT_URL != ' ' && env.DEPLOYMENT_URL != 0 }}
+        name: Send Discord notification
+        uses: Ilshidur/action-discord@master
+        with:
+          args: ':hammer_pick: The deployment of {{ EVENT_PAYLOAD.repository.full_name }} to the ${{ env.NODE_ENV }} environment has started. Monitor the workflow run using this link: {{ GITHUB_SERVER_URL }}/{{ GITHUB_REPOSITORY }}/actions/runs/{{ GITHUB_RUN_ID }}.'
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+
+  update:
+    name: Update
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull updates from the repository and run composer install
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.BITNAMI_SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            eval "$(ssh-agent -s)"
+            ssh-add -l
+            ssh-add ${{ secrets.BITNAMI_HOME_DIRECTORY }}/.ssh/${{ secrets.REPOSITORY_NAME }}
+            cd ${{ secrets.BITNAMI_HOME_DIRECTORY }}/${{ secrets.BITNAMI_WORDPRESS_PLUGIN_DIRECTORY }}/${{ secrets.REPOSITORY_NAME }}
+            git pull
+            composer install
+
+  notify-workflow-finished:
+    name: Notify (Workflow Finished)
+    needs: update
+    runs-on: ubuntu-latest
+    steps:
+      - if: ${{ env.DISCORD_WEBHOOK != null && env.DISCORD_WEBHOOK != ' ' && env.DISCORD_WEBHOOK != 0 && env.DEPLOYMENT_URL != null && env.DEPLOYMENT_URL != ' ' && env.DEPLOYMENT_URL != 0 }}
+        name: Send Discord notification
+        uses: Ilshidur/action-discord@master
+        with:
+          args: ':white_check_mark: {{ EVENT_PAYLOAD.repository.full_name }} has been deployed to the ${{ env.NODE_ENV }} environment: ${{ env.DEPLOYMENT_URL }}.'
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
