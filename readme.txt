@@ -94,8 +94,13 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 == Changelog ==
 
+= 1.13.5 =
+*Release Date - January 16, 2024*
+[FIX] Fixed metadata tag validation workflow
+[CHORE] Compatibility tests with WC 8.5.1
+
 = 1.13.4 =
-*Release Date - December 8, 2023*
+*Release Date - January 8, 2024*
 [FIX] Fix dependency issue
 [CHORE] Compatibility tests with WC 8.4.0 & WP 6.4.2
 

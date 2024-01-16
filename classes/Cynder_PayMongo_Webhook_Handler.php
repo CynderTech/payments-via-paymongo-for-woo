@@ -201,8 +201,8 @@ class Cynder_PayMongo_Webhook_Handler extends WC_Payment_Gateway
             $metaTag = $metadataMapItem['tag'];
 
             if ($originalValue !== $metaValue) {
-                $this->utils->log('warning', 'Paymen Intent ID ' . $paymentIntentId . ' did not originate from ' . $metaTag . ' ' . $metaValue . ' but originated from ' . $metaTag . ' ' . $originalValue);
-                status_header(400);
+                $this->utils->log('warning', 'Payment Intent ID ' . $paymentIntentId . ' did not originate from ' . $metaTag . ' ' . $metaValue . ' but originated from ' . $metaTag . ' ' . $originalValue);
+                status_header(200);
                 die();
             }
         }
