@@ -4,7 +4,7 @@ Tags: payments, credit card, gcash, grabpay
 Requires at least: 5.0
 Tested up to: 6.4.2
 Requires PHP: 5.6
-Stable tag: 1.13.4
+Stable tag: 1.13.5
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -94,8 +94,13 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 == Changelog ==
 
+= 1.13.5 =
+*Release Date - January 23, 2024*
+[FIX] Fixed metadata tag validation workflow
+[CHORE] Compatibility tests with WC 8.5.1
+
 = 1.13.4 =
-*Release Date - December 8, 2023*
+*Release Date - January 8, 2024*
 [FIX] Fix dependency issue
 [CHORE] Compatibility tests with WC 8.4.0 & WP 6.4.2
 
