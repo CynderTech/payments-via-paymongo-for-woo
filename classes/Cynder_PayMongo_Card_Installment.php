@@ -197,7 +197,7 @@ class Cynder_PayMongo_Card_Installment extends CynderPayMongoPaymentIntentGatewa
         wp_register_script(
             'woocommerce_paymongo_card_installment',
             plugins_url('assets/js/paymongo-installment.js', CYNDER_PAYMONGO_MAIN_FILE),
-            array('jquery', 'cleave'),
+            array('jquery', 'cleave')
         );
 
         wp_localize_script('woocommerce_paymongo_card_installment', 'cynder_paymongo_cc_params', $paymongoCc);
