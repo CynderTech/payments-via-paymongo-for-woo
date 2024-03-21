@@ -74,7 +74,7 @@ Before accepting actual payments for transactions, it is ideal to test payment w
 
 **Webhooks Configuration**
 
-For the plugin to work, you need to specify a webhook secret key in the corresponding settings fields. You can generate one using Cynder's [Webhook Secret Key Generator](https://paymongo-webhook-tool.meeco.dev). A convenience link is provided just below the field. After generating a webhook secret key using the key generator, paste it on the webhook secret key fields.
+For the plugin to work, you need to specify a webhook secret key in the corresponding settings fields. You can generate one using Cynder's [Webhook Secret Key Generator](https://paymongo-webhook-tool.cynder.io/). A convenience link is provided just below the field. After generating a webhook secret key using the key generator, paste it on the webhook secret key fields.
 
 * **Note:** Webhook secret keys can be created using the PayMongo secret keys. You need to generate 2 separate webhook secret keys using production and sandbox secret keys if you want to test the plugin first and later put it to production mode.
 
