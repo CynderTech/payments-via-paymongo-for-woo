@@ -275,7 +275,7 @@ function add_webhook_settings($settings, $current_section) {
                 'id' => 'paymongo_webhook_secret_key',
                 'type' => 'text',
                 'desc_tip' => 'This is required to properly process payments and update order statuses accordingly',
-                'desc' => '<a target="_blank" href="https://paymongo-webhook-tool.meeco.dev?url=' 	
+                'desc' => '<a target="_blank" href="https://paymongo-webhook-tool.cynder.io?url=' 	
                 . $webhookUrl	
                 . '">Go here to generate a webhook secret</a>',
             ),
@@ -312,7 +312,7 @@ function add_webhook_settings($settings, $current_section) {
                 'id' => 'paymongo_test_webhook_secret_key',
                 'type' => 'text',
                 'desc_tip' => 'This is required to properly process payments and update order statuses accordingly',
-                'desc' => '<a target="_blank" href="https://paymongo-webhook-tool.meeco.dev?url=' 	
+                'desc' => '<a target="_blank" href="https://paymongo-webhook-tool.cynder.io?url=' 	
                 . $webhookUrl	
                 . '">Go here to generate a webhook secret</a>',
             ),

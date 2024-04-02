@@ -2,9 +2,9 @@
 Contributors: pickmeshop
 Tags: payments, credit card, gcash, grabpay
 Requires at least: 5.0
-Tested up to: 6.4.2
+Tested up to: 6.4.3
 Requires PHP: 5.6
-Stable tag: 1.13.6
+Stable tag: 1.13.7
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -93,6 +93,11 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 3. Payment methods as displayed in checkout page.
 
 == Changelog ==
+
+= 1.13.7 =
+*Release Date - April 2, 2024*
+[FIX] Webhook link in the payment gateway settings
+[CHORE] Compatibility tests with WC 8.7.0 and WP 6.4.3
 
 = 1.13.6 =
 *Release Date - February 20, 2024*
